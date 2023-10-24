@@ -53,8 +53,6 @@ fun FAQS(modifier: Modifier = Modifier) {
             item { cuerpoFAQS() }
         }
     }
-
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,9 +79,6 @@ fun cuerpoFAQS(modifier: Modifier = Modifier){
     )
     Divider()
 }
-
-
-
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
