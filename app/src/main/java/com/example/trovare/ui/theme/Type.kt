@@ -5,16 +5,48 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.Font
+import com.example.trovare.R
+
+val JosefinSans = FontFamily(
+        Font(R.font.josefinsans_bold, weight = FontWeight.Bold),
+        Font(R.font.josefinsans_light, weight = FontWeight.Light)
+
+)
+
 
 // Set of Material typography styles to start with
 val Typography = Typography(
+
+        displayMedium = TextStyle(
+                fontFamily = JosefinSans,
+                fontWeight = FontWeight.Bold,
+                fontSize = 34.sp
+        ),
+        displaySmall = TextStyle(
+                fontFamily = JosefinSans,
+                fontWeight = FontWeight.Bold,
+                fontSize = 30.sp
+        ),
         bodyLarge = TextStyle(
-                fontFamily = FontFamily.Default,
-                fontWeight = FontWeight.Normal,
+                fontFamily = JosefinSans,
+                fontWeight = FontWeight.Light,
                 fontSize = 16.sp,
-                lineHeight = 24.sp,
-                letterSpacing = 0.5.sp
-        )
+        ),
+        bodyMedium = TextStyle(
+                fontFamily = JosefinSans,
+                fontWeight = FontWeight.Light,
+                fontSize = 20.sp
+        ),
+        bodySmall = TextStyle(
+                fontFamily = JosefinSans,
+                fontWeight = FontWeight.Light,
+                fontSize = 20.sp
+        ),
+
+
+
+
         /* Other default text styles to override
     titleLarge = TextStyle(
         fontFamily = FontFamily.Default,
@@ -32,3 +64,4 @@ val Typography = Typography(
     )
     */
 )
+

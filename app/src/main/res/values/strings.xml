@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Trovare</string>
+    <string name="pregunta1">¿Cómo informar errores a soporte técnico?</string>
+    <string name="respuesta1">Para informar de errores al soporte técnico de Trovare dirígete a la sección inferior de esta página y selecciona Soporte. Ahí enocntraras diferentes formas de ponerte en contacto con el soporte técnico de Trovare.</string>
 </resources>
