@@ -41,8 +41,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.trovare.ui.theme.TrovareTheme
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.ExpandLess
+//import androidx.compose.material.icons.filled.ExpandMore
+//import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -116,6 +118,13 @@ fun CuerpoFAQS(padding: PaddingValues,  modifier: Modifier = Modifier){
             items(listaDePreguntas){
                 TarjetaPregunta(pregunta = it)
             }
+            item {
+                Divider(
+                    modifier = modifier
+                        .padding(start = 25.dp, end = 25.dp, top = 15.dp, bottom = 15.dp),
+                    color = Color.White
+                )
+            }
 
 
 
@@ -140,7 +149,7 @@ fun TarjetaPregunta(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 25.dp, end = 25.dp)
+            .padding(start = 25.dp, top = 15.dp, end = 25.dp, bottom = 15.dp)
     ) {
 
         Column(modifier = Modifier
@@ -163,11 +172,12 @@ fun TarjetaPregunta(
                 Text(
                     modifier = modifier
                         .padding(1.dp)
-                        .fillMaxWidth(0.8F)
+                        .fillMaxWidth(0.83F)
                     ,
                     text = stringResource(id = pregunta.pregunta),
                     textAlign = TextAlign.Left,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White
                 )
 
                 BotonPregunta(
@@ -176,7 +186,12 @@ fun TarjetaPregunta(
                 )
             }
             if(expanded){
-                RespuestaPregunta()
+                Text(
+                    modifier = modifier.padding(start = 20.dp, end = 20.dp),
+                    text = stringResource(id = pregunta.respuesta),
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
 
@@ -194,19 +209,13 @@ fun BotonPregunta(
         modifier = modifier
     ){
         Icon(
-            imageVector = if(expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+            imageVector = if(expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
             contentDescription = "",
             tint = Color.White
         )
     }
 }
 
-@Composable
-fun RespuestaPregunta(
-
-){
-    Text(text = "Prueba")
-}
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
