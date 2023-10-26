@@ -11,7 +11,10 @@ import com.example.trovare.R
 val JosefinSans = FontFamily(
         Font(R.font.josefinsans_bold, weight = FontWeight.Bold),
         Font(R.font.josefinsans_light, weight = FontWeight.Light)
+)
 
+val Inder = FontFamily(
+        Font(R.font.inder_regular)
 )
 
 
@@ -42,6 +45,11 @@ val Typography = Typography(
                 fontFamily = JosefinSans,
                 fontWeight = FontWeight.Light,
                 fontSize = 20.sp
+        ),
+        labelSmall = TextStyle(
+                fontFamily = Inder,
+                fontWeight = FontWeight.Normal,
+                fontSize = 16.sp
         ),
 
 

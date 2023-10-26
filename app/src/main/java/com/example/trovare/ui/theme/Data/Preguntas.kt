@@ -11,4 +11,6 @@ data class Pregunta(
 val listaDePreguntas = listOf(
     Pregunta(R.string.pregunta1, R.string.respuesta1),
     Pregunta(R.string.pregunta1, R.string.respuesta1),
+    Pregunta(R.string.pregunta1, R.string.respuesta1),
+    Pregunta(R.string.pregunta1, R.string.respuesta1),
 )
