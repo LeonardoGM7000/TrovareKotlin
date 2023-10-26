@@ -46,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import com.example.trovare.ui.theme.Data.Pregunta
 import com.example.trovare.ui.theme.Data.listaDePreguntas
+import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
@@ -65,26 +66,6 @@ fun FAQS() {
     ) { it ->
         CuerpoFAQS(padding = it)
     }
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BarraSuperior() {
-    CenterAlignedTopAppBar(
-        colors = TopAppBarDefaults.smallTopAppBarColors(Trv1),
-        navigationIcon = {
-            IconButton(onClick = { /*TODO*/ }) {
-                Icon(
-                    imageVector = Icons.Filled.KeyboardArrowLeft,
-                    contentDescription = "",
-                    tint = Color.White
-                )
-            }
-        },
-        title = {
-        }
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

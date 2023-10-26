@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.trovare.ui.theme.Pantallas.FAQS
+import com.example.trovare.ui.theme.Pantallas.Inicio
 import com.example.trovare.ui.theme.TrovareTheme
 
 class MainActivity : ComponentActivity() {
@@ -39,7 +40,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TrovareTheme {
                 // A surface container using the 'background' color from the theme
-                    FAQS()
+                    Inicio()
             }
         }
     }
