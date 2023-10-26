@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,11 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.example.trovare.ui.theme.TrovareTheme
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.IconButtonColors
-import androidx.compose.material3.IconToggleButtonColors
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,13 +54,13 @@ import com.example.trovare.ui.theme.Trv3
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FAQS(modifier: Modifier = Modifier) {
+fun FAQS() {
     Scaffold(
         topBar = {
-            barraSuperior()
+            BarraSuperior()
         },
         bottomBar = {
-            barrInferior()
+            BarrInferior()
         },
     ) { it ->
         CuerpoFAQS(padding = it)
@@ -75,7 +70,7 @@ fun FAQS(modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun barraSuperior(modifier: Modifier = Modifier) {
+fun BarraSuperior() {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.smallTopAppBarColors(Trv1),
         navigationIcon = {
@@ -94,7 +89,7 @@ fun barraSuperior(modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun barrInferior(modifier: Modifier = Modifier) {
+fun BarrInferior(modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = Trv3
