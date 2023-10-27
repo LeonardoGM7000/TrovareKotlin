@@ -16,9 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.Card
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,7 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,10 +49,10 @@ import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv3
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FAQS() {
+
     Scaffold(
         topBar = {
             BarraSuperior()
@@ -68,34 +65,6 @@ fun FAQS() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BarrInferior(modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = Trv3
-    ) {
-        Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(top = 15.dp, bottom = 15.dp)
-            ,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Servicio al cliente",
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.Black
-            )
-            Text(
-                text = "5555-5555",
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.Black
-            )
-        }
-
-    }
-}
 
 @Composable
 fun CuerpoFAQS(padding: PaddingValues,  modifier: Modifier = Modifier){
@@ -109,8 +78,7 @@ fun CuerpoFAQS(padding: PaddingValues,  modifier: Modifier = Modifier){
             item {
                 Text(
                     modifier = modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 15.dp),
+                        .fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     color = Color.White,
                     text = "FAQs",
@@ -147,7 +115,7 @@ fun CuerpoFAQS(padding: PaddingValues,  modifier: Modifier = Modifier){
                         )
 
                         Text(
-                            modifier = modifier.clickable { /* TODO */ },
+                            modifier = modifier.clickable { /*TODO*/ },
                             text = "Soporte",
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
@@ -157,6 +125,35 @@ fun CuerpoFAQS(padding: PaddingValues,  modifier: Modifier = Modifier){
                 }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BarrInferior(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = Trv3
+    ) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(top = 15.dp, bottom = 15.dp)
+            ,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Servicio al cliente",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.Black
+            )
+            Text(
+                text = "5555-5555",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.Black
+            )
+        }
+
     }
 }
 

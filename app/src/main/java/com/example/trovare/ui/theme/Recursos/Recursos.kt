@@ -20,7 +20,7 @@ import com.example.trovare.ui.theme.Trv1
 fun Divisor(modifier: Modifier = Modifier){
     Divider(
         modifier = modifier
-            .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
+            .padding(horizontal = 25.dp, vertical = 15.dp),
         color = Color.White
     )
 }
@@ -46,7 +46,7 @@ fun BarraSuperior() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BarraSuperiorInicio() {
+fun BarraSuperiorConfig() {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.smallTopAppBarColors(Trv1),
         actions = {

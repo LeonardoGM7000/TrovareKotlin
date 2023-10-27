@@ -6,11 +6,13 @@ plugins {
 android {
     namespace = "com.example.trovare"
     compileSdk = 33
+    //compileSdk = 34 (para navegacion)
 
     defaultConfig {
         applicationId = "com.example.trovare"
         minSdk = 24
         targetSdk = 33
+        //targetSdk = 34 (para navegacion)
         versionCode = 1
         versionName = "1.0"
 
@@ -64,6 +66,7 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
 
 
 }
