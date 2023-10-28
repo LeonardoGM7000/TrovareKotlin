@@ -178,7 +178,7 @@ fun TarjetaPregunta(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 25.dp, top = 15.dp, end = 25.dp, bottom = 15.dp)
+            .padding(horizontal = 25.dp, vertical = 15.dp)
             .then(cardSizeModifier),  // Aplicar el modificador de tamaño aquí
         colors = CardDefaults.cardColors(
             containerColor = Trv1
