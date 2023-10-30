@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -41,17 +43,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
+import androidx.navigation.NavController
+import com.example.trovare.PantallasTrovare
 import com.example.trovare.ui.theme.Data.Pregunta
 import com.example.trovare.ui.theme.Data.listaDePreguntas
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
+import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv3
 
+
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FAQS() {
+fun FAQS(
+    modifier: Modifier = Modifier,
+    navController: NavController
+) {
 
     Scaffold(
         topBar = {
@@ -61,70 +72,69 @@ fun FAQS() {
             BarrInferior()
         },
     ) { it ->
-        CuerpoFAQS(padding = it)
-    }
-}
 
+        //Cuerpo FAQS-------------------------------------------------------------------------------
+        Surface(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(it),
+            color = Trv1
+        ) {
+            LazyColumn(){
+                item {
+                    Text(
+                        modifier = modifier
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        color = Color.White,
+                        text = "FAQs",
+                        style = MaterialTheme.typography.displayMedium
+                    )
+                }
+                item {
+                    Divisor()
+                }
+                items(listaDePreguntas){
+                    TarjetaPregunta(pregunta = it)
+                }
+                item {
+                    Divisor()
+                }
+                item {
+                    Card(
+                        modifier = modifier
+                            .wrapContentSize()
+                            .padding(start = 25.dp, end = 25.dp, bottom = 15.dp)
+                            .clickable(
+                                indication = null,
+                                interactionSource = NoRippleInteractionSource()
+                            ) { navController.navigate(PantallasTrovare.Soporte.name) },
+                        colors = CardDefaults.cardColors(
+                            containerColor = Trv1
+                        ),
+                    ) {
+                        Row(modifier = modifier){
+                            Icon(
+                                modifier = modifier
+                                    .padding(horizontal = 15.dp, vertical = 5.dp),
+                                imageVector = Icons.Filled.Help,
+                                contentDescription = "",
+                                tint = Color.White,
+                            )
 
-@Composable
-fun CuerpoFAQS(padding: PaddingValues,  modifier: Modifier = Modifier){
-    Surface(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(padding),
-        color = Trv1
-    ) {
-        LazyColumn(){
-            item {
-                Text(
-                    modifier = modifier
-                        .fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    color = Color.White,
-                    text = "FAQs",
-                    style = MaterialTheme.typography.displayMedium
-                )
-            }
-            item {
-                Divisor()
-            }
-            items(listaDePreguntas){
-                TarjetaPregunta(pregunta = it)
-            }
-            item {
-                Divisor()
-            }
-            item {
-                Card(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .padding(start = 25.dp, top = 15.dp, end = 25.dp, bottom = 15.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Trv1
-                    ),
-                ) {
-                    Row(modifier = modifier
-                        .fillMaxWidth()
-                    ){
-                        Icon(
-                            modifier = modifier
-                                .padding(horizontal = 15.dp, vertical = 5.dp),
-                            imageVector = Icons.Filled.Help,
-                            contentDescription = "",
-                            tint = Color.White,
-                        )
-
-                        Text(
-                            modifier = modifier.clickable { /*TODO*/ },
-                            text = "Soporte",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
+                            Text(
+                                text = "Soporte",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
                     }
                 }
             }
         }
+
+
     }
 }
 
@@ -179,7 +189,13 @@ fun TarjetaPregunta(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 25.dp, vertical = 15.dp)
-            .then(cardSizeModifier),  // Aplicar el modificador de tamaño aquí
+            .then(cardSizeModifier) // Aplicar el modificador de tamaño aquí
+            .clickable(
+                indication = null,
+                interactionSource = NoRippleInteractionSource()
+            ) { expanded = !expanded },
+
+
         colors = CardDefaults.cardColors(
             containerColor = Trv1
         ),
@@ -247,7 +263,7 @@ fun BotonPregunta(
     }
 }
 
-
+/*
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun GreetingPreview() {
@@ -255,3 +271,5 @@ fun GreetingPreview() {
         FAQS()
     }
 }
+
+ */

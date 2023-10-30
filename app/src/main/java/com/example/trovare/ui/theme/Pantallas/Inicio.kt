@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
 import com.example.trovare.ui.theme.TrovareTheme
 import com.example.trovare.ui.theme.Trv1
@@ -48,10 +49,10 @@ import com.example.trovare.ui.theme.Trv5
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Inicio() {
+fun Inicio(navController: NavController) {
     Scaffold(
         topBar = {
-            BarraSuperiorConfig()
+            BarraSuperiorConfig(navController)
         },
         bottomBar = {
             MenuInferior()
@@ -226,12 +227,4 @@ fun MenuInferior(modifier: Modifier = Modifier) {
     }
 }
 
-
-@Preview
-@Composable
-fun preview(){
-    TrovareTheme {
-        Inicio()
-    }
-}
 

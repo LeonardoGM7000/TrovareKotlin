@@ -34,7 +34,7 @@ val Typography = Typography(
         bodyLarge = TextStyle(
                 fontFamily = JosefinSans,
                 fontWeight = FontWeight.Light,
-                fontSize = 16.sp,
+                fontSize = 26.sp,
         ),
         bodyMedium = TextStyle(
                 fontFamily = JosefinSans,
