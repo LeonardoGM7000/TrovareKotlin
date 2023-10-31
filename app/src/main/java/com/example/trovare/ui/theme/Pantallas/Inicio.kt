@@ -49,7 +49,10 @@ import com.example.trovare.ui.theme.Trv5
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Inicio(navController: NavController) {
+fun Inicio(
+
+    navController: NavController
+) {
     Scaffold(
         topBar = {
             BarraSuperiorConfig(navController)

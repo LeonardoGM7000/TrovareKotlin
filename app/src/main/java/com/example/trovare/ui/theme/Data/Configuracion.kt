@@ -31,6 +31,15 @@ object ConfiguracionDataSource {
 }
 
 
+object SoporteDatasource {
+    val ResultoUtil = listOf(
+        "",
+        "Si",
+        "No"
+    )
+}
+
+
 val listaDeConfiguracion = listOf(
     Configuracion(nombreDeConfig = "Idioma", icono = Icons.Filled.Language, opciones = ConfiguracionDataSource.Idiomas),
     Configuracion(nombreDeConfig = "Unidades", icono = Icons.Filled.SocialDistance, opciones = ConfiguracionDataSource.Unidades),

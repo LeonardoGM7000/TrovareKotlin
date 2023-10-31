@@ -79,6 +79,7 @@ fun Trovare(
         }
         composable(route = PantallasTrovare.Soporte.name){
             Soporte(
+                viewModel = viewModel,
                 navController = navController
             )
         }

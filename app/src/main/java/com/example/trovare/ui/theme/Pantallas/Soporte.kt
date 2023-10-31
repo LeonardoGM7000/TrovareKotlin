@@ -25,6 +25,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ChipColors
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -33,14 +34,18 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableChipBorder
 import androidx.compose.material3.SelectableChipColors
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -56,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.trovare.PantallasTrovare
 import com.example.trovare.ui.theme.Data.listaDePreguntas
+import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
@@ -68,13 +74,24 @@ import com.example.trovare.ui.theme.Trv6
 @Composable
 fun Soporte(
     modifier: Modifier = Modifier,
+    viewModel: TrovareViewModel,
     navController: NavController
 ) {
+
+    var textoComentario by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue("", TextRange(0, 7)))
+    }
+    val uiState by viewModel.uiState.collectAsState()
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
         },
+
+
+
     ) { it ->
         Surface(
             modifier = modifier
@@ -82,12 +99,7 @@ fun Soporte(
                 .padding(it),
             color = Trv1
         ) {
-
-            var resultoUtil by rememberSaveable { mutableStateOf("") }
-            var textoComentario by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-                mutableStateOf(TextFieldValue("", TextRange(0, 7)))
-            }
-
+            //CUERPO DE LA PANTALLA SOPORTE---------------------------------------------------------
             LazyColumn() {
                 item {
                     Text(
@@ -185,15 +197,15 @@ fun Soporte(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         FilterChip(
-                            selected = resultoUtil == "Si",
-                            onClick = { resultoUtil = "Si" },
+                            selected = uiState.resultoUtil == "Si",
+                            onClick = { viewModel.setResultoUtil("Si") },
                             colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF298538), containerColor = Trv1),
                             label = { Text(text = "Si") }
                         )
                         Spacer(modifier = modifier.padding(3.dp))
                         FilterChip(
-                            selected = resultoUtil == "No",
-                            onClick = { resultoUtil = "No" },
+                            selected = uiState.resultoUtil == "No",
+                            onClick = { viewModel.setResultoUtil("No") },
                             colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF853129), containerColor = Trv1),
                             label = { Text(text = "No") }
                         )

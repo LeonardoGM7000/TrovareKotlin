@@ -22,17 +22,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 /**
- * [OrderViewModel] holds information about a cupcake order in terms of quantity, flavor, and
- * pickup date. It also knows how to calculate the total price based on these order details.
+ * [TrovareViewModel] guarda información de la aplicación dentro del ciclo de vida.
  */
 
 class TrovareViewModel : ViewModel() {
 
 
 
-    private val _estadoUi = MutableStateFlow(ConfiguracionEstadoUi())
-    val uiState: StateFlow<ConfiguracionEstadoUi> = _estadoUi.asStateFlow()
-
+    private val _estadoUi = MutableStateFlow(TrovareEstadoUi())
+    val uiState: StateFlow<TrovareEstadoUi> = _estadoUi.asStateFlow()
+    //Pantalla-configuración------------------------------------------------------------------------
     fun setIdioma(nuevoIdioma: String) {
         _estadoUi.update { estadoActual ->
             estadoActual.copy(
@@ -57,69 +56,15 @@ class TrovareViewModel : ViewModel() {
         }
     }
 
-    /*
+    //Pantalla-soporte------------------------------------------------------------------------------
 
-    /**
-     * Set the [desiredFlavor] of cupcakes for this order's state.
-     * Only 1 flavor can be selected for the whole order.
-     */
-    fun setFlavor(desiredFlavor: String) {
-        _EstadoUi.update { currentState ->
-            currentState.copy(flavor = desiredFlavor)
-        }
-    }
-
-    /**
-     * Set the [pickupDate] for this order's state and update the price
-     */
-    fun setDate(pickupDate: String) {
-        _EstadoUi.update { currentState ->
-            currentState.copy(
-                date = pickupDate,
-                price = calculatePrice(pickupDate = pickupDate)
+    fun setResultoUtil(nuevaSeleccion: String){
+        _estadoUi.update { estadoActual ->
+            estadoActual.copy(
+                resultoUtil = nuevaSeleccion
             )
         }
     }
-
-    /**
-     * Reset the order state
-     */
-    fun resetOrder() {
-        _EstadoUi.value = ConfiguracionEstadoUi(pickupOptions = pickupOptions())
-    }
-
-    /**
-     * Returns the calculated price based on the order details.
-     */
-    private fun calculatePrice(
-        quantity: Int = _EstadoUi.value.quantity,
-        pickupDate: String = _EstadoUi.value.date
-    ): String {
-        var calculatedPrice = quantity * PRICE_PER_CUPCAKE
-        // If the user selected the first option (today) for pickup, add the surcharge
-        if (pickupOptions()[0] == pickupDate) {
-            calculatedPrice += PRICE_FOR_SAME_DAY_PICKUP
-        }
-        val formattedPrice = NumberFormat.getCurrencyInstance().format(calculatedPrice)
-        return formattedPrice
-    }
-
-    /**
-     * Returns a list of date options starting with the current date and the following 3 dates.
-     */
-    private fun pickupOptions(): List<String> {
-        val dateOptions = mutableListOf<String>()
-        val formatter = SimpleDateFormat("E MMM d", Locale.getDefault())
-        val calendar = Calendar.getInstance()
-        // add current date and the following 3 dates.
-        repeat(4) {
-            dateOptions.add(formatter.format(calendar.time))
-            calendar.add(Calendar.DATE, 1)
-        }
-        return dateOptions
-    }
-
-     */
 
 
 }
