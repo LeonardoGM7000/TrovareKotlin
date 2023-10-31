@@ -66,7 +66,7 @@ fun FAQS(
 
     Scaffold(
         topBar = {
-            BarraSuperior()
+            BarraSuperior(navController = navController)
         },
         bottomBar = {
             BarrInferior()

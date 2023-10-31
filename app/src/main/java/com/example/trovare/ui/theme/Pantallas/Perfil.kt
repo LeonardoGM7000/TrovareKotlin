@@ -14,20 +14,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
 
-@Preview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Perfil(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navController: NavController
 ) {
 
     Scaffold(
         topBar = {
-            BarraSuperior()
+            BarraSuperior(navController = navController)
         },
     ) { it ->
         Surface(

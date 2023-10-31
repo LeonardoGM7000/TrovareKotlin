@@ -83,7 +83,7 @@ fun Trovare(
             )
         }
         composable(route = PantallasTrovare.Perfil.name){
-            Perfil()
+            Perfil(navController = navController)
         }
     }
 }

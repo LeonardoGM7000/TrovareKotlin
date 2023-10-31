@@ -51,6 +51,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -64,6 +65,7 @@ import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
 import com.example.trovare.ui.theme.Recursos.VentanaDeAlerta
+import com.example.trovare.ui.theme.TrovareTheme
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv6
@@ -78,12 +80,13 @@ fun Configuracion(
 
     Scaffold(
         topBar = {
-            BarraSuperior()
+            BarraSuperior(navController = navController)
         },
     ) { it ->
 
         var mostrarCerrarSesion by rememberSaveable { mutableStateOf(false) }
         var mostrarBorrarCuenta by rememberSaveable { mutableStateOf(false) }
+        val uiState by viewModel.uiState.collectAsState()
 
         //CUERPO DE LA PANTALLA CONFIGURACION ------------------------------------------------------
         Surface(
@@ -113,11 +116,26 @@ fun Configuracion(
                     Divisor()
                 }
                 item {
-                    listaDeConfiguracion.forEach(){configuracion ->
-                        TarjetaConfiguracion(
-                            configuracion = configuracion,
-                            viewModel = viewModel
-                        )
+                    //Configuración-Idioma----------------------------------------------------------
+                    TarjetaConfiguracion(
+                        configuracion = listaDeConfiguracion[0],
+                        configuracionActual = uiState.idioma
+                    ) {
+                        viewModel.setIdioma(it)
+                    }
+                    //Configuración-Unidad----------------------------------------------------------
+                    TarjetaConfiguracion(
+                        configuracion = listaDeConfiguracion[1],
+                        configuracionActual = uiState.unidad
+                    ) {
+                        viewModel.setUnidades(it)
+                    }
+                    //Configuración-Moneda----------------------------------------------------------
+                    TarjetaConfiguracion(
+                        configuracion = listaDeConfiguracion[2],
+                        configuracionActual = uiState.moneda
+                    ) {
+                        viewModel.setMonedas(it)
                     }
                 }
                 item {
@@ -229,11 +247,12 @@ fun TarjetaPerfil(
 fun TarjetaConfiguracion(
     modifier: Modifier = Modifier,
     configuracion: Configuracion,
-    viewModel: TrovareViewModel
+    configuracionActual: String,
+    accion: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     var selectedValue by rememberSaveable { mutableStateOf(configuracion.opciones.first()) }
-    val uiState by viewModel.uiState.collectAsState()
+
 
     // Definir la animación de tamaño de la tarjeta
     val cardSizeModifier = Modifier
@@ -291,7 +310,7 @@ fun TarjetaConfiguracion(
                         modifier = modifier
                             .padding(top = 10.dp)
                             .fillMaxSize(),
-                        text = uiState.idioma,
+                        text = configuracionActual,
                         textAlign = TextAlign.Right,
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White
@@ -313,19 +332,19 @@ fun TarjetaConfiguracion(
                         Row(
                             modifier = Modifier
                                 .selectable(
-                                    selected = selectedValue == item,
+                                    selected = configuracionActual == item,
                                     onClick = {
                                         selectedValue = item
-                                        viewModel.setIdioma(item)
+                                        accion(item)
                                     }
                                 ),
                             verticalAlignment = Alignment.CenterVertically
                         ){
                             RadioButton(
-                                selected = selectedValue == item,
+                                selected = configuracionActual == item,
                                 onClick = {
                                     selectedValue = item
-                                    viewModel.setIdioma(item)
+                                    accion(item)
                                 },
                                 colors = RadioButtonDefaults.colors(selectedColor = Trv6)
                             )
@@ -402,7 +421,7 @@ fun TarjetaNormal(
 @Composable
 fun PreviewConfiguracion() {
     TrovareTheme {
-        Configuracion()
+
     }
 }
 

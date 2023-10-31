@@ -30,11 +30,11 @@ class TrovareViewModel : ViewModel() {
 
 
 
-    private val _EstadoUi = MutableStateFlow(ConfiguracionEstadoUi())
-    val uiState: StateFlow<ConfiguracionEstadoUi> = _EstadoUi.asStateFlow()
+    private val _estadoUi = MutableStateFlow(ConfiguracionEstadoUi())
+    val uiState: StateFlow<ConfiguracionEstadoUi> = _estadoUi.asStateFlow()
 
     fun setIdioma(nuevoIdioma: String) {
-        _EstadoUi.update { estadoActual ->
+        _estadoUi.update { estadoActual ->
             estadoActual.copy(
                 idioma = nuevoIdioma,
             )
@@ -42,9 +42,17 @@ class TrovareViewModel : ViewModel() {
     }
 
     fun setUnidades(nuevaUnidad: String) {
-        _EstadoUi.update { estadoActual ->
+        _estadoUi.update { estadoActual ->
             estadoActual.copy(
-                idioma = nuevaUnidad,
+                unidad = nuevaUnidad,
+            )
+        }
+    }
+
+    fun setMonedas(nuevaMoneda: String) {
+        _estadoUi.update { estadoActual ->
+            estadoActual.copy(
+                moneda = nuevaMoneda,
             )
         }
     }

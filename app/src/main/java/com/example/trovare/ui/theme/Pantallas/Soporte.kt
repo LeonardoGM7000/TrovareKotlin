@@ -73,7 +73,7 @@ fun Soporte(
 
     Scaffold(
         topBar = {
-            BarraSuperior()
+            BarraSuperior(navController = navController)
         },
     ) { it ->
         Surface(
@@ -197,40 +197,6 @@ fun Soporte(
                             colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF853129), containerColor = Trv1),
                             label = { Text(text = "No") }
                         )
-                    }
-                }
-                item {
-                    Divisor()
-                }
-                item {
-                    Card(
-                        modifier = modifier
-                            .wrapContentSize()
-                            .padding(horizontal = 25.dp)
-                            .clickable(
-                                indication = null,
-                                interactionSource = NoRippleInteractionSource()
-                            ) { navController.navigate(PantallasTrovare.FAQS.name) },
-                        colors = CardDefaults.cardColors(
-                            containerColor = Trv1
-                        ),
-                    ) {
-                        Row(modifier = modifier){
-                            Icon(
-                                modifier = modifier
-                                    .padding(horizontal = 15.dp, vertical = 5.dp),
-                                imageVector = Icons.Filled.Info,
-                                contentDescription = "",
-                                tint = Color.White,
-                            )
-
-                            Text(
-                                text = "FAQs",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                        }
                     }
                 }
                 item {

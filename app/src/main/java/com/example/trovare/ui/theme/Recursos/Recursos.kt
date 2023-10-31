@@ -46,11 +46,13 @@ fun Divisor(modifier: Modifier = Modifier){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BarraSuperior() {
+fun BarraSuperior(
+    navController: NavController
+) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.smallTopAppBarColors(Trv1),
         navigationIcon = {
-            IconButton(onClick = {  }) {
+            IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.Filled.KeyboardArrowLeft,
                     contentDescription = "",
