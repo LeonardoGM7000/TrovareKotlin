@@ -242,6 +242,7 @@ fun Soporte(
 
                     )
                 }
+                //Botón para enviar comentario------------------------------------------------------
                 item {
                     Box(
                         modifier = modifier
@@ -249,6 +250,7 @@ fun Soporte(
                             .fillMaxWidth()
                     ){
                         TextButton(
+                            enabled = textoComentario != TextFieldValue(""),
                             modifier = modifier.fillMaxWidth(),
                             onClick = {
                                 //Muestra el mensaje de comentario enviado con éxito----------------
