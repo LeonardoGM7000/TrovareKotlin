@@ -16,6 +16,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Help
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.Phone
@@ -34,6 +35,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableChipBorder
 import androidx.compose.material3.SelectableChipColors
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -69,6 +71,7 @@ import com.example.trovare.ui.theme.TrovareTheme
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv3
 import com.example.trovare.ui.theme.Trv6
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,7 +93,9 @@ fun Soporte(
             BarraSuperior(navController = navController)
         },
 
-
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
 
     ) { it ->
         Surface(
@@ -245,7 +250,7 @@ fun Soporte(
                         ),
                         maxLines = 5,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                        keyboardActions = KeyboardActions(onSend = {}),
+                        keyboardActions = KeyboardActions(onSend = { /*Por Hacer*/ }),
                     )
                 }
                 item {
@@ -256,7 +261,11 @@ fun Soporte(
                     ){
                         TextButton(
                             modifier = modifier.fillMaxWidth(),
-                            onClick = { /*TODO*/ },
+                            onClick = { /*scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "Comentario enviado con éxito"
+                                )
+                            } */},
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Trv6,
                                 contentColor = Color.White
