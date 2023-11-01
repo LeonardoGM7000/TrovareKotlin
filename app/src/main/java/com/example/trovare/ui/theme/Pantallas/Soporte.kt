@@ -1,6 +1,5 @@
 package com.example.trovare.ui.theme.Pantallas
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,38 +8,27 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Help
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ChipColors
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SelectableChipBorder
-import androidx.compose.material3.SelectableChipColors
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -54,20 +42,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.trovare.PantallasTrovare
-import com.example.trovare.ui.theme.Data.listaDePreguntas
 import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
-import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
-import com.example.trovare.ui.theme.TrovareTheme
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv3
 import com.example.trovare.ui.theme.Trv6
@@ -88,13 +71,17 @@ fun Soporte(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val keyboardOptions: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done)
+
+
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
         },
 
         snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
+            SnackbarHost(
+                hostState = snackbarHostState)
         },
 
     ) { it ->
@@ -219,11 +206,12 @@ fun Soporte(
                 item {
                     Divisor()
                 }
+                //Caja de comentarios---------------------------------------------------------------
                 item {
                     OutlinedTextField(
                         modifier = modifier
                             .fillMaxSize()
-                            .padding(horizontal = 25.dp, vertical = 15.dp),
+                            .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
                         value = textoComentario,
                         onValueChange = { textoComentario = it },
                         label = {
@@ -249,8 +237,9 @@ fun Soporte(
                             unfocusedIndicatorColor = Color.White
                         ),
                         maxLines = 5,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                        keyboardActions = KeyboardActions(onSend = { /*Por Hacer*/ }),
+                        keyboardOptions = keyboardOptions
+                       ,
+
                     )
                 }
                 item {
@@ -261,11 +250,16 @@ fun Soporte(
                     ){
                         TextButton(
                             modifier = modifier.fillMaxWidth(),
-                            onClick = { /*scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = "Comentario enviado con éxito"
-                                )
-                            } */},
+                            onClick = {
+                                //Muestra el mensaje de comentario enviado con éxito----------------
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Comentario enviado con éxito",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                                textoComentario = TextFieldValue("")
+                            },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Trv6,
                                 contentColor = Color.White
