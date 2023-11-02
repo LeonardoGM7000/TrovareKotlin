@@ -25,6 +25,7 @@ import com.example.trovare.ui.theme.Pantallas.Inicio
 import com.example.trovare.ui.theme.Pantallas.Soporte
 import androidx.compose.runtime.collectAsState
 import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
+import com.example.trovare.ui.theme.Pantallas.Buscar
 import com.example.trovare.ui.theme.Pantallas.Perfil
 
 /**
@@ -35,7 +36,8 @@ enum class PantallasTrovare(val titulo: String) {
     Configuracion(titulo = "Configuracion"),
     FAQS(titulo = "FAQS"),
     Soporte(titulo = "Soporte"),
-    Perfil(titulo = "Configuracion")
+    Perfil(titulo = "Perfil"),
+    Buscar(titulo = "Buscar")
 }
 
 
@@ -64,7 +66,9 @@ fun Trovare(
 
     ) {
         composable(route = PantallasTrovare.Inicio.name){
-            Inicio(navController)
+            Inicio(
+                navController = navController
+            )
         }
         composable(route = PantallasTrovare.Configuracion.name){
             Configuracion(
@@ -84,7 +88,14 @@ fun Trovare(
             )
         }
         composable(route = PantallasTrovare.Perfil.name){
-            Perfil(navController = navController)
+            Perfil(
+                navController = navController
+            )
+        }
+        composable(route = PantallasTrovare.Buscar.name){
+            Buscar(
+                navController = navController
+            )
         }
     }
 }

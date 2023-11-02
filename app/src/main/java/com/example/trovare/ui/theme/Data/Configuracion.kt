@@ -7,7 +7,7 @@ import androidx.compose.material.icons.filled.SocialDistance
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
 
-class Configuracion(
+data class Configuracion(
     val nombreDeConfig: String,
     val icono: ImageVector,
     val opciones: List<String>,
@@ -30,14 +30,6 @@ object ConfiguracionDataSource {
     )
 }
 
-
-object SoporteDatasource {
-    val ResultoUtil = listOf(
-        "",
-        "Si",
-        "No"
-    )
-}
 
 
 val listaDeConfiguracion = listOf(
