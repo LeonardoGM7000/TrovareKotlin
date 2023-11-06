@@ -84,7 +84,9 @@ fun Inicio(
             BarraSuperiorConfig(navController)
         },
         bottomBar = {
-            MenuInferior()
+            MenuInferior(
+                navController = navController
+            )
         },
 
     ) { it ->
@@ -253,7 +255,7 @@ fun Inicio(
 }
 
 
-
+//Tarjeta para mostrar categorías-------------------------------------------------------------------
 @Composable
 fun TarjetaCategorias(modifier: Modifier = Modifier){
     Card(
@@ -297,6 +299,7 @@ fun TarjetaCategorias(modifier: Modifier = Modifier){
 
     }
 }
+//Categoria para ser mostrada en la tarjeta de categorías-------------------------------------------
 @Composable
 fun Categoria(icono: ImageVector, nombre: String,  modifier: Modifier = Modifier) {
         Column(
@@ -307,9 +310,7 @@ fun Categoria(icono: ImageVector, nombre: String,  modifier: Modifier = Modifier
             FloatingActionButton(
                 onClick = { /*TODO*/ },
                 containerColor = Color.White
-            )
-
-            {
+            ){
                 Icon(
                     imageVector = icono,
                     contentDescription = ""
@@ -324,9 +325,12 @@ fun Categoria(icono: ImageVector, nombre: String,  modifier: Modifier = Modifier
         }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
-fun MenuInferior(modifier: Modifier = Modifier) {
+fun MenuInferior(
+    modifier: Modifier = Modifier,
+    navController: NavController
+) {
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = Trv1
@@ -352,7 +356,7 @@ fun MenuInferior(modifier: Modifier = Modifier) {
                         tint = Trv5
                     )
                 }
-                IconButton(onClick = { /*TODO*/ }) {
+                IconButton(onClick = { navController.navigate(PantallasTrovare.Perfil.name) }) {
                     Icon(
                         modifier = modifier
                             .size(40.dp),
@@ -361,7 +365,7 @@ fun MenuInferior(modifier: Modifier = Modifier) {
                         tint = Color.White
                     )
                 }
-                IconButton(onClick = { /*TODO*/ }) {
+                IconButton(onClick = { navController.navigate(PantallasTrovare.Detalles.name) }) {
                     Icon(
                         modifier = modifier
                             .size(40.dp),

@@ -187,7 +187,7 @@ fun VentanaDeAlerta(
 
 }
 
-
+//No mostrar feedback al interactuar con una tarjeta------------------------------------------------
 class NoRippleInteractionSource : MutableInteractionSource {
 
     override val interactions: kotlinx.coroutines.flow.Flow<Interaction> = emptyFlow()

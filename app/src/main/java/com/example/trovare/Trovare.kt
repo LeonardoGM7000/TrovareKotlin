@@ -26,7 +26,9 @@ import com.example.trovare.ui.theme.Pantallas.Soporte
 import androidx.compose.runtime.collectAsState
 import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
 import com.example.trovare.ui.theme.Pantallas.Buscar
+import com.example.trovare.ui.theme.Pantallas.Detalles
 import com.example.trovare.ui.theme.Pantallas.Perfil
+import com.google.android.libraries.places.api.net.PlacesClient
 
 /**
  * enum values that represent the screens in the app
@@ -37,14 +39,17 @@ enum class PantallasTrovare(val titulo: String) {
     FAQS(titulo = "FAQS"),
     Soporte(titulo = "Soporte"),
     Perfil(titulo = "Perfil"),
-    Buscar(titulo = "Buscar")
+    Buscar(titulo = "Buscar"),
+    Detalles(titulo = "Detalles"),
+
 }
 
 
 @Composable
 fun Trovare(
     viewModel: TrovareViewModel = viewModel(),
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    placesClient: PlacesClient
 ){
 // Obtener la entrada actual en la pila de retroceso
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -94,8 +99,13 @@ fun Trovare(
         }
         composable(route = PantallasTrovare.Buscar.name){
             Buscar(
-                navController = navController
+                navController = navController,
+                viewModel = viewModel,
+                placesClient = placesClient
             )
+        }
+        composable(route = PantallasTrovare.Detalles.name){
+            Detalles()
         }
     }
 }

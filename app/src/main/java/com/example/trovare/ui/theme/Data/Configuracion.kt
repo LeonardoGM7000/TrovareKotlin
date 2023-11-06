@@ -5,7 +5,6 @@ import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.SocialDistance
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
 
 data class Configuracion(
     val nombreDeConfig: String,
