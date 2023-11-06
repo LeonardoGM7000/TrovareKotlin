@@ -24,23 +24,34 @@ import com.example.trovare.ui.theme.Pantallas.FAQS
 import com.example.trovare.ui.theme.Pantallas.Inicio
 import com.example.trovare.ui.theme.Pantallas.Soporte
 import androidx.compose.runtime.collectAsState
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.example.trovare.ui.theme.Data.Lugar
 import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
 import com.example.trovare.ui.theme.Pantallas.Buscar
 import com.example.trovare.ui.theme.Pantallas.Detalles
 import com.example.trovare.ui.theme.Pantallas.Perfil
 import com.google.android.libraries.places.api.net.PlacesClient
 
-/**
- * enum values that represent the screens in the app
- */
-enum class PantallasTrovare(val titulo: String) {
-    Inicio(titulo = "Inicio"),
-    Configuracion(titulo = "Configuracion"),
-    FAQS(titulo = "FAQS"),
-    Soporte(titulo = "Soporte"),
-    Perfil(titulo = "Perfil"),
-    Buscar(titulo = "Buscar"),
-    Detalles(titulo = "Detalles"),
+
+sealed class Pantalla(val ruta: String){
+    object Inicio: Pantalla("Inicio")
+    object Configuracion: Pantalla("Configuracion")
+    object FAQS: Pantalla("FAQS")
+    object Soporte: Pantalla("Soporte")
+    object Perfil: Pantalla("Perfil")
+    object Buscar: Pantalla("Buscar")
+    object Detalles: Pantalla("Detalles")
+
+    fun conArgs(vararg args: String): String {
+        return buildString {
+            append(ruta)
+            args.forEach { arg ->
+                append("/$arg")
+            }
+        }
+
+    }
 
 }
 
@@ -51,18 +62,10 @@ fun Trovare(
     navController: NavHostController = rememberNavController(),
     placesClient: PlacesClient
 ){
-// Obtener la entrada actual en la pila de retroceso
-    val backStackEntry by navController.currentBackStackEntryAsState()
-    // Obtener el nombre de la pantalla actual
-    val currentScreen = PantallasTrovare.valueOf(
-        backStackEntry?.destination?.route ?: PantallasTrovare.Inicio.name
-    )
-
-    val uiState by viewModel.uiState.collectAsState()
 
     NavHost(
         navController = navController,
-        startDestination = PantallasTrovare.Inicio.name,
+        startDestination = Pantalla.Inicio.ruta,
         //enterTransition = {  slideInHorizontally(animationSpec = SpringSpec(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium,)) { 0 }  },
         //exitTransition = { slideOutHorizontally(animationSpec = SpringSpec(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium,)) { -300 }  }
         //enterTransition = { fadeIn() },
@@ -70,42 +73,54 @@ fun Trovare(
         exitTransition = { ExitTransition.None}
 
     ) {
-        composable(route = PantallasTrovare.Inicio.name){
+        composable(route = Pantalla.Inicio.ruta){
             Inicio(
                 navController = navController
             )
         }
-        composable(route = PantallasTrovare.Configuracion.name){
+        composable(route = Pantalla.Configuracion.ruta){
             Configuracion(
                 viewModel = viewModel,
                 navController = navController
             )
         }
-        composable(route = PantallasTrovare.FAQS.name){
+        composable(route = Pantalla.FAQS.ruta){
             FAQS(
                 navController = navController
             )
         }
-        composable(route = PantallasTrovare.Soporte.name){
+        composable(route = Pantalla.Soporte.ruta){
             Soporte(
                 viewModel = viewModel,
                 navController = navController
             )
         }
-        composable(route = PantallasTrovare.Perfil.name){
+        composable(route = Pantalla.Perfil.ruta){
             Perfil(
                 navController = navController
             )
         }
-        composable(route = PantallasTrovare.Buscar.name){
+        composable(route = Pantalla.Buscar.ruta){
             Buscar(
                 navController = navController,
                 viewModel = viewModel,
                 placesClient = placesClient
             )
         }
-        composable(route = PantallasTrovare.Detalles.name){
-            Detalles()
+        composable(
+            route = Pantalla.Detalles.ruta + "/{lugar}",
+            arguments = listOf(
+                navArgument("lugar"){
+                    type = NavType.StringType
+                    defaultValue = "Prueba"
+                    nullable = true
+                }
+            )
+        ){
+            Detalles(
+                placeId = it.arguments?.getString("lugar"),
+                navController = navController,
+            )
         }
     }
 }

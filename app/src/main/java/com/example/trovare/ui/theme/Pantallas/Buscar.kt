@@ -1,7 +1,7 @@
 package com.example.trovare.ui.theme.Pantallas
 
 import android.annotation.SuppressLint
-import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.trovare.Pantalla
 import com.example.trovare.ui.theme.Data.LugarAutocompletar
 import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.Divisor
@@ -184,7 +185,10 @@ fun Buscar(
                         Card(
                             modifier = Modifier
                                 .padding(horizontal = 25.dp, vertical = 5.dp)
-                                .fillMaxWidth(),
+                                .fillMaxWidth()
+                                .clickable {
+                                      navController.navigate(Pantalla.Detalles.conArgs(lugar.id))
+                                },
                             colors = CardDefaults.cardColors(Trv1),
                             border = CardDefaults.outlinedCardBorder()
                         ) {

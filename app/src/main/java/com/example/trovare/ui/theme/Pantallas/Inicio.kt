@@ -46,23 +46,16 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.trovare.PantallasTrovare
+import com.example.trovare.Pantalla
 import com.example.trovare.R
 import com.example.trovare.ui.theme.Data.listaDeExplorar
 import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
 import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
-import com.example.trovare.ui.theme.TrovareTheme
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv4
@@ -108,7 +101,7 @@ fun Inicio(
                         .clickable(
                             indication = null,
                             interactionSource = NoRippleInteractionSource()
-                        ) { navController.navigate(PantallasTrovare.Buscar.name) },
+                        ) { navController.navigate(Pantalla.Buscar.ruta) },
                     colors = CardDefaults.cardColors(Color.Black),
                     border = CardDefaults.outlinedCardBorder()
                 ){
@@ -356,7 +349,7 @@ fun MenuInferior(
                         tint = Trv5
                     )
                 }
-                IconButton(onClick = { navController.navigate(PantallasTrovare.Perfil.name) }) {
+                IconButton(onClick = { navController.navigate(Pantalla.Perfil.ruta) }) {
                     Icon(
                         modifier = modifier
                             .size(40.dp),
@@ -365,7 +358,7 @@ fun MenuInferior(
                         tint = Color.White
                     )
                 }
-                IconButton(onClick = { navController.navigate(PantallasTrovare.Detalles.name) }) {
+                IconButton(onClick = { /*TODO*/ }) {
                     Icon(
                         modifier = modifier
                             .size(40.dp),

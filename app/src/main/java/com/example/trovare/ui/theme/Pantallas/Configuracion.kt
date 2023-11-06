@@ -55,7 +55,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.trovare.PantallasTrovare
+import com.example.trovare.Pantalla
 import com.example.trovare.ui.theme.Data.Configuracion
 import com.example.trovare.ui.theme.Data.Usuario
 import com.example.trovare.ui.theme.Data.listaDeConfiguracion
@@ -142,12 +142,12 @@ fun Configuracion(
                     TarjetaNormal(
                         titulo = "Soporte",
                         icono = Icons.Filled.Help,
-                        accion = {navController.navigate(PantallasTrovare.Soporte.name)}
+                        accion = {navController.navigate(Pantalla.Soporte.ruta)}
                     )
                     TarjetaNormal(
                         titulo = "FAQs",
                         icono = Icons.Filled.Info,
-                        accion = {navController.navigate(PantallasTrovare.FAQS.name)}
+                        accion = {navController.navigate(Pantalla.FAQS.ruta)}
                     )
                     Divisor()
                     TarjetaNormal(
@@ -232,7 +232,7 @@ fun TarjetaPerfil(
                 )
                 Text(
                     modifier = modifier
-                        .clickable { navController.navigate(PantallasTrovare.Perfil.name) },
+                        .clickable { navController.navigate(Pantalla.Perfil.ruta) },
                     text = "Ver Perfil",
                     style = MaterialTheme.typography.bodySmall,
                     textDecoration = TextDecoration.Underline,

@@ -44,7 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
-import com.example.trovare.PantallasTrovare
+import com.example.trovare.Pantalla
 import com.example.trovare.ui.theme.Data.Pregunta
 import com.example.trovare.ui.theme.Data.listaDePreguntas
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
@@ -108,7 +108,7 @@ fun FAQS(
                             .clickable(
                                 indication = null,
                                 interactionSource = NoRippleInteractionSource()
-                            ) { navController.navigate(PantallasTrovare.Soporte.name) },
+                            ) { navController.navigate(Pantalla.Soporte.ruta) },
                         colors = CardDefaults.cardColors(
                             containerColor = Trv1
                         ),

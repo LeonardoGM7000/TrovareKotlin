@@ -1,15 +1,14 @@
 package com.example.trovare.ui.theme.Data
 
-import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
 import com.example.trovare.R
 
 data class Usuario(
     val nombre: String,
-    @DrawableRes val foto_perfil: Int
+    @DrawableRes val foto_perfil: Int = R.drawable.perfil,
+    val fechaDeRegistro: String,
+    val descripcion: String?,
+    val lugarDeOrigen: String?
 )
 
-val usuarioPrueba = Usuario(nombre = "Usuario Prueba", foto_perfil = R.drawable.perfil)
+val usuarioPrueba = Usuario(nombre = "Usuario Prueba", fechaDeRegistro = "2023", descripcion = "Descripcion del usuario de prueba Descripcion del usuario de prueba", lugarDeOrigen = "Mexico")

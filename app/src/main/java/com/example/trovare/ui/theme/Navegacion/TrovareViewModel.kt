@@ -2,10 +2,14 @@ package com.example.trovare.ui.theme.Navegacion
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.example.trovare.ui.theme.Data.Lugar
 import com.example.trovare.ui.theme.Data.LugarAutocompletar
 import com.google.android.gms.common.api.ApiException
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
+import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.PlaceTypes
+import com.google.android.libraries.places.api.net.FetchPlaceRequest
+import com.google.android.libraries.places.api.net.FetchPlaceResponse
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
 import com.google.android.libraries.places.api.net.PlacesClient
@@ -109,6 +113,36 @@ class TrovareViewModel : ViewModel() {
             }.addOnFailureListener { exception: Exception? ->
                 if (exception is ApiException) {
                     Log.e("maps api", "no se encontro el lugar: ${exception.statusCode}")
+                }
+            }
+    }
+
+    //Funcion para obtener detalles del lugar con base en un ID de lugar----------------------------
+    fun obtenerLugar(
+        placesClient: PlacesClient,
+        placeId: String,
+        lugar: Lugar
+    ){
+
+        val placeFields = listOf(Place.Field.NAME, Place.Field.RATING, Place.Field.ADDRESS, Place.Field.OPENING_HOURS, Place.Field.WEBSITE_URI, /*Place.Field.LAT_LNG*/)//campos que se deben obtener de la API de places
+        val request = FetchPlaceRequest.newInstance(placeId, placeFields)
+
+        placesClient.fetchPlace(request)
+            .addOnSuccessListener { response: FetchPlaceResponse ->
+                val place = response.place
+
+                lugar.setNombre(place.name)
+                lugar.setCalificacion(place.rating)
+                lugar.setDireccion(place.address)
+                lugar.setHorario(place.openingHours)
+                lugar.setPagina(place.websiteUri)
+
+                Log.i("testLugar", "Place found: ${place.name}")
+            }.addOnFailureListener { exception: Exception ->
+                if (exception is ApiException) {
+                    Log.e("testLugar", "Place not found: ${exception.message}")
+                    val statusCode = exception.statusCode
+                    TODO("Handle error with given status code")
                 }
             }
     }

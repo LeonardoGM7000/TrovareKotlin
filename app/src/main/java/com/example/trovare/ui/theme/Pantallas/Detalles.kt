@@ -19,9 +19,7 @@ import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.Web
 import androidx.compose.material3.Card
-import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.IconToggleButton
@@ -31,28 +29,28 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.trovare.ui.theme.Data.Lugar
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv7
-import com.google.android.libraries.places.api.model.Place
 
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun Detalles(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    placeId: String? = "prueba",
+    navController: NavController
+
 ){
 
-    val placeFields = listOf(Place.Field.NAME, Place.Field.RATING, Place.Field.ADDRESS, Place.Field.OPENING_HOURS, Place.Field.WEBSITE_URI, Place.Field.LAT_LNG)//campos que se deben obtener de la API de places
-    val rating = 4.5
-
+    //var lugar by remember { mutableStateOf(Lugar("Nombre del lugar", 3.5, "", null, null)) }
     var secondChecked by rememberSaveable { mutableStateOf(false) }
 
     Surface(
@@ -77,7 +75,7 @@ fun Detalles(
                         FloatingActionButton(
                             modifier = modifier
                                 .size(35.dp),
-                            onClick = { /*TODO*/ },
+                            onClick = { navController.popBackStack() },
                             containerColor = Color.White,
                             shape = CircleShape
                         ){
@@ -136,7 +134,7 @@ fun Detalles(
                     Text(
                         modifier = modifier
                             .fillMaxWidth(0.7f),
-                        text = "Nombre del lugar",
+                        text = placeId.toString(),
                         textAlign = TextAlign.Justify,
                         color = Color.White,
                         style = MaterialTheme.typography.displaySmall
@@ -147,7 +145,7 @@ fun Detalles(
                     ) {
                         Text(
                             modifier = modifier.fillMaxWidth(0.75f),
-                            text = "${rating}/5",
+                            text = "12/5",
                             textAlign = TextAlign.Right,
                             color = Color.White,
                             style = MaterialTheme.typography.bodyMedium
