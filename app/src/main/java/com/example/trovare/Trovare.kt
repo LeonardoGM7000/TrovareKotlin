@@ -42,6 +42,7 @@ sealed class Pantalla(val ruta: String){
     object Perfil: Pantalla("Perfil")
     object Buscar: Pantalla("Buscar")
     object Detalles: Pantalla("Detalles")
+    object EditarPerfil: Pantalla("EditarPerfil")
 
     fun conArgs(vararg args: String): String {
         return buildString {
@@ -121,6 +122,9 @@ fun Trovare(
                 placeId = it.arguments?.getString("lugar"),
                 navController = navController,
             )
+        }
+        composable(route = Pantalla.EditarPerfil.ruta){
+
         }
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Edit
@@ -139,7 +140,7 @@ fun PerfilPrincipal(
                             )
                             Icon(
                                 modifier = modifier
-                                    .clickable { /* POR HACER */ }
+                                    .clickable {  }
                                     .padding(vertical = 5.dp),
                                 imageVector = Icons.Rounded.Edit,
                                 contentDescription = "",
@@ -163,8 +164,6 @@ fun PerfilPrincipal(
                         color = Color.White,
                         style = MaterialTheme.typography.bodySmall
                     )
-                } else {
-
                 }
             }
             item {
@@ -177,20 +176,22 @@ fun PerfilPrincipal(
                         Icon(
                             modifier = modifier.padding(end = 5.dp),
                             imageVector = Icons.Rounded.LocationOn,
-                            contentDescription = ""
+                            contentDescription = "",
+                            tint = Color.White,
                         )
                         Text(
                             text = "Lugar de origen: ${usuario.lugarDeOrigen}",
-                            style = MaterialTheme.typography.bodySmall
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White
                         )
                     }
-                } else {
-
                 }
             }
             item {
                 Divisor()
             }
+
+
         }
 
     }

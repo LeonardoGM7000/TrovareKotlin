@@ -8,7 +8,8 @@ data class Usuario(
     @DrawableRes val foto_perfil: Int = R.drawable.perfil,
     val fechaDeRegistro: String,
     val descripcion: String?,
-    val lugarDeOrigen: String?
+    val lugarDeOrigen: String?,
+    val comentarios: List<String>?,
 )
 
-val usuarioPrueba = Usuario(nombre = "Usuario Prueba", fechaDeRegistro = "2023", descripcion = "Descripcion del usuario de prueba Descripcion del usuario de prueba", lugarDeOrigen = "Mexico")
+val usuarioPrueba = Usuario(nombre = "Usuario Prueba", fechaDeRegistro = "2023", descripcion = "Descripcion del usuario de prueba Descripcion del usuario de prueba",  lugarDeOrigen = "Mexico", comentarios = null)

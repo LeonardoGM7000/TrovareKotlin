@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.trovare.ui.theme.Pantallas.Detalles
+import com.example.trovare.ui.theme.Pantallas.EditarPerfil
 import com.example.trovare.ui.theme.TrovareTheme
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.PlacesClient
