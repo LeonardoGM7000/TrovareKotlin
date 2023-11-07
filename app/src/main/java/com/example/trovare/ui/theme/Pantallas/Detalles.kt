@@ -1,5 +1,6 @@
 package com.example.trovare.ui.theme.Pantallas
 
+import android.util.Log
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -27,9 +28,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,20 +39,31 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.trovare.ui.theme.Data.Lugar
+import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv7
+import com.google.android.libraries.places.api.net.PlacesClient
 
 @Composable
 fun Detalles(
     modifier: Modifier = Modifier,
-    placeId: String? = "prueba",
+    placeId: String? = "",
+    placesClient: PlacesClient,
+    viewModel: TrovareViewModel,
     navController: NavController
-
 ){
-
     //var lugar by remember { mutableStateOf(Lugar("Nombre del lugar", 3.5, "", null, null)) }
     var secondChecked by rememberSaveable { mutableStateOf(false) }
+    var nombre by rememberSaveable { mutableStateOf("") }
+    var direccion by rememberSaveable { mutableStateOf("") }
+    var calificacion by rememberSaveable { mutableStateOf(0.0) }
+
+
+
+    LaunchedEffect(key1 = Unit){
+    viewModel.obtenerLugar(placesClient = placesClient, placeId = placeId?: "", nombre = { nombre = it?:"" }, direccion = { direccion = it?:""}, rating =  { calificacion = it?: 0.0} )
+    }
+
 
     Surface(
         modifier = modifier
@@ -134,7 +146,7 @@ fun Detalles(
                     Text(
                         modifier = modifier
                             .fillMaxWidth(0.7f),
-                        text = placeId.toString(),
+                        text = nombre,
                         textAlign = TextAlign.Justify,
                         color = Color.White,
                         style = MaterialTheme.typography.displaySmall
@@ -145,7 +157,7 @@ fun Detalles(
                     ) {
                         Text(
                             modifier = modifier.fillMaxWidth(0.75f),
-                            text = "12/5",
+                            text = "${calificacion}/5",
                             textAlign = TextAlign.Right,
                             color = Color.White,
                             style = MaterialTheme.typography.bodyMedium
@@ -172,7 +184,7 @@ fun Detalles(
                         tint = Color.White
                     )
                     Text(
-                        text = "Direccion del lugar",
+                        text = direccion,
                         color = Color.White,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -220,5 +232,7 @@ fun Detalles(
     }
 
 }
+
+
 
 

@@ -29,6 +29,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -77,6 +78,8 @@ fun Buscar(
     var job: Job? by remember { mutableStateOf(null) }
 
     val prediccionesAutocompletar by remember { mutableStateOf(mutableStateListOf<LugarAutocompletar>()) }//lista de lugares entregados por la API para autocompletar
+
+    val estadoLugar by viewModel.estadoLugar.collectAsState()
 
     //Al escribir en la barra de busqueda se activa un timer de un segundo el cual se reinicia cada que se modifica el texto de la barra de busqueda
     //con la finalidad de que no se haga una llamada a la API en cada modificaci[on del texto

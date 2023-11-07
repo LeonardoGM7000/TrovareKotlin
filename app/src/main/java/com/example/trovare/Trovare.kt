@@ -142,6 +142,8 @@ fun Trovare(
         ){
             Detalles(
                 placeId = it.arguments?.getString("lugar"),
+                placesClient = placesClient,
+                viewModel = viewModel,
                 navController = navController,
             )
         }

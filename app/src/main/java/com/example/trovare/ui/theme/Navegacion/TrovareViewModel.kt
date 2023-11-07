@@ -15,21 +15,6 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.PlacesClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-/*
- * Copyright (C) 2023 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
@@ -39,7 +24,8 @@ import kotlinx.coroutines.flow.update
 
 class TrovareViewModel : ViewModel() {
 
-
+    private val _estadoLugar = MutableStateFlow(TrovareEstadoLugar())
+    val estadoLugar: StateFlow<TrovareEstadoLugar> = _estadoLugar.asStateFlow()
 
     private val _estadoUi = MutableStateFlow(TrovareEstadoUi())
     val uiState: StateFlow<TrovareEstadoUi> = _estadoUi.asStateFlow()
@@ -77,6 +63,36 @@ class TrovareViewModel : ViewModel() {
             )
         }
     }
+
+    //Lugar-Actual----------------------------------------------------------------------------------
+    fun setNombreLugar(nuevoNombre: String) {
+        _estadoLugar.update { estadoActual ->
+            estadoActual.copy(
+                nombre = nuevoNombre,
+            )
+        }
+    }
+
+    fun setRating(nuevoRating: Double) {
+        _estadoLugar.update { estadoActual ->
+            estadoActual.copy(
+                rating = nuevoRating,
+            )
+        }
+    }
+
+    fun setDireccion(nuevaDireccion: String) {
+        _estadoLugar.update { estadoActual ->
+            estadoActual.copy(
+                direccion = nuevaDireccion,
+            )
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------//
+    //-------------------------------------API----------------------------------------------------//
+    //--------------------------------------------------------------------------------------------//
+
 
     //Función para autocompletar lugares en la barra de busqueda------------------------------------
     fun autocompletar(
@@ -121,23 +137,32 @@ class TrovareViewModel : ViewModel() {
     fun obtenerLugar(
         placesClient: PlacesClient,
         placeId: String,
-        lugar: Lugar
+        nombre: (String?) -> Unit,
+        direccion: (String?) -> Unit,
+        rating: (Double?) -> Unit
     ){
-
-        val placeFields = listOf(Place.Field.NAME, Place.Field.RATING, Place.Field.ADDRESS, Place.Field.OPENING_HOURS, Place.Field.WEBSITE_URI, /*Place.Field.LAT_LNG*/)//campos que se deben obtener de la API de places
+        Log.i("testLugar", "Primera entrada")
+        val placeFields = listOf(Place.Field.NAME,  Place.Field.ADDRESS, /* \Place.Field.PHONE_NUMBER, Place.Field.USER_RATINGS_TOTAL, Place.Field.WEBSITE_URI,Place.Field.LAT_LNG*/)//campos que se deben obtener de la API de places
         val request = FetchPlaceRequest.newInstance(placeId, placeFields)
 
         placesClient.fetchPlace(request)
             .addOnSuccessListener { response: FetchPlaceResponse ->
                 val place = response.place
 
-                lugar.setNombre(place.name)
-                lugar.setCalificacion(place.rating)
-                lugar.setDireccion(place.address)
-                lugar.setHorario(place.openingHours)
-                lugar.setPagina(place.websiteUri)
+                //lugar.setCalificacion(place.rating)
+                //lugar.setHorario(place.openingHours)
+                //lugar.setPagina(place.websiteUri)
 
-                Log.i("testLugar", "Place found: ${place.name}")
+                nombre(place.name)
+                direccion(place.address)
+                rating(place.rating)
+                Log.i("testLugar", "nombre: ${place.name}")
+                Log.i("testLugar", "direccion: ${place.address}")
+                //Log.i("testLugar", "rating: ${place.phoneNumber}")
+                //Log.i("testLugar", "userRating: ${place.userRatingsTotal}")
+                //Log.i("testLugar", "url: ${place.websiteUri}")
+                //Log.i("testLugar", "rating: ${place.rating}")
+
             }.addOnFailureListener { exception: Exception ->
                 if (exception is ApiException) {
                     Log.e("testLugar", "Place not found: ${exception.message}")
@@ -146,6 +171,7 @@ class TrovareViewModel : ViewModel() {
                 }
             }
     }
+
 
 
 }

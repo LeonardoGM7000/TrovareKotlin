@@ -12,7 +12,7 @@ data class LugarAutocompletar(
 data class Lugar(
     private var nombre: String,
     private var calificacion: Double,
-    private var direccion: String?,
+    private var direccion: String,
     private var horario: OpeningHours?,
     private var pagina: Uri?,
 ){
@@ -22,7 +22,7 @@ data class Lugar(
     fun setCalificacion(nuevaCalificacion: Double){
         calificacion = nuevaCalificacion
     }
-    fun setDireccion(nuevaDireccion: String?){
+    fun setDireccion(nuevaDireccion: String){
         direccion = nuevaDireccion
     }
     fun setHorario(nuevoHorario: OpeningHours?){
@@ -40,4 +40,17 @@ data class Lugar(
         return calificacion
     }
 
+    fun getDireccion(): String{
+        return direccion
+    }
+
 }
+
+val lugarPrueba = Lugar(
+    nombre = "Nombre del lugar",
+    calificacion = 4.5,
+    direccion = "Dirección del lugar",
+    horario = null,
+    pagina = null,//Uri.parse("https://www.ejemplo.com") // Cambia la URL por la que desees
+)
+
