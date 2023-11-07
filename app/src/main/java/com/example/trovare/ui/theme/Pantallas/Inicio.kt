@@ -16,12 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Attractions
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Hotel
 import androidx.compose.material.icons.filled.Museum
 import androidx.compose.material.icons.filled.Park
@@ -32,7 +28,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -55,10 +50,10 @@ import com.example.trovare.Pantalla
 import com.example.trovare.R
 import com.example.trovare.ui.theme.Data.listaDeExplorar
 import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
+import com.example.trovare.ui.theme.Recursos.MenuInferior
 import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
-import com.example.trovare.ui.theme.Trv4
 import com.example.trovare.ui.theme.Trv5
 import kotlin.math.absoluteValue
 
@@ -78,10 +73,14 @@ fun Inicio(
         },
         bottomBar = {
             MenuInferior(
-                navController = navController
+                presionarHome = {},
+                presionarPerfil = {navController.navigate(Pantalla.PerfilInicio.ruta)},
+                presionarNavegacion = {},
+                presionarItinerario = {},
+                colorHome = Trv5
             )
-        },
 
+        },
     ) { it ->
         Surface(
             modifier = modifier
@@ -319,67 +318,6 @@ fun Categoria(icono: ImageVector, nombre: String,  modifier: Modifier = Modifier
 }
 
 
-@Composable
-fun MenuInferior(
-    modifier: Modifier = Modifier,
-    navController: NavController
-) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = Trv1
-    ) {
-        Card(
-            modifier = modifier.padding(horizontal = 30.dp, vertical = 15.dp),
-            colors = CardDefaults.cardColors(Trv4)
 
-        ) {
-            Row(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 10.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(
-                        modifier = modifier
-                            .size(40.dp),
-                        imageVector = Icons.Filled.Home,
-                        contentDescription =  "",
-                        tint = Trv5
-                    )
-                }
-                IconButton(onClick = { navController.navigate(Pantalla.Perfil.ruta) }) {
-                    Icon(
-                        modifier = modifier
-                            .size(40.dp),
-                        imageVector = Icons.Filled.AccountCircle,
-                        contentDescription =  "",
-                        tint = Color.White
-                    )
-                }
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(
-                        modifier = modifier
-                            .size(40.dp),
-                        imageVector = Icons.Filled.Explore,
-                        contentDescription =  "",
-                        tint = Color.White
-                    )
-                }
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(
-                        modifier = modifier
-                            .size(40.dp),
-                        imageVector = Icons.Filled.CalendarToday,
-                        contentDescription =  "",
-                        tint = Color.White
-                    )
-                }
-            }
-        }
-
-    }
-}
 
 

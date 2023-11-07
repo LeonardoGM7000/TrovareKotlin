@@ -2,44 +2,40 @@ package com.example.trovare
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.SpringSpec
-import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.expandIn
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.trovare.ui.theme.Pantallas.Configuracion
 import com.example.trovare.ui.theme.Pantallas.FAQS
 import com.example.trovare.ui.theme.Pantallas.Inicio
 import com.example.trovare.ui.theme.Pantallas.Soporte
-import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.example.trovare.ui.theme.Data.Lugar
 import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
+import com.example.trovare.ui.theme.Pantallas.Bienvenida
 import com.example.trovare.ui.theme.Pantallas.Buscar
+import com.example.trovare.ui.theme.Pantallas.CrearCuenta
 import com.example.trovare.ui.theme.Pantallas.Detalles
-import com.example.trovare.ui.theme.Pantallas.Perfil
+import com.example.trovare.ui.theme.Pantallas.EditarPerfil
+import com.example.trovare.ui.theme.Pantallas.InicioDeSesion
+import com.example.trovare.ui.theme.Pantallas.PerfilConfiguracion
+import com.example.trovare.ui.theme.Pantallas.PerfilInicio
 import com.google.android.libraries.places.api.net.PlacesClient
 
 
 sealed class Pantalla(val ruta: String){
+    object Bienvenida: Pantalla("Bienvenida")
+    object InicioDeSesion: Pantalla("InicioDeSesion")
+    object Registro: Pantalla("Registro")
     object Inicio: Pantalla("Inicio")
     object Configuracion: Pantalla("Configuracion")
     object FAQS: Pantalla("FAQS")
     object Soporte: Pantalla("Soporte")
-    object Perfil: Pantalla("Perfil")
+    object PerfilInicio: Pantalla("PerfilInicio")
+    object PerfilConfiguracion: Pantalla("PerfilConfiguracion")
     object Buscar: Pantalla("Buscar")
     object Detalles: Pantalla("Detalles")
     object EditarPerfil: Pantalla("EditarPerfil")
@@ -66,7 +62,7 @@ fun Trovare(
 
     NavHost(
         navController = navController,
-        startDestination = Pantalla.Inicio.ruta,
+        startDestination = Pantalla.Bienvenida.ruta,
         //enterTransition = {  slideInHorizontally(animationSpec = SpringSpec(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium,)) { 0 }  },
         //exitTransition = { slideOutHorizontally(animationSpec = SpringSpec(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium,)) { -300 }  }
         //enterTransition = { fadeIn() },
@@ -74,6 +70,21 @@ fun Trovare(
         exitTransition = { ExitTransition.None}
 
     ) {
+        composable(route = Pantalla.Bienvenida.ruta){
+            Bienvenida(
+                navController = navController
+            )
+        }
+        composable(route = Pantalla.InicioDeSesion.ruta){
+            InicioDeSesion(
+                navController = navController
+            )
+        }
+        composable(route = Pantalla.Registro.ruta){
+            CrearCuenta(
+                navController = navController
+            )
+        }
         composable(route = Pantalla.Inicio.ruta){
             Inicio(
                 navController = navController
@@ -96,11 +107,22 @@ fun Trovare(
                 navController = navController
             )
         }
-        composable(route = Pantalla.Perfil.ruta){
-            Perfil(
+        composable(route = Pantalla.PerfilInicio.ruta){
+            PerfilInicio(
                 navController = navController
             )
         }
+        composable(route = Pantalla.PerfilConfiguracion.ruta){
+            PerfilConfiguracion(
+                navController = navController
+            )
+        }
+        composable(route = Pantalla.EditarPerfil.ruta){
+            EditarPerfil(
+                navController = navController
+            )
+        }
+
         composable(route = Pantalla.Buscar.ruta){
             Buscar(
                 navController = navController,
@@ -122,9 +144,6 @@ fun Trovare(
                 placeId = it.arguments?.getString("lugar"),
                 navController = navController,
             )
-        }
-        composable(route = Pantalla.EditarPerfil.ruta){
-
         }
     }
 }

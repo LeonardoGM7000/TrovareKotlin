@@ -164,7 +164,13 @@ fun Configuracion(
                     VentanaDeAlerta(
                         mostrar = mostrarCerrarSesion,
                         alRechazar = {mostrarCerrarSesion = false},
-                        alConfirmar = {},
+                        alConfirmar = {
+                            navController.navigate(Pantalla.Bienvenida.ruta){
+                                popUpTo(navController.graph.id){
+                                    inclusive = true
+                                }
+                            }
+                        },
                         textoConfirmar = "Cerrar Sesión",
                         titulo = "Cerrar Sesión",
                         texto = "¿Quiéres cerrar sesión en Trovare?",
@@ -173,7 +179,13 @@ fun Configuracion(
                     VentanaDeAlerta(
                         mostrar = mostrarBorrarCuenta,
                         alRechazar = {mostrarBorrarCuenta = false},
-                        alConfirmar = {},
+                        alConfirmar = {
+                            navController.navigate(Pantalla.Bienvenida.ruta){
+                                popUpTo(navController.graph.id){
+                                    inclusive = true
+                                }
+                            }
+                        },
                         textoConfirmar = "Borrar Cuenta",
                         titulo = "Borrar Cuenta",
                         texto = "¿Quiéres borrar tu cuenta de Trovare? No se guardarán tus datos y tendrás que crear una nueva si es que deseas usar la aplicación",
@@ -232,7 +244,7 @@ fun TarjetaPerfil(
                 )
                 Text(
                     modifier = modifier
-                        .clickable { navController.navigate(Pantalla.Perfil.ruta) },
+                        .clickable { navController.navigate(Pantalla.PerfilConfiguracion.ruta) },
                     text = "Ver Perfil",
                     style = MaterialTheme.typography.bodySmall,
                     textDecoration = TextDecoration.Underline,

@@ -3,6 +3,7 @@ package com.example.trovare.ui.theme.Pantallas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -37,15 +39,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.trovare.Pantalla
 import com.example.trovare.ui.theme.Data.Usuario
 import com.example.trovare.ui.theme.Data.usuarioPrueba
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
+import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
 import com.example.trovare.ui.theme.Recursos.Divisor
+import com.example.trovare.ui.theme.Recursos.MenuInferior
 import com.example.trovare.ui.theme.Trv1
+import com.example.trovare.ui.theme.Trv2
+import com.example.trovare.ui.theme.Trv5
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Perfil(
+fun PerfilConfiguracion(
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
@@ -61,17 +68,52 @@ fun Perfil(
                 .padding(it),
             color = Trv1
         ) {
-            PerfilPrincipal()
-
+            PerfilPrincipal(
+                navController = navController
+            )
         }
     }
 }
 
-@Preview(showSystemUi = true, showBackground = true)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PerfilInicio(
+    modifier: Modifier = Modifier,
+    navController: NavController
+) {
+
+    Scaffold(
+        topBar = {
+            BarraSuperiorConfig(navController = navController)
+        },
+        bottomBar = {
+            MenuInferior(
+                presionarHome = { navController.navigate(Pantalla.Inicio.ruta) },
+                presionarPerfil = {  },
+                presionarNavegacion = {  },
+                presionarItinerario = {  },
+                colorPerfil = Trv5)
+        }
+    ) { it ->
+        Surface(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(it),
+            color = Trv1
+        ) {
+            PerfilPrincipal(
+                navController = navController
+            )
+        }
+    }
+}
+
+
 @Composable
 fun PerfilPrincipal(
     modifier: Modifier = Modifier,
-    usuario: Usuario = usuarioPrueba
+    usuario: Usuario = usuarioPrueba,
+    navController: NavController
 ){
     Surface(
         modifier = modifier
@@ -140,7 +182,7 @@ fun PerfilPrincipal(
                             )
                             Icon(
                                 modifier = modifier
-                                    .clickable {  }
+                                    .clickable { navController.navigate(Pantalla.EditarPerfil.ruta) }
                                     .padding(vertical = 5.dp),
                                 imageVector = Icons.Rounded.Edit,
                                 contentDescription = "",
@@ -190,6 +232,78 @@ fun PerfilPrincipal(
             item {
                 Divisor()
             }
+            if(usuario.comentarios == null){
+                item {
+                    Box(modifier = modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 25.dp)
+                    ){
+                        Text(
+                            modifier = modifier.fillMaxSize(),
+                            text = "No hay reseñas",
+                            style = MaterialTheme.typography.displaySmall,
+                            textAlign = TextAlign.Left,
+                            color = Color.White
+                        )
+                    }
+                }
+            } else {
+                item {
+                    Text(
+                        modifier = modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 25.dp),
+                        text = "${usuario.comentarios.size} reseñas",
+                        style = MaterialTheme.typography.displaySmall,
+                        textAlign = TextAlign.Left,
+                        color = Color.White
+                    )
+                }
+                items(usuario.comentarios){comentario ->
+                    Card(modifier = modifier
+                        .padding(horizontal = 25.dp, vertical = 5.dp)
+                        .fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Trv2
+                        ),
+                    ) {
+                        Row() {
+                            Card(
+                                modifier = modifier
+                                    .padding(10.dp)
+                                    .size(50.dp),
+                                shape = RoundedCornerShape(100.dp)
+                            ) {
+                                Image(
+                                    modifier = modifier.fillMaxSize(),
+                                    painter = painterResource(id = usuario.foto_perfil),
+                                    contentDescription = "",
+                                    contentScale = ContentScale.FillBounds
+                                )
+                            }
+                            Column(
+                                verticalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = usuario.nombre,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                )
+                                Text(
+                                    modifier = modifier.padding(end = 10.dp, bottom = 10.dp),
+                                    text = comentario,
+                                    textAlign = TextAlign.Justify,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.White,
+                                )
+                            }
+
+                        }
+                    }
+                }
+            }
+
 
 
         }
