@@ -2,7 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
-
+// Prueba
 android {
     namespace = "com.example.trovare"
     compileSdk = 34
