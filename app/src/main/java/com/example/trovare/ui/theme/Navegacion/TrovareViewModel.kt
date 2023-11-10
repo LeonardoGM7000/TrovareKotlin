@@ -142,7 +142,7 @@ class TrovareViewModel : ViewModel() {
         rating: (Double?) -> Unit
     ){
         Log.i("testLugar", "Primera entrada")
-        val placeFields = listOf(Place.Field.NAME,  Place.Field.ADDRESS, /* \Place.Field.PHONE_NUMBER, Place.Field.USER_RATINGS_TOTAL, Place.Field.WEBSITE_URI,Place.Field.LAT_LNG*/)//campos que se deben obtener de la API de places
+        val placeFields = listOf(Place.Field.NAME,  Place.Field.ADDRESS,Place.Field.RATING, Place.Field.PHOTO_METADATAS, Place.Field.CURRENT_OPENING_HOURS /* \Place.Field.PHONE_NUMBER, Place.Field.USER_RATINGS_TOTAL, Place.Field.WEBSITE_URI,Place.Field.LAT_LNG*/)//campos que se deben obtener de la API de places
         val request = FetchPlaceRequest.newInstance(placeId, placeFields)
 
         placesClient.fetchPlace(request)
@@ -156,8 +156,12 @@ class TrovareViewModel : ViewModel() {
                 nombre(place.name)
                 direccion(place.address)
                 rating(place.rating)
+
                 Log.i("testLugar", "nombre: ${place.name}")
                 Log.i("testLugar", "direccion: ${place.address}")
+                Log.i("testLugar", "rating: ${place.rating}")
+                Log.i("testLugar", "photo metadata: ${place.photoMetadatas}")
+                Log.i("testLugar", "opeinig horus: ${place.currentOpeningHours}")
                 //Log.i("testLugar", "rating: ${place.phoneNumber}")
                 //Log.i("testLugar", "userRating: ${place.userRatingsTotal}")
                 //Log.i("testLugar", "url: ${place.websiteUri}")

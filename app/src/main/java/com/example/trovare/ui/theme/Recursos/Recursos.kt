@@ -236,7 +236,7 @@ fun MenuInferior(
 }
 
 
-//No mostrar feedback al interactuar con una tarjeta------------------------------------------------
+//No mostrar animación de feedback al interactuar con una tarjeta-----------------------------------
 class NoRippleInteractionSource : MutableInteractionSource {
 
     override val interactions: kotlinx.coroutines.flow.Flow<Interaction> = emptyFlow()
