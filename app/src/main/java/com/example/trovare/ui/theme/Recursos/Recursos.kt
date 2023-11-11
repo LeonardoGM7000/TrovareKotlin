@@ -38,6 +38,7 @@ import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv4
 import com.example.trovare.ui.theme.Trv5
+import com.example.trovare.ui.theme.Trv9
 import kotlinx.coroutines.flow.emptyFlow
 
 
@@ -175,12 +176,13 @@ fun MenuInferior(
     colorPerfil: Color = Color.White,
     colorNavegacion: Color = Color.White,
     colorItinerario: Color = Color.White,
-
+    colorSuperficie: Color = Trv1
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = Trv1
+        color = colorSuperficie
     ) {
+
         Card(
             modifier = modifier.padding(horizontal = 30.dp, vertical = 15.dp),
             colors = CardDefaults.cardColors(Trv4)

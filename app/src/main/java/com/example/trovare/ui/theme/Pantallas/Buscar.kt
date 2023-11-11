@@ -79,8 +79,6 @@ fun Buscar(
 
     val prediccionesAutocompletar by remember { mutableStateOf(mutableStateListOf<LugarAutocompletar>()) }//lista de lugares entregados por la API para autocompletar
 
-    val estadoLugar by viewModel.estadoLugar.collectAsState()
-
     //Al escribir en la barra de busqueda se activa un timer de un segundo el cual se reinicia cada que se modifica el texto de la barra de busqueda
     //con la finalidad de que no se haga una llamada a la API en cada modificaci[on del texto
 

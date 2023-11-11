@@ -83,7 +83,10 @@ dependencies {
     implementation("com.google.android.libraries.places:places:3.2.0")
     implementation("com.google.maps.android:places-ktx:2.0.0")
 
+    implementation ("com.google.maps.android:maps-compose:2.11.4")
+    implementation ("com.google.android.gms:play-services-maps:18.2.0")
 
+    //implementation("com.exyte:animated-navigation-bar:1.0.0")
 
 
 

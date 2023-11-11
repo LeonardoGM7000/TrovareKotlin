@@ -21,6 +21,7 @@ import com.example.trovare.ui.theme.Pantallas.CrearCuenta
 import com.example.trovare.ui.theme.Pantallas.Detalles
 import com.example.trovare.ui.theme.Pantallas.EditarPerfil
 import com.example.trovare.ui.theme.Pantallas.InicioDeSesion
+import com.example.trovare.ui.theme.Pantallas.Mapa.MapaPrincipal
 import com.example.trovare.ui.theme.Pantallas.PerfilConfiguracion
 import com.example.trovare.ui.theme.Pantallas.PerfilInicio
 import com.google.android.libraries.places.api.net.PlacesClient
@@ -39,6 +40,7 @@ sealed class Pantalla(val ruta: String){
     object Buscar: Pantalla("Buscar")
     object Detalles: Pantalla("Detalles")
     object EditarPerfil: Pantalla("EditarPerfil")
+    object Mapa: Pantalla("Mapa")
 
     fun conArgs(vararg args: String): String {
         return buildString {
@@ -145,6 +147,13 @@ fun Trovare(
                 placesClient = placesClient,
                 viewModel = viewModel,
                 navController = navController,
+            )
+        }
+        composable(route = Pantalla.Mapa.ruta){
+            MapaPrincipal(
+                navController = navController,
+                viewModel = viewModel,
+                placesClient = placesClient
             )
         }
     }

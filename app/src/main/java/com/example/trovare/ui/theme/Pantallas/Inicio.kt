@@ -55,6 +55,7 @@ import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv5
+import com.example.trovare.ui.theme.Trv9
 import kotlin.math.absoluteValue
 
 
@@ -64,7 +65,6 @@ fun Inicio(
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
-
     val pagerState = rememberPagerState(initialPage = 1) { listaDeExplorar.size }
 
     Scaffold(
@@ -72,12 +72,18 @@ fun Inicio(
             BarraSuperiorConfig(navController)
         },
         bottomBar = {
+
             MenuInferior(
                 presionarHome = {},
-                presionarPerfil = {navController.navigate(Pantalla.PerfilInicio.ruta)},
-                presionarNavegacion = {},
+                presionarPerfil = {
+                    navController.navigate(Pantalla.PerfilInicio.ruta)
+                },
+                presionarNavegacion = {
+                    navController.navigate(Pantalla.Mapa.ruta)
+                },
                 presionarItinerario = {},
-                colorHome = Trv5
+                colorHome = Trv5,
+
             )
 
         },
@@ -226,22 +232,15 @@ fun Inicio(
 
                                                     )
                                                 }
-
                                             }
                                         }
-
                                     }
                                 }
                             }
-
                         }
-
-
                     }
                 }
-
             }
-
         }
     }
 }
