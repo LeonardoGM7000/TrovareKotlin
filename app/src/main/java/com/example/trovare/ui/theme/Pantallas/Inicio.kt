@@ -57,7 +57,7 @@ import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv5
 import kotlin.math.absoluteValue
 
-
+// Prueba
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun Inicio(
