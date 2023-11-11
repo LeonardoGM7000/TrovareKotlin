@@ -3,7 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
 
     // Dependencias de Firebase
-    id("com.google.gms.google-services")
+    id("com.google.gms.google-services") version "4.4.0" apply false
 }
 // Prueba
 android {
