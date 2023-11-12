@@ -1,21 +1,17 @@
 package com.example.trovare.ui.theme.Pantallas.Mapa
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import com.google.maps.android.compose.GoogleMap
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.rounded.TravelExplore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -36,14 +32,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
-import com.example.trovare.Pantalla
 import com.example.trovare.ui.theme.Data.LugarAutocompletar
-import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
-import com.example.trovare.ui.theme.Recursos.Divisor
-import com.example.trovare.ui.theme.Recursos.MenuInferior
-import com.example.trovare.ui.theme.Trv5
+import com.example.trovare.ui.theme.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Trv9
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -132,17 +123,6 @@ fun MapaPrincipal(
                 }
             }
         },
-        bottomBar = {
-            MenuInferior(
-                presionarHome = {navController.navigate(Pantalla.Inicio.ruta)},
-                presionarPerfil = {navController.navigate(Pantalla.PerfilInicio.ruta)},
-                presionarNavegacion = {},
-                presionarItinerario = {},
-                colorHome = Trv5,
-                colorSuperficie = Trv9
-            )
-
-        },
     ){
         Box(modifier = modifier
             .fillMaxSize()
@@ -156,14 +136,8 @@ fun MapaPrincipal(
             ){
 
             }
-
         }
-
-
     }
-
-
-
 }
 
 

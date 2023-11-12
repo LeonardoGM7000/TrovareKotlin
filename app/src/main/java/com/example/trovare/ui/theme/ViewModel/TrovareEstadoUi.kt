@@ -1,4 +1,4 @@
-package com.example.trovare.ui.theme.Navegacion
+package com.example.trovare.ui.theme.ViewModel
 
 import android.media.Rating
 import com.example.trovare.ui.theme.Data.ConfiguracionDataSource

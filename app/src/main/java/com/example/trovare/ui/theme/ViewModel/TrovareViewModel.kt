@@ -1,8 +1,7 @@
-package com.example.trovare.ui.theme.Navegacion
+package com.example.trovare.ui.theme.ViewModel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.example.trovare.ui.theme.Data.Lugar
 import com.example.trovare.ui.theme.Data.LugarAutocompletar
 import com.google.android.gms.common.api.ApiException
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken

@@ -1,4 +1,4 @@
-package com.example.trovare.ui.theme.Pantallas
+package com.example.trovare.ui.theme.Pantallas.Ingreso
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -25,7 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.trovare.Pantalla
+import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.R
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv6
@@ -114,7 +114,7 @@ fun Bienvenida(
                     modifier = modifier
                         .padding(bottom = 10.dp),
                     onClick = {
-                        navController.navigate(Pantalla.Inicio.ruta)
+                        navController.navigate(Pantalla.NavegacionSecundaria.ruta)
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Red,

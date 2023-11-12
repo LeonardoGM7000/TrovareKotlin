@@ -1,4 +1,4 @@
-package com.example.trovare.ui.theme.Pantallas
+package com.example.trovare.ui.theme.Pantallas.Perfil
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -36,19 +35,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.trovare.Pantalla
+import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Data.Usuario
 import com.example.trovare.ui.theme.Data.usuarioPrueba
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
 import com.example.trovare.ui.theme.Recursos.Divisor
-import com.example.trovare.ui.theme.Recursos.MenuInferior
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
-import com.example.trovare.ui.theme.Trv5
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,19 +77,10 @@ fun PerfilInicio(
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
-
     Scaffold(
         topBar = {
             BarraSuperiorConfig(navController = navController)
         },
-        bottomBar = {
-            MenuInferior(
-                presionarHome = { navController.navigate(Pantalla.Inicio.ruta) },
-                presionarPerfil = {  },
-                presionarNavegacion = {  },
-                presionarItinerario = {  },
-                colorPerfil = Trv5)
-        }
     ) { it ->
         Surface(
             modifier = modifier

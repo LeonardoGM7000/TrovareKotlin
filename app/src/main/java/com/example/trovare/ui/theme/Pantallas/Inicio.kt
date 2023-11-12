@@ -46,16 +46,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.trovare.Pantalla
+import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.R
 import com.example.trovare.ui.theme.Data.listaDeExplorar
 import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
-import com.example.trovare.ui.theme.Recursos.MenuInferior
 import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
-import com.example.trovare.ui.theme.Trv5
-import com.example.trovare.ui.theme.Trv9
 import kotlin.math.absoluteValue
 
 
@@ -70,22 +67,6 @@ fun Inicio(
     Scaffold(
         topBar = {
             BarraSuperiorConfig(navController)
-        },
-        bottomBar = {
-
-            MenuInferior(
-                presionarHome = {},
-                presionarPerfil = {
-                    navController.navigate(Pantalla.PerfilInicio.ruta)
-                },
-                presionarNavegacion = {
-                    navController.navigate(Pantalla.Mapa.ruta)
-                },
-                presionarItinerario = {},
-                colorHome = Trv5,
-
-            )
-
         },
     ) { it ->
         Surface(

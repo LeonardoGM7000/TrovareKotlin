@@ -1,4 +1,4 @@
-package com.example.trovare.ui.theme.Pantallas
+package com.example.trovare.ui.theme.Pantallas.Ingreso
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -32,7 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -46,7 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.trovare.Pantalla
+import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.R
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Trv1
@@ -212,7 +211,7 @@ fun InicioDeSesion(
                             .padding(start = 25.dp, end = 25.dp, bottom = 10.dp),
                         onClick = {
 
-                            navController.navigate(Pantalla.Inicio.ruta){
+                            navController.navigate(Pantalla.NavegacionSecundaria.ruta){
                                 popUpTo(navController.graph.id){
                                     inclusive = true
                                 }
@@ -226,8 +225,6 @@ fun InicioDeSesion(
                     ) {
                         Text(text = "Ingresar")
                     }
-
-
                 }
             }
         }

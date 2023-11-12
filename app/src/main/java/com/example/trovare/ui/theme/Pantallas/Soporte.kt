@@ -48,7 +48,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
+import com.example.trovare.ui.theme.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
@@ -113,6 +113,8 @@ fun Soporte(
                         text = "Informa a soporte técnico",
                         style = MaterialTheme.typography.displaySmall
                     )
+                }
+                item {
                     Text(
                         modifier = modifier
                             .padding(horizontal = 55.dp, vertical = 15.dp),

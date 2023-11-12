@@ -1,6 +1,5 @@
 package com.example.trovare.ui.theme.Pantallas
 
-import android.util.Log
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -39,7 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
+import com.example.trovare.ui.theme.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv7
 import com.google.android.libraries.places.api.net.PlacesClient
@@ -63,7 +62,6 @@ fun Detalles(
     LaunchedEffect(key1 = Unit){
     viewModel.obtenerLugar(placesClient = placesClient, placeId = placeId?: "", nombre = { nombre = it?:"" }, direccion = { direccion = it?:""}, rating =  { calificacion = it?: 0.0} )
     }
-
 
     Surface(
         modifier = modifier

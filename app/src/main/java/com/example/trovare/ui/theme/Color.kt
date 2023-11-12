@@ -12,5 +12,7 @@ val Trv6 = Color(0xFF1E91D6)
 val Trv7 = Color(0xFF2D2A2A)
 val Trv8 = Color(0xFF262525)
 val Trv9 = Color(0xFFF2F3F5)
+val Trv10 = Color(0xFFEDA35E)
+val Trv11 = Color(0xFFA7C3D6)
 
 

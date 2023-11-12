@@ -1,4 +1,4 @@
-package com.example.trovare.ui.theme.Pantallas
+package com.example.trovare.ui.theme.Pantallas.Perfil
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
