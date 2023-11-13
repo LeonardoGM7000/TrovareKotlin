@@ -1,4 +1,4 @@
-package com.example.trovare.ui.theme.Data
+package com.example.trovare.Data
 
 import androidx.annotation.StringRes
 import com.example.trovare.R

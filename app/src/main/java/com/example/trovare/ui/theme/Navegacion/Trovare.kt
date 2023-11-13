@@ -21,7 +21,7 @@ import com.example.trovare.ui.theme.Pantallas.Perfil.EditarPerfil
 import com.example.trovare.ui.theme.Pantallas.Ingreso.InicioDeSesion
 import com.example.trovare.ui.theme.Pantallas.Itinerarios.EditarItinerario
 import com.example.trovare.ui.theme.Pantallas.Perfil.PerfilConfiguracion
-import com.example.trovare.ui.theme.ViewModel.TrovareViewModel
+import com.example.trovare.ViewModel.TrovareViewModel
 import com.google.android.libraries.places.api.net.PlacesClient
 
 
@@ -125,8 +125,6 @@ fun Trovare(
         composable(route = Pantalla.Buscar.ruta){
             Buscar(
                 navController = navController,
-                viewModel = viewModel,
-                placesClient = placesClient
             )
         }
         composable(

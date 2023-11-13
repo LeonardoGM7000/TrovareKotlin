@@ -41,8 +41,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
 import com.example.trovare.ui.theme.Navegacion.Pantalla
-import com.example.trovare.ui.theme.Data.Pregunta
-import com.example.trovare.ui.theme.Data.listaDePreguntas
+import com.example.trovare.Data.Pregunta
+import com.example.trovare.Data.listaDePreguntas
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource

@@ -1,4 +1,4 @@
-package com.example.trovare.ui.theme.Data
+package com.example.trovare.Data
 
 object SoporteDatasource {
     val ResultoUtil = listOf(

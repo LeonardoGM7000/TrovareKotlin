@@ -44,14 +44,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.trovare.Api.rawJSON
+import com.example.trovare.Data.Places
 import com.example.trovare.ui.theme.Navegacion.Pantalla
-import com.example.trovare.ui.theme.Data.LugarAutocompletar
-import com.example.trovare.ui.theme.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
-import com.google.android.libraries.places.api.net.PlacesClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -64,8 +64,6 @@ import kotlinx.coroutines.launch
 fun Buscar(
     modifier: Modifier = Modifier,
     navController: NavController,
-    viewModel: TrovareViewModel,
-    placesClient: PlacesClient
 ){
     val focusRequester = remember { FocusRequester() }//permite que se abra el teclado automaticamente al abrir la pantalla
     var textoBuscar by rememberSaveable(stateSaver = TextFieldValue.Saver) {//texto a buscar
@@ -76,7 +74,7 @@ fun Buscar(
     var tiempoRestante by rememberSaveable { mutableIntStateOf(1) }//tiempo antes de que se haga la llamada a la API de places(1 segundo)
     var job: Job? by remember { mutableStateOf(null) }
 
-    val prediccionesAutocompletar by remember { mutableStateOf(mutableStateListOf<LugarAutocompletar>()) }//lista de lugares entregados por la API para autocompletar
+    val prediccionesAutocompletar by remember { mutableStateOf(mutableStateListOf<Places>()) }//lista de lugares entregados por la API para autocompletar
 
     //Al escribir en la barra de busqueda se activa un timer de un segundo el cual se reinicia cada que se modifica el texto de la barra de busqueda
     //con la finalidad de que no se haga una llamada a la API en cada modificaci[on del texto
@@ -93,7 +91,11 @@ fun Buscar(
 
             busquedaEnProgreso = false//se acaba el tiempo del timer y se lleva a cabo la busqueda
             //Log.i("test", "terminado")
-            viewModel.autocompletar(placesClient = placesClient, query = textoBuscar.text, listaLugares = prediccionesAutocompletar)
+            //viewModel.autocompletar(placesClient = placesClient, query = textoBuscar.text, listaLugares = prediccionesAutocompletar)
+            rawJSON(
+                query = textoBuscar.text,
+                recuperarResultados = prediccionesAutocompletar
+            )
         }
     }
 
@@ -187,7 +189,7 @@ fun Buscar(
                                 .padding(horizontal = 25.dp, vertical = 5.dp)
                                 .fillMaxWidth()
                                 .clickable {
-                                      navController.navigate(Pantalla.Detalles.conArgs(lugar.id))
+                                    navController.navigate(Pantalla.Detalles.conArgs(lugar.id))
                                 },
                             colors = CardDefaults.cardColors(Trv1),
                             border = CardDefaults.outlinedCardBorder()
@@ -196,17 +198,19 @@ fun Buscar(
                                 modifier = modifier.padding(5.dp)
                             ) {
                                 Text(
-                                    text = lugar.textoPrimario,
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = modifier.padding(3.dp),
+                                    text = lugar.displayName?.text?: "",
+                                    style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    text = lugar.textoSecundario,
-                                    style = MaterialTheme.typography.bodySmall
+                                    modifier = modifier.padding(3.dp),
+                                    text = lugar.formattedAddress?: "",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    textAlign = TextAlign.Justify
                                 )
                             }
                         }
-
                     }
                 }
             }

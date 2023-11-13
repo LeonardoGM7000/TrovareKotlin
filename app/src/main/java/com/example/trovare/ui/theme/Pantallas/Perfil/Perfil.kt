@@ -38,8 +38,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.trovare.ui.theme.Navegacion.Pantalla
-import com.example.trovare.ui.theme.Data.Usuario
-import com.example.trovare.ui.theme.Data.usuarioPrueba
+import com.example.trovare.Data.Usuario
+import com.example.trovare.Data.usuarioPrueba
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
 import com.example.trovare.ui.theme.Recursos.Divisor
@@ -188,7 +188,7 @@ fun PerfilPrincipal(
                         modifier = modifier
                             .padding(horizontal = 25.dp, vertical = 10.dp)
                             .fillMaxWidth(),
-                        text = usuario.descripcion ?: "",
+                        text = usuario.descripcion,
                         textAlign = TextAlign.Justify,
                         color = Color.White,
                         style = MaterialTheme.typography.bodySmall

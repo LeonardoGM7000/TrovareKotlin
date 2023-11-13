@@ -33,8 +33,8 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.trovare.ui.theme.Data.LugarAutocompletar
-import com.example.trovare.ui.theme.ViewModel.TrovareViewModel
+import com.example.trovare.Data.LugarAutocompletar
+import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Trv9
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -80,7 +80,8 @@ fun MapaPrincipal(
 
             busquedaEnProgreso = false//se acaba el tiempo del timer y se lleva a cabo la busqueda
             //Log.i("test", "terminado")
-            viewModel.autocompletar(placesClient = placesClient, query = textoBuscar.text, listaLugares = prediccionesAutocompletar)
+            //viewModel.autocompletar(placesClient = placesClient, query = textoBuscar.text, listaLugares = prediccionesAutocompletar)
+            //rawJSON(query = textoBuscar.text, recuperarResultados = )
         }
     }
 

@@ -52,11 +52,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.trovare.ui.theme.Navegacion.Pantalla
-import com.example.trovare.ui.theme.Data.Configuracion
-import com.example.trovare.ui.theme.Data.Usuario
-import com.example.trovare.ui.theme.Data.listaDeConfiguracion
-import com.example.trovare.ui.theme.Data.usuarioPrueba
-import com.example.trovare.ui.theme.ViewModel.TrovareViewModel
+import com.example.trovare.Data.Configuracion
+import com.example.trovare.Data.Usuario
+import com.example.trovare.Data.listaDeConfiguracion
+import com.example.trovare.Data.usuarioPrueba
+import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
@@ -197,9 +197,9 @@ fun Configuracion(
 
 @Composable
 fun TarjetaPerfil(
-        modifier: Modifier = Modifier,
-        usuario: Usuario = usuarioPrueba,
-        navController: NavController,
+    modifier: Modifier = Modifier,
+    usuario: Usuario = usuarioPrueba,
+    navController: NavController,
     ){
     Card(
         modifier = modifier

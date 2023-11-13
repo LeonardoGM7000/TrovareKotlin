@@ -1,9 +1,7 @@
-package com.example.trovare.ui.theme.ViewModel
+package com.example.trovare.ViewModel
 
-import android.media.Rating
-import com.example.trovare.ui.theme.Data.ConfiguracionDataSource
-import com.example.trovare.ui.theme.Data.Lugar
-import com.example.trovare.ui.theme.Data.SoporteDatasource
+import com.example.trovare.Data.ConfiguracionDataSource
+import com.example.trovare.Data.SoporteDatasource
 
 
 data class TrovareEstadoUi(
@@ -15,9 +13,3 @@ data class TrovareEstadoUi(
     val resultoUtil: String = SoporteDatasource.ResultoUtil[0],
 )
 
-data class TrovareEstadoLugar(
-
-    val nombre: String = "p",
-    val rating: Double = 1.5,
-    val direccion: String = "p",
-)

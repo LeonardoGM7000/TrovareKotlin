@@ -1,4 +1,4 @@
-package com.example.trovare.ui.theme.Data
+package com.example.trovare.Data
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney

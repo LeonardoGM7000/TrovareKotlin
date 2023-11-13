@@ -48,7 +48,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.R
-import com.example.trovare.ui.theme.Data.listaDeExplorar
+import com.example.trovare.Data.listaDeExplorar
 import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
 import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
 import com.example.trovare.ui.theme.Trv1

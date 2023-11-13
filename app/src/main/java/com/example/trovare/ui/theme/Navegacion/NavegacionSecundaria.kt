@@ -18,7 +18,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.trovare.ui.theme.ViewModel.TrovareViewModel
+import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Pantallas.Inicio
 import com.example.trovare.ui.theme.Pantallas.Itinerarios.Itinerarios
 import com.example.trovare.ui.theme.Pantallas.Mapa.MapaPrincipal
