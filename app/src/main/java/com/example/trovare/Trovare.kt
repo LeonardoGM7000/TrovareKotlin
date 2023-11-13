@@ -31,24 +31,25 @@ import com.example.trovare.ui.theme.Pantallas.PreguntasAdmin
 import com.google.android.libraries.places.api.net.PlacesClient
 
 
-sealed class Pantalla(val ruta: String){
-    object Bienvenida: Pantalla("Bienvenida")
-    object InicioDeSesion: Pantalla("InicioDeSesion")
-    object Registro: Pantalla("Registro")
-    object Inicio: Pantalla("Inicio")
-    object Configuracion: Pantalla("Configuracion")
-    object FAQS: Pantalla("FAQS")
-    object Soporte: Pantalla("Soporte")
-    object PerfilInicio: Pantalla("PerfilInicio")
-    object PerfilConfiguracion: Pantalla("PerfilConfiguracion")
-    object Buscar: Pantalla("Buscar")
-    object Detalles: Pantalla("Detalles")
-    object EditarPerfil: Pantalla("EditarPerfil")
-    object Administrador: Pantalla("Administrador")
-    object PreguntasAdmin:Pantalla("PreguntasAdmin")
-    object EditarPreguntas:Pantalla("EditarPreguntas")
-    object EliminarCuentas: Pantalla("EliminarCuentas")
-    object EliminarComentarios: Pantalla("EliminarComentarios")
+sealed class Pantalla(val ruta: String) {
+    object Bienvenida : Pantalla("Bienvenida")
+    object InicioDeSesion : Pantalla("InicioDeSesion")
+    object Registro : Pantalla("Registro")
+    object Inicio : Pantalla("Inicio")
+    object Configuracion : Pantalla("Configuracion")
+    object FAQS : Pantalla("FAQS")
+    object Soporte : Pantalla("Soporte")
+    object PerfilInicio : Pantalla("PerfilInicio")
+    object PerfilConfiguracion : Pantalla("PerfilConfiguracion")
+    object Buscar : Pantalla("Buscar")
+    object Detalles : Pantalla("Detalles")
+    object EditarPerfil : Pantalla("EditarPerfil")
+    object Administrador : Pantalla("Administrador")
+    object PreguntasAdmin : Pantalla("PreguntasAdmin")
+    object EditarPreguntas : Pantalla("EditarPreguntas")
+    object EliminarCuentas : Pantalla("EliminarCuentas")
+    object EliminarComentarios : Pantalla("EliminarComentarios")
+
     fun conArgs(vararg args: String): String {
         return buildString {
             append(ruta)
@@ -67,7 +68,7 @@ fun Trovare(
     viewModel: TrovareViewModel = viewModel(),
     navController: NavHostController = rememberNavController(),
     placesClient: PlacesClient
-){
+) {
 
     NavHost(
         navController = navController,
@@ -75,89 +76,89 @@ fun Trovare(
         //enterTransition = {  slideInHorizontally(animationSpec = SpringSpec(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium,)) { 0 }  },
         //exitTransition = { slideOutHorizontally(animationSpec = SpringSpec(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium,)) { -300 }  }
         //enterTransition = { fadeIn() },
-        enterTransition = { EnterTransition.None},
-        exitTransition = { ExitTransition.None}
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None }
 
     ) {
-        composable(route = Pantalla.Bienvenida.ruta){
+        composable(route = Pantalla.Bienvenida.ruta) {
             Bienvenida(
                 navController = navController
             )
         }
-        composable(route = Pantalla.InicioDeSesion.ruta){
+        composable(route = Pantalla.InicioDeSesion.ruta) {
             InicioDeSesion(
                 navController = navController
             )
         }
-        composable(route = Pantalla.Registro.ruta){
+        composable(route = Pantalla.Registro.ruta) {
             CrearCuenta(
                 navController = navController
             )
         }
-        composable(route = Pantalla.Inicio.ruta){
+        composable(route = Pantalla.Inicio.ruta) {
             Inicio(
                 navController = navController
             )
         }
-        composable(route = Pantalla.Configuracion.ruta){
+        composable(route = Pantalla.Configuracion.ruta) {
             Configuracion(
                 viewModel = viewModel,
                 navController = navController
             )
         }
-        composable(route = Pantalla.FAQS.ruta){
+        composable(route = Pantalla.FAQS.ruta) {
             FAQS(
                 navController = navController
             )
         }
-        composable(route = Pantalla.Soporte.ruta){
+        composable(route = Pantalla.Soporte.ruta) {
             Soporte(
                 viewModel = viewModel,
                 navController = navController
             )
         }
-        composable(route = Pantalla.PerfilInicio.ruta){
+        composable(route = Pantalla.PerfilInicio.ruta) {
             PerfilInicio(
                 navController = navController
             )
         }
-        composable(route = Pantalla.PerfilConfiguracion.ruta){
+        composable(route = Pantalla.PerfilConfiguracion.ruta) {
             PerfilConfiguracion(
                 navController = navController
             )
         }
-        composable(route = Pantalla.EditarPerfil.ruta){
+        composable(route = Pantalla.EditarPerfil.ruta) {
             EditarPerfil(
                 navController = navController
             )
         }
-        composable(route = Pantalla.Administrador.ruta){
+        composable(route = Pantalla.Administrador.ruta) {
             Administrador(
                 navController = navController
             )
         }
-        composable(route = Pantalla.PreguntasAdmin.ruta){
+        composable(route = Pantalla.PreguntasAdmin.ruta) {
             PreguntasAdmin(
                 navController = navController
             )
         }
-        composable(route = Pantalla.EditarPreguntas.ruta){
+        composable(route = Pantalla.EditarPreguntas.ruta) {
             EditarPreguntas(
                 navController = navController
             )
         }
-        composable(route = Pantalla.EliminarCuentas.ruta){
+        composable(route = Pantalla.EliminarCuentas.ruta) {
             EliminarCuentas(
                 navController = navController
             )
         }
-        composable(route = Pantalla.EliminarComentarios.ruta){
+        composable(route = Pantalla.EliminarComentarios.ruta) {
             EliminarComentarios(
                 navController = navController
             )
         }
 
-        composable(route = Pantalla.Buscar.ruta){
+        composable(route = Pantalla.Buscar.ruta) {
             Buscar(
                 navController = navController,
                 viewModel = viewModel,
@@ -167,13 +168,13 @@ fun Trovare(
         composable(
             route = Pantalla.Detalles.ruta + "/{lugar}",
             arguments = listOf(
-                navArgument("lugar"){
+                navArgument("lugar") {
                     type = NavType.StringType
                     defaultValue = "Prueba"
                     nullable = true
                 }
             )
-        ){
+        ) {
             Detalles(
                 placeId = it.arguments?.getString("lugar"),
                 placesClient = placesClient,

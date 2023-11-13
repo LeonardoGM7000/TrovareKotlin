@@ -1,10 +1,11 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
     //id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 
     // Dependencias de Firebase
-    id("com.google.gms.google-services") version "4.4.0" apply false
+    //id("com.google.gms.google-services") version "4.4.0" apply false
 }
 
 android {
