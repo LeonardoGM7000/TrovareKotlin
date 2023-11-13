@@ -123,6 +123,20 @@ fun Bienvenida(
                 ) {
                     Text(text = "SALTAR")
                 }
+                //Boton temporal para acceder a las pantallas de admin------------------------------
+                TextButton(
+                    modifier = modifier
+                        .padding(bottom = 10.dp),
+                    onClick = {
+                        navController.navigate(Pantalla.Administrador.ruta)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Red,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(text = "ADMIN")
+                }
             }
 
         }

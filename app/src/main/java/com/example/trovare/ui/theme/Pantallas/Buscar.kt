@@ -201,13 +201,15 @@ fun Buscar(
                                     modifier = modifier.padding(3.dp),
                                     text = lugar.displayName?.text?: "",
                                     style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
                                 )
                                 Text(
                                     modifier = modifier.padding(3.dp),
                                     text = lugar.formattedAddress?: "",
                                     style = MaterialTheme.typography.labelSmall,
-                                    textAlign = TextAlign.Justify
+                                    textAlign = TextAlign.Justify,
+                                    color = Color.White
                                 )
                             }
                         }

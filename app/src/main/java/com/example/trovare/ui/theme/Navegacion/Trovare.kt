@@ -22,6 +22,11 @@ import com.example.trovare.ui.theme.Pantallas.Ingreso.InicioDeSesion
 import com.example.trovare.ui.theme.Pantallas.Itinerarios.EditarItinerario
 import com.example.trovare.ui.theme.Pantallas.Perfil.PerfilConfiguracion
 import com.example.trovare.ViewModel.TrovareViewModel
+import com.example.trovare.ui.theme.Pantallas.Administrador.Administrador
+import com.example.trovare.ui.theme.Pantallas.Administrador.EditarPreguntas
+import com.example.trovare.ui.theme.Pantallas.Administrador.EliminarComentarios
+import com.example.trovare.ui.theme.Pantallas.Administrador.EliminarCuentas
+import com.example.trovare.ui.theme.Pantallas.Administrador.PreguntasAdmin
 import com.google.android.libraries.places.api.net.PlacesClient
 
 
@@ -42,6 +47,11 @@ sealed class Pantalla(val ruta: String){
     object Mapa: Pantalla("Mapa")
     object Itinerarios: Pantalla("Itinerarios")
     object EditarItinerario: Pantalla("EditarItinerario")
+    object Administrador: Pantalla("Administrador")
+    object PreguntasAdmin:Pantalla("PreguntasAdmin")
+    object EditarPreguntas:Pantalla("EditarPreguntas")
+    object EliminarCuentas: Pantalla("EliminarCuentas")
+    object EliminarComentarios: Pantalla("EliminarComentarios")
 
     fun conArgs(vararg args: String): String {
         return buildString {
@@ -149,5 +159,31 @@ fun Trovare(
                 navController = navController,
             )
         }
+        composable(route = Pantalla.Administrador.ruta){
+            Administrador(
+                navController = navController
+            )
+        }
+        composable(route = Pantalla.PreguntasAdmin.ruta){
+            PreguntasAdmin(
+                navController = navController
+            )
+        }
+        composable(route = Pantalla.EditarPreguntas.ruta){
+            EditarPreguntas(
+                navController = navController
+            )
+        }
+        composable(route = Pantalla.EliminarCuentas.ruta){
+            EliminarCuentas(
+                navController = navController
+            )
+        }
+        composable(route = Pantalla.EliminarComentarios.ruta){
+            EliminarComentarios(
+                navController = navController
+            )
+        }
+
     }
 }

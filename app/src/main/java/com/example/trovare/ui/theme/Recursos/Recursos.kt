@@ -47,6 +47,15 @@ fun Divisor(modifier: Modifier = Modifier){
     )
 }
 
+@Composable
+fun Divisor2(modifier: Modifier = Modifier){
+    Divider(
+        modifier = modifier
+            .padding(horizontal = 5.dp, vertical = 5.dp),
+        color = Color.White
+    )
+}
+
 //BARRA-SUPERIOR------------------------------------------------------------------------------------
 
 @OptIn(ExperimentalMaterial3Api::class)
