@@ -114,14 +114,14 @@ fun Bienvenida(
                     modifier = modifier
                         .padding(bottom = 10.dp),
                     onClick = {
-                        navController.navigate(Pantalla.Inicio.ruta)
+                        navController.navigate(Pantalla.Administrador.ruta)
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Red,
                         contentColor = Color.White
                     )
                 ) {
-                    Text(text = "SALTAR")
+                    Text(text = "ADMIN")
                 }
             }
 
