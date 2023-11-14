@@ -25,6 +25,7 @@ class TrovareViewModel : ViewModel() {
 
     private val _estadoUi = MutableStateFlow(TrovareEstadoUi())
     val uiState: StateFlow<TrovareEstadoUi> = _estadoUi.asStateFlow()
+
     //Pantalla-configuración------------------------------------------------------------------------
     fun setIdioma(nuevoIdioma: String) {
         _estadoUi.update { estadoActual ->
@@ -59,6 +60,17 @@ class TrovareViewModel : ViewModel() {
             )
         }
     }
+
+    //Ubicacion-------------------------------------------------------------------------------------
+
+
+    private val _ubicacion = MutableStateFlow(LatLng(19.504507, -99.147314))
+    val ubicacion = _ubicacion.asStateFlow()
+    // Función para actualizar el valor de la ubicación
+    fun setUbicacion(nuevaUbicacion: LatLng) {
+        _ubicacion.value = nuevaUbicacion
+    }
+
 
     //--------------------------------------------------------------------------------------------//
     //-------------------------------------API----------------------------------------------------//
@@ -154,4 +166,31 @@ class TrovareViewModel : ViewModel() {
                 }
             }
     }
+    //funci[on para obtener informacion para el mapa------------------------------------------------
+    fun obtenerMarcador(
+        placesClient: PlacesClient,
+        viewModel: TrovareViewModel,
+        placeId: String,
+    ){
+        val placeFields = listOf(
+            Place.Field.LAT_LNG,
+        )//campos que se deben obtener de la API de places
+
+        val request = FetchPlaceRequest.newInstance(placeId, placeFields)
+
+        placesClient.fetchPlace(request)
+            .addOnSuccessListener { response: FetchPlaceResponse ->
+                val place = response.place
+
+                viewModel.setUbicacion(place.latLng)
+
+            }.addOnFailureListener { exception: Exception ->
+                if (exception is ApiException) {
+                    Log.e("testLugar", "Place not found: ${exception.message}")
+                    val statusCode = exception.statusCode
+                    TODO("Handle error with given status code")
+                }
+            }
+    }
+
 }

@@ -93,6 +93,8 @@ dependencies {
     implementation ("com.squareup.okhttp3:okhttp:4.10.0")
     implementation ("com.google.code.gson:gson:2.9.0")
 
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
+
 
 
 

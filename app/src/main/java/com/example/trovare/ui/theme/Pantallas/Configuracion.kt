@@ -187,11 +187,9 @@ fun Configuracion(
                         icono = Icons.Filled.DeleteForever,
                         colorConfirmar = Color.Red
                     )
-
                 }
             }
         }
-
     }
 }
 
