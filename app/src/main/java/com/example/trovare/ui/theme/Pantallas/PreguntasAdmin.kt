@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cancel
@@ -100,6 +102,7 @@ fun PreguntasAdmin(
 
     var isLoading by remember { mutableStateOf(true) }
 
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {
         Log.i("FaqScreen", "LaunchedEffect: Obtaining questions from Firestore")
@@ -150,7 +153,10 @@ fun PreguntasAdmin(
                 .padding(it),
             color = Trv1
         ) {
-            Column {
+            Column ( modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp) // Añadir esta línea para el desplazamiento vertical
+                ){
                 if (isLoading) {
                     // Muestra el CircularProgressIndicator mientras se cargan las preguntas
                     Box(
@@ -164,7 +170,10 @@ fun PreguntasAdmin(
                         )
                     }
                 } else{
-                    LazyColumn() {
+                    LazyColumn(modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(.5f) // Esto permitirá que LazyColumn ocupe el espacio vertical restante disponible
+                        .padding(bottom = 16.dp)) {
                         item {
                             TituloAdmin(titulo = "EDITAR PREGUNTAS")
                         }
@@ -194,7 +203,7 @@ fun PreguntasAdmin(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(5.dp))
                 if (isAddingNewQuestion) {
                     // Campos de "Nueva Pregunta" y "Nueva Respuesta"
                     Column {
@@ -276,8 +285,8 @@ fun PreguntasAdmin(
                                             respuesta = textoRespuesta.text,
                                             id = newQuestionDocument.id
                                         )
-                                        //textoPregunta.text = ""
-                                        //textoRespuesta.text = ""
+                                        textoPregunta = TextFieldValue("", TextRange(0, 0))
+                                        textoRespuesta = TextFieldValue("", TextRange(0, 0))
                                         isAddingNewQuestion = false
                                     }
                                 },
