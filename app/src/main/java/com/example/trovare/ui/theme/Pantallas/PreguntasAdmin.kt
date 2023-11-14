@@ -30,6 +30,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -47,6 +48,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextRange
@@ -85,8 +87,6 @@ fun PreguntasAdmin(
     val firestore: FirebaseFirestore by lazy { Firebase.firestore }
     var questions by remember { mutableStateOf(emptyList<Question>()) }
     var expandedQuestionIndex by remember { mutableStateOf(-1) }
-    var isEditDialogOpen by remember { mutableStateOf(false) }
-    var editingQuestionIndex by remember { mutableStateOf(-1) }
     var isAddingNewQuestion by remember { mutableStateOf(false) }
 
     var textoPregunta by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -98,6 +98,8 @@ fun PreguntasAdmin(
     val keyboardOptionsTexto: KeyboardOptions =
         KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done)
 
+    var isLoading by remember { mutableStateOf(true) }
+
 
     LaunchedEffect(Unit) {
         Log.i("FaqScreen", "LaunchedEffect: Obtaining questions from Firestore")
@@ -107,6 +109,8 @@ fun PreguntasAdmin(
             Log.i("FaqScreen", "Questions obtained successfully: $questions")
         } catch (e: Exception) {
             Log.i("FaqScreen", "Error obtaining questions from Firestore", e)
+        }finally {
+            isLoading = false
         }
     }
 
@@ -147,131 +151,143 @@ fun PreguntasAdmin(
             color = Trv1
         ) {
             Column {
-                LazyColumn() {
-                    item {
-                        TituloAdmin(titulo = "EDITAR PREGUNTAS")
+                if (isLoading) {
+                    // Muestra el CircularProgressIndicator mientras se cargan las preguntas
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Transparent)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Center),
+                            color = Color.White
+                        )
                     }
-                    item {
-                        Divisor(modifier = modifier.padding(15.dp))
-                    }
-                    items(questions.size) { index ->
-                        val question = questions[index]
+                } else{
+                    LazyColumn() {
+                        item {
+                            TituloAdmin(titulo = "EDITAR PREGUNTAS")
+                        }
+                        item {
+                            Divisor(modifier = modifier.padding(15.dp))
+                        }
+                        items(questions.size) { index ->
+                            val question = questions[index]
 
-                        TarjetaPreguntas(
-                            question = question,
-                            expanded = index == expandedQuestionIndex,
-                            onExpandClick = {
-                                expandedQuestionIndex =
-                                    if (expandedQuestionIndex == index) -1 else index
-                            },
-                            onDeleteClick = {
-                                // Eliminar la pregunta de Firestore
-                                firestore.collection("FAQS").document(question.id.toString())
-                                    .delete()
-                                questions = questions.filterNot { it.id == question.id }
-                            },
-                            onEditClick = {
-                                isEditDialogOpen = true
-                                editingQuestionIndex = index
-                            },
-                            modifier = modifier.padding(top = 20.dp),
-                            navController = navController)
+                            TarjetaPreguntas(
+                                question = question,
+                                expanded = index == expandedQuestionIndex,
+                                onExpandClick = {
+                                    expandedQuestionIndex =
+                                        if (expandedQuestionIndex == index) -1 else index
+                                },
+                                onDeleteClick = {
+                                    // Eliminar la pregunta de Firestore
+                                    firestore.collection("FAQS").document(question.id.toString())
+                                        .delete()
+                                    questions = questions.filterNot { it.id == question.id }
+                                },
+                                modifier = modifier.padding(top = 20.dp),
+                                navController = navController
+                            )
+                        }
                     }
                 }
+
                 Spacer(modifier = Modifier.height(32.dp))
                 if (isAddingNewQuestion) {
-                // Campos de "Nueva Pregunta" y "Nueva Respuesta"
-                Column {
-                    OutlinedTextField(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 15.dp, start = 50.dp, end = 50.dp),
-                        value = textoPregunta,
-                        onValueChange = { textoPregunta = it },
-                        label = {
-                            Text(
-                                text = "Pregunta",
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                        },
-                        textStyle = MaterialTheme.typography.labelSmall,
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = Color.White,
-                            focusedLabelColor = Color.White,
-                            unfocusedLabelColor = Color.White,
-                            containerColor = Trv8,
-                            cursorColor = Color.White,
-                            focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White
-                        ),
-                        singleLine = true,
-                        keyboardOptions = keyboardOptionsTexto,
-                    )
+                    // Campos de "Nueva Pregunta" y "Nueva Respuesta"
+                    Column {
+                        OutlinedTextField(
+                            modifier = modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 15.dp, start = 50.dp, end = 50.dp),
+                            value = textoPregunta,
+                            onValueChange = { textoPregunta = it },
+                            label = {
+                                Text(
+                                    text = "Pregunta",
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            },
+                            textStyle = MaterialTheme.typography.labelSmall,
+                            colors = TextFieldDefaults.textFieldColors(
+                                textColor = Color.White,
+                                focusedLabelColor = Color.White,
+                                unfocusedLabelColor = Color.White,
+                                containerColor = Trv8,
+                                cursorColor = Color.White,
+                                focusedIndicatorColor = Color.White,
+                                unfocusedIndicatorColor = Color.White
+                            ),
+                            singleLine = true,
+                            keyboardOptions = keyboardOptionsTexto,
+                        )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    OutlinedTextField(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 15.dp, start = 50.dp, end = 50.dp),
-                        value = textoRespuesta,
-                        onValueChange = { textoRespuesta = it },
-                        label = {
-                            Text(
-                                text = "Respuesta",
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                        },
-                        textStyle = MaterialTheme.typography.labelSmall,
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = Color.White,
-                            focusedLabelColor = Color.White,
-                            unfocusedLabelColor = Color.White,
-                            containerColor = Trv8,
-                            cursorColor = Color.White,
-                            focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White
-                        ),
-                        singleLine = true,
-                        keyboardOptions = keyboardOptionsTexto,
-                    )
+                        OutlinedTextField(
+                            modifier = modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 15.dp, start = 50.dp, end = 50.dp),
+                            value = textoRespuesta,
+                            onValueChange = { textoRespuesta = it },
+                            label = {
+                                Text(
+                                    text = "Respuesta",
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            },
+                            textStyle = MaterialTheme.typography.labelSmall,
+                            colors = TextFieldDefaults.textFieldColors(
+                                textColor = Color.White,
+                                focusedLabelColor = Color.White,
+                                unfocusedLabelColor = Color.White,
+                                containerColor = Trv8,
+                                cursorColor = Color.White,
+                                focusedIndicatorColor = Color.White,
+                                unfocusedIndicatorColor = Color.White
+                            ),
+                            singleLine = true,
+                            keyboardOptions = keyboardOptionsTexto,
+                        )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Button(
-                            onClick = {
-                                if (textoPregunta.text.isNotBlank() && textoPregunta.text.isNotBlank()) {
-                                    // Agregar nueva pregunta a Firestore
-                                    val newQuestionDocument =
-                                        firestore.collection("FAQS").document()
-                                    newQuestionDocument.set(
-                                        Question(
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Button(
+                                onClick = {
+                                    if (textoPregunta.text.isNotBlank() && textoPregunta.text.isNotBlank()) {
+                                        // Agregar nueva pregunta a Firestore
+                                        val newQuestionDocument =
+                                            firestore.collection("FAQS").document()
+                                        newQuestionDocument.set(
+                                            Question(
+                                                pregunta = textoPregunta.text,
+                                                respuesta = textoRespuesta.text,
+                                                id = newQuestionDocument.id
+                                            )
+                                        )
+                                        questions = questions + Question(
                                             pregunta = textoPregunta.text,
                                             respuesta = textoRespuesta.text,
                                             id = newQuestionDocument.id
                                         )
-                                    )
-                                    questions = questions + Question(
-                                        pregunta = textoPregunta.text,
-                                        respuesta = textoRespuesta.text,
-                                        id = newQuestionDocument.id
-                                    )
-                                    //textoPregunta.text = ""
-                                    //textoRespuesta.text = ""
-                                    isAddingNewQuestion = false
-                                }
-                            },
-                            modifier = Modifier
-                                .heightIn(min = 56.dp)
-                                .padding(start = 8.dp, end = 50.dp)
-                        ) {
-                            Text("Agregar pregunta")
+                                        //textoPregunta.text = ""
+                                        //textoRespuesta.text = ""
+                                        isAddingNewQuestion = false
+                                    }
+                                },
+                                modifier = Modifier
+                                    .heightIn(min = 56.dp)
+                                    .padding(start = 8.dp, end = 50.dp)
+                            ) {
+                                Text("Agregar pregunta")
+                            }
                         }
-                    }
                     }
                 }
             }
@@ -285,7 +301,6 @@ fun TarjetaPreguntas(
     expanded: Boolean,
     onExpandClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    onEditClick: () -> Unit,
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
@@ -327,7 +342,10 @@ fun TarjetaPreguntas(
                 Icon(
                     modifier = Modifier
                         .padding(13.dp)
-                        .clickable { navController.navigate(Pantalla.EditarPreguntas.ruta) },
+                        .clickable {
+                            navController.navigate(Pantalla.EditarPreguntas.ruta + "/${question.id}")
+                            Log.i("pregunta2", question.id)
+                        },
                     imageVector = Icons.Rounded.Edit,
                     contentDescription = "",
                     tint = Color.White
@@ -359,7 +377,13 @@ fun TarjetaPreguntas(
             Spacer(modifier = Modifier.height(8.dp))
 
             AnimatedVisibility(visible = expanded) {
-                Text(text = question.respuesta, style = MaterialTheme.typography.bodyMedium,modifier=Modifier.padding(start = 50.dp, end = 50.dp).height(50.dp))
+                Text(
+                    text = question.respuesta,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .padding(start = 50.dp, end = 50.dp)
+                        .height(50.dp)
+                )
             }
         }
     }

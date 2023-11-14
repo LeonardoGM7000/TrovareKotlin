@@ -142,11 +142,14 @@ fun Trovare(
                 navController = navController
             )
         }
-        composable(route = Pantalla.EditarPreguntas.ruta) {
+        composable(route = Pantalla.EditarPreguntas.ruta + "/{preguntaId}") { navBackStackEntry ->
+            val preguntaId = navBackStackEntry.arguments?.getString("preguntaId") ?: ""
             EditarPreguntas(
-                navController = navController
+                navController = navController,
+                preguntaId = preguntaId
             )
         }
+
         composable(route = Pantalla.EliminarCuentas.ruta) {
             EliminarCuentas(
                 navController = navController
