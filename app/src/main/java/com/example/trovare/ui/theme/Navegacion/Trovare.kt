@@ -22,11 +22,11 @@ import com.example.trovare.ui.theme.Pantallas.Ingreso.InicioDeSesion
 import com.example.trovare.ui.theme.Pantallas.Itinerarios.EditarItinerario
 import com.example.trovare.ui.theme.Pantallas.Perfil.PerfilConfiguracion
 import com.example.trovare.ViewModel.TrovareViewModel
-import com.example.trovare.ui.theme.Pantallas.Administrador.Administrador
-import com.example.trovare.ui.theme.Pantallas.Administrador.EditarPreguntas
-import com.example.trovare.ui.theme.Pantallas.Administrador.EliminarComentarios
-import com.example.trovare.ui.theme.Pantallas.Administrador.EliminarCuentas
-import com.example.trovare.ui.theme.Pantallas.Administrador.PreguntasAdmin
+import com.example.trovare.ui.theme.Pantallas.Administrador
+import com.example.trovare.ui.theme.Pantallas.EditarPreguntas
+import com.example.trovare.ui.theme.Pantallas.EliminarComentarios
+import com.example.trovare.ui.theme.Pantallas.EliminarCuentas
+import com.example.trovare.ui.theme.Pantallas.PreguntasAdmin
 import com.google.android.libraries.places.api.net.PlacesClient
 
 
@@ -169,9 +169,11 @@ fun Trovare(
                 navController = navController
             )
         }
-        composable(route = Pantalla.EditarPreguntas.ruta){
+        composable(route = Pantalla.EditarPreguntas.ruta + "/{preguntaId}") { navBackStackEntry ->
+            val preguntaId = navBackStackEntry.arguments?.getString("preguntaId") ?: ""
             EditarPreguntas(
-                navController = navController
+                navController = navController,
+                preguntaId = preguntaId
             )
         }
         composable(route = Pantalla.EliminarCuentas.ruta){

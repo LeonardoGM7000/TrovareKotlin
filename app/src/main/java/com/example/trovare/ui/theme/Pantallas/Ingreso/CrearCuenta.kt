@@ -51,6 +51,22 @@ import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv6
 import com.example.trovare.ui.theme.Trv8
+import android.util.Log
+import android.util.Patterns
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import com.example.trovare.Data.Usuario
+import com.example.trovare.R
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +74,12 @@ fun CrearCuenta(
     modifier: Modifier = Modifier,
     navController: NavController
 ){
+    val auth = FirebaseAuth.getInstance()
 
+    val firestore = Firebase.firestore
+
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     var textoNombre by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
@@ -75,14 +96,33 @@ fun CrearCuenta(
 
     var passwordOculta by rememberSaveable { mutableStateOf(true) }
     var aceptarTyC by rememberSaveable { mutableStateOf(false) }
+    var cuentaCreada by remember { mutableStateOf(false) }
 
-    val keyboardOptionsTexto: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done)
-    val keyboardOptionsCorreo: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email, imeAction = ImeAction.Done)
-    val keyboardOptionsPassword: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done)
+    val keyboardOptionsTexto: KeyboardOptions =
+        KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done)
+    val keyboardOptionsCorreo: KeyboardOptions =
+        KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email, imeAction = ImeAction.Done)
+    val keyboardOptionsPassword: KeyboardOptions = KeyboardOptions.Default.copy(
+        keyboardType = KeyboardType.Password,
+        imeAction = ImeAction.Done
+    )
+
+    var isError by rememberSaveable { mutableStateOf(false) }
+    val charLimit = 8
+
+    fun validate(text: String) {
+        Log.i("Erro tamaño",text.length.toString())
+        isError = text.length < charLimit
+    }
 
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState
+            )
         },
     ) {
         Surface(
@@ -203,12 +243,29 @@ fun CrearCuenta(
                             .fillMaxWidth()
                             .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
                         value = textoPassword,
-                        onValueChange = { textoPassword = it },
+                        onValueChange = { textoPassword = it
+                            validate(textoPassword.text)},
+                        supportingText = {
+                            isError = isError
+                            if (isError) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Al menos $charLimit carácteres",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
                         trailingIcon = {
                             IconButton(onClick = { passwordOculta = !passwordOculta }) {
-                                val visibilityIcon = if (passwordOculta) Icons.Rounded.Visibility else Icons.Rounded.VisibilityOff
-                                val description = if (passwordOculta) "Mostrar contraseña" else "Ocultar contraseña"
-                                Icon(imageVector = visibilityIcon, contentDescription = description, tint = Color.White)
+                                val visibilityIcon =
+                                    if (passwordOculta) Icons.Rounded.Visibility else Icons.Rounded.VisibilityOff
+                                val description =
+                                    if (passwordOculta) "Mostrar contraseña" else "Ocultar contraseña"
+                                Icon(
+                                    imageVector = visibilityIcon,
+                                    contentDescription = description,
+                                    tint = Color.White
+                                )
                             }
                         },
                         visualTransformation = if (passwordOculta) PasswordVisualTransformation() else VisualTransformation.None,
@@ -260,12 +317,62 @@ fun CrearCuenta(
                             .padding(start = 25.dp, end = 25.dp, bottom = 10.dp),
                         onClick = {
                             //Iniciar-------------------------------------------------------------------
-                            navController.navigate(Pantalla.Bienvenida.ruta){
-                                popUpTo(navController.graph.id){
-                                    inclusive = true
+                            if(textoNombre.text.isBlank() || textoApellido.text.isBlank() || textoCorreo.text.isBlank() || textoPassword.text.isBlank()){
+                                Log.i("error", "campos imcompletos")
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Completa todos los campos",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            } else if(!Patterns.EMAIL_ADDRESS.matcher(textoCorreo.text).matches()){
+                                Log.i("error correo", textoCorreo.text)
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Correo inválido",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            } else if(textoPassword.text.length < charLimit) {
+                                Log.i("error contraseña", textoPassword.text.length.toString())
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Contraseña débil",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            } else {
+                                auth.createUserWithEmailAndPassword(
+                                    textoCorreo.text,
+                                    textoPassword.text
+                                ).addOnCompleteListener { task ->
+
+                                    if (task.isSuccessful) {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = "Cuenta creada exitosamente, se necesita verificación de correo",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                            cuentaCreada = true
+                                        }
+                                        //Guardar datos firebase
+                                        saveUserData(
+                                            textoNombre.text,
+                                            textoCorreo.text,
+                                            firestore
+                                        )
+                                        val user = FirebaseAuth.getInstance().currentUser
+                                        user?.sendEmailVerification()
+                                    } else {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = "El correo ingresado ya está asociado a otra cuenta",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
+                                    }
                                 }
                             }
-
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Trv6,
@@ -274,11 +381,35 @@ fun CrearCuenta(
                     ) {
                         Text(text = "Registrarme")
                     }
+                    LaunchedEffect(cuentaCreada) {
+                        if (cuentaCreada) {
+                            delay(1000)
+                            navController.navigate(Pantalla.InicioDeSesion.ruta) {
+                                popUpTo(navController.graph.id) {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                    }
 
                 }
             }
         }
     }
+}
 
-
+//Guardar datos del usuario en firestore
+private fun saveUserData(
+    textoNombre: String,
+    textoCorreo: String,
+    firestore: FirebaseFirestore
+) {
+    // Crear un objeto para representar la información del usuario
+    val userData = Usuario(textoNombre, R.drawable.perfil, "2023", "", "México", null)
+    Log.i("cuenta", "Punto")
+    firestore.collection("Usuario").document(textoCorreo).set(userData).addOnSuccessListener {
+        Log.i("cuenta", "Datos guardados")
+    }.addOnFailureListener {
+        Log.i("cuenta", "Datos no guardados")
+    }
 }

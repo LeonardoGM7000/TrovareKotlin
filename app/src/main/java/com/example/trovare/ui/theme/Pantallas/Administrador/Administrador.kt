@@ -1,4 +1,5 @@
-package com.example.trovare.ui.theme.Pantallas.Administrador
+package com.example.trovare.ui.theme.Pantallas
+
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -30,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.trovare.ui.theme.Navegacion.Pantalla
-import com.example.trovare.ui.theme.Pantallas.TarjetaNormal
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Recursos.VentanaDeAlerta
 import com.example.trovare.ui.theme.Trv1

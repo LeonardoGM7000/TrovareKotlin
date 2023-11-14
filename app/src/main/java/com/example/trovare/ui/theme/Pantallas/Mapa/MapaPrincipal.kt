@@ -55,7 +55,9 @@ import com.example.trovare.ui.theme.Recursos.Divisor2
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -110,7 +112,7 @@ fun MapaPrincipal(
         position = CameraPosition.fromLatLngZoom(ubicacion, 15f)
     }
 
-    //var estadoMarcador = rememberMarkerState(position = ubicacion)
+    val estadoMarcador = rememberMarkerState(position = ubicacion)
 
 
 
@@ -132,13 +134,11 @@ fun MapaPrincipal(
                 .fillMaxSize(),
             cameraPositionState = cameraPositionState,
         ){
-            /*
             Marker(
                 state = estadoMarcador,
                 title = ubicacion.toString()
             )
 
-             */
         }
         //Busqueda----------------------------------------------------------------------------------
         Column {

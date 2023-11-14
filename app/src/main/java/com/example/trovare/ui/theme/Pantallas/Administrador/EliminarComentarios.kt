@@ -1,4 +1,4 @@
-package com.example.trovare.ui.theme.Pantallas.Administrador
+package com.example.trovare.ui.theme.Pantallas
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable

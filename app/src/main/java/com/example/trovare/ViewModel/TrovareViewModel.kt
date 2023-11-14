@@ -69,6 +69,7 @@ class TrovareViewModel : ViewModel() {
     // Función para actualizar el valor de la ubicación
     fun setUbicacion(nuevaUbicacion: LatLng) {
         _ubicacion.value = nuevaUbicacion
+        Log.i("pruebaqas","${ubicacion}")
     }
 
 
@@ -111,6 +112,7 @@ class TrovareViewModel : ViewModel() {
                 rating(place.rating)
                 numeroTelefono(place.phoneNumber)
                 latLng(place.latLng)
+
                 if(place.websiteUri != null){
                     paginaWeb(place.websiteUri.toString())
                 } else {
