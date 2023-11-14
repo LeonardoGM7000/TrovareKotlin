@@ -375,6 +375,7 @@ fun TarjetaPreguntas(
                 alRechazar = { mostrarBorrarCuenta = false },
                 alConfirmar = { //Necesita eliminar la pregunta
                     onDeleteClick()
+                    navController.navigate(Pantalla.PreguntasAdmin.ruta)
                 },
                 textoConfirmar = "Borrar Pregunta",
                 titulo = "Borrar Pregunta",
