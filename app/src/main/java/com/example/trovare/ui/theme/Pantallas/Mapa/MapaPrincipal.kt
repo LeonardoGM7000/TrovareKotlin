@@ -47,24 +47,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.trovare.Api.rawJSON
-import com.example.trovare.Data.LugarAutocompletar
 import com.example.trovare.Data.Places
 import com.example.trovare.ViewModel.TrovareViewModel
-import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.Divisor2
-import com.example.trovare.ui.theme.Trv9
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.net.PlacesClient
-import com.google.maps.android.compose.CameraPositionState
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.CoroutineScope
@@ -115,13 +106,13 @@ fun MapaPrincipal(
     //variables para el mapa------------------------------------------------------------------------
 
 
+    val ubicacion by viewModel.ubicacion.collectAsState()
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(LatLng(19.504507, -99.147314), 15f)
+        position = CameraPosition.fromLatLngZoom(ubicacion, 15f)
     }
-    val ubicacion by viewModel.ubicacion.collectAsStateWithLifecycle()
 
-    //var estadoMarcador = rememberMarkerState(position = ubicacion)
+    val estadoMarcador = rememberMarkerState(position = ubicacion)
 
 
 
@@ -143,13 +134,11 @@ fun MapaPrincipal(
                 .fillMaxSize(),
             cameraPositionState = cameraPositionState,
         ){
-            /*
             Marker(
                 state = estadoMarcador,
                 title = ubicacion.toString()
             )
 
-             */
         }
         //Busqueda----------------------------------------------------------------------------------
         Column {
