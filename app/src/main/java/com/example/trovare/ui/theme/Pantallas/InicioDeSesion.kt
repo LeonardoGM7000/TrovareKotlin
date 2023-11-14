@@ -1,5 +1,6 @@
 package com.example.trovare.ui.theme.Pantallas
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -30,6 +35,8 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -52,6 +59,8 @@ import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv6
 import com.example.trovare.ui.theme.Trv8
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +68,8 @@ fun InicioDeSesion(
     modifier: Modifier = Modifier,
     navController: NavController
 ){
+    // Declaramos variables
+    val auth = FirebaseAuth.getInstance()
 
     var textoCorreo by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
@@ -66,6 +77,9 @@ fun InicioDeSesion(
     var textoPasswrod by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
+
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     var passwordOculta by rememberSaveable { mutableStateOf(true) }
 
@@ -75,6 +89,10 @@ fun InicioDeSesion(
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState)
         },
     ) {
         Surface(
@@ -212,10 +230,60 @@ fun InicioDeSesion(
                             .padding(start = 25.dp, end = 25.dp, bottom = 10.dp),
                         onClick = {
 
-                            navController.navigate(Pantalla.Inicio.ruta){
-                                popUpTo(navController.graph.id){
-                                    inclusive = true
+                            if(textoCorreo.text.isBlank() || textoPasswrod.text.isBlank()){
+
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Campos vacios",
+                                        duration = SnackbarDuration.Short
+                                    )
                                 }
+                            }else{
+
+
+                                try{
+
+                                    auth.signInWithEmailAndPassword(textoCorreo.text, textoPasswrod.text)
+                                        .addOnCompleteListener{ task ->
+
+                                            if(task.isSuccessful){
+
+                                                scope.launch {
+                                                    snackbarHostState.showSnackbar(
+                                                        message = "Iniciando Sesión...",
+                                                        duration = SnackbarDuration.Short
+                                                    )
+                                                }
+
+                                                navController.navigate(Pantalla.Inicio.ruta){
+                                                    popUpTo(navController.graph.id){
+                                                        inclusive = true
+                                                    }
+                                                }
+
+
+
+                                            }else{
+
+                                                scope.launch {
+                                                    snackbarHostState.showSnackbar(
+                                                        message = "Correo o contraseña incorrectos",
+                                                        duration = SnackbarDuration.Short
+                                                    )
+                                                }
+                                            }
+
+
+                                        }
+
+
+                                }catch(ex:Exception){
+
+                                    Log.d("Login", "Error en la conexión de la base de datos")
+
+                                }
+
+
                             }
 
                         },
