@@ -244,8 +244,7 @@ fun CrearCuenta(
                         Text(
                             modifier = modifier.padding(end = 25.dp),
                             text = "Aceptar Términos y Condiciones",
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = TextAlign.Justify,
+                            style = MaterialTheme.typography.labelSmall,
                             textDecoration = TextDecoration.Underline,
                             color = Color.White
                         )
