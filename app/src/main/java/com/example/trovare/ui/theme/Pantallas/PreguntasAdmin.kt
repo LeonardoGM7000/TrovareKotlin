@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -125,7 +126,7 @@ fun PreguntasAdmin(
                     },
                     containerColor = Trv4,
                     modifier = Modifier
-                        .padding(25.dp)
+                        .padding(start = 300.dp, bottom = 50.dp)
                         .size(60.dp)
                 ) {
                     Icon(
@@ -288,9 +289,7 @@ fun TarjetaPreguntas(
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
-
     var mostrarBorrarCuenta by rememberSaveable { mutableStateOf(false) }
-    var showAnswer by remember { mutableStateOf(false) }
 
     Card(
         modifier = modifier
@@ -308,7 +307,7 @@ fun TarjetaPreguntas(
                 Icon(
                     modifier = Modifier
                         .padding(13.dp),
-                    imageVector = Icons.Filled.Info,
+                    imageVector = Icons.Filled.QuestionMark,
                     contentDescription = "",
                     tint = Color.White,
                 )
@@ -328,7 +327,7 @@ fun TarjetaPreguntas(
                 Icon(
                     modifier = Modifier
                         .padding(13.dp)
-                        .clickable { navController.navigate(Pantalla.EditarPreguntas.ruta) }, //necesita abrir la info de su pregunta
+                        .clickable { navController.navigate(Pantalla.EditarPreguntas.ruta) },
                     imageVector = Icons.Rounded.Edit,
                     contentDescription = "",
                     tint = Color.White
@@ -344,18 +343,24 @@ fun TarjetaPreguntas(
                     tint = Color.White,
                 )
             }
-                VentanaDeAlerta(
-                    mostrar = mostrarBorrarCuenta,
-                    alRechazar = { mostrarBorrarCuenta = false },
-                    alConfirmar = { //Necesita eliminar la pregunta
-                        onDeleteClick()
-                    },
-                    textoConfirmar = "Borrar Pregunta",
-                    titulo = "Borrar Pregunta",
-                    texto = "¿Quieres borrar la pregunta frecuente?",
-                    icono = Icons.Filled.DeleteForever,
-                    colorConfirmar = Color.Red
-                )
+            VentanaDeAlerta(
+                mostrar = mostrarBorrarCuenta,
+                alRechazar = { mostrarBorrarCuenta = false },
+                alConfirmar = { //Necesita eliminar la pregunta
+                    onDeleteClick()
+                },
+                textoConfirmar = "Borrar Pregunta",
+                titulo = "Borrar Pregunta",
+                texto = "¿Quieres borrar la pregunta frecuente?",
+                icono = Icons.Filled.DeleteForever,
+                colorConfirmar = Color.Red
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            AnimatedVisibility(visible = expanded) {
+                Text(text = question.respuesta, style = MaterialTheme.typography.bodyMedium,modifier=Modifier.padding(start = 50.dp, end = 50.dp).height(50.dp))
+            }
         }
     }
 }
