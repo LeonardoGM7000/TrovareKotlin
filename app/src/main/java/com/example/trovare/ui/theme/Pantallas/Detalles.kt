@@ -1,5 +1,7 @@
 package com.example.trovare.ui.theme.Pantallas
 
+import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,14 +34,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv7
@@ -103,52 +109,76 @@ fun Detalles(
                         .padding(start = 45.dp, top = 25.dp, end = 45.dp)
                         .aspectRatio(1F),
                 ) {
-                    Row(modifier = modifier
-                        .padding(5.dp)
-                        .fillMaxWidth()
-                    ){
-                        FloatingActionButton(
-                            modifier = modifier
-                                .size(35.dp),
-                            onClick = { navController.popBackStack() },
-                            containerColor = Color.White,
-                            shape = CircleShape
-                        ){
-                            Icon(
-                                imageVector = Icons.Rounded.KeyboardArrowLeft,
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(5.dp)
+                    ) {
+                        val imagen = viewModel.imagen.value
+
+                        if (imagen != null) {
+                            Image(
+                                bitmap = imagen,
                                 contentDescription = "",
-                                tint = Color.Black
+                                modifier = Modifier
+                                    .fillMaxSize()
+                            )
+                        } else {
+                            Image(
+                                modifier = modifier
+                                    .fillMaxSize(),
+                                painter = painterResource(id = R.drawable.image_placeholder),
+                                contentDescription = ""
                             )
                         }
-                        Spacer(modifier = modifier.fillMaxWidth(0.86f))
-                        FloatingActionButton(
+
+                        Row(
                             modifier = modifier
-                                .size(35.dp),
-                            onClick = { /*TODO*/ },
-                            containerColor = Color.White,
-                            shape = CircleShape
-                        ){
-                            IconToggleButton(
-                                checked = secondChecked,
-                                onCheckedChange = { checked -> secondChecked = checked },
-                                colors = IconButtonDefaults.iconToggleButtonColors(
-                                    containerColor = Color.White,
-                                    checkedContainerColor = Color.White,
-                                    contentColor = Color.Black,
-                                    checkedContentColor = Color.Red
-                                )
+                                .padding(5.dp)
+                                .fillMaxWidth()
+                        ) {
+                            FloatingActionButton(
+                                modifier = modifier
+                                    .size(35.dp),
+                                onClick = { navController.popBackStack() },
+                                containerColor = Color.White,
+                                shape = CircleShape
                             ) {
-                                if(secondChecked){
-                                    Icon(
-                                        imageVector = Icons.Rounded.Favorite,
-                                        contentDescription = ""
+                                Icon(
+                                    imageVector = Icons.Rounded.KeyboardArrowLeft,
+                                    contentDescription = "",
+                                    tint = Color.Black
+                                )
+                            }
+                            Spacer(modifier = modifier.fillMaxWidth(0.86f))
+                            FloatingActionButton(
+                                modifier = modifier
+                                    .size(35.dp),
+                                onClick = { /*TODO*/ },
+                                containerColor = Color.White,
+                                shape = CircleShape
+                            ) {
+                                IconToggleButton(
+                                    checked = secondChecked,
+                                    onCheckedChange = { checked -> secondChecked = checked },
+                                    colors = IconButtonDefaults.iconToggleButtonColors(
+                                        containerColor = Color.White,
+                                        checkedContainerColor = Color.White,
+                                        contentColor = Color.Black,
+                                        checkedContentColor = Color.Red
                                     )
-                                }
-                                else {
-                                    Icon(
-                                        imageVector = Icons.Rounded.FavoriteBorder,
-                                        contentDescription = ""
-                                    )
+                                ) {
+                                    if (secondChecked) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Favorite,
+                                            contentDescription = ""
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = Icons.Rounded.FavoriteBorder,
+                                            contentDescription = ""
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -308,14 +338,13 @@ fun Detalles(
                 )
             }
             item {
+
                 /*
                 Image(
                     bitmap = imagen,
                     contentDescription = null, // Puedes proporcionar una descripción si es necesario
                     modifier = Modifier.fillMaxSize() // Ajusta el tamaño de la imagen según sea necesario
-                )
-
-                 */
+                )*/
 
             }
         }

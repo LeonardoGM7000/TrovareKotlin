@@ -1,6 +1,8 @@
 package com.example.trovare.ViewModel
 
 import android.util.Log
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
@@ -22,7 +24,8 @@ import kotlinx.coroutines.flow.update
  */
 
 class TrovareViewModel : ViewModel() {
-
+    private val _imagen = mutableStateOf<ImageBitmap?>(null)
+    val imagen: State<ImageBitmap?> = _imagen
     private val _estadoUi = MutableStateFlow(TrovareEstadoUi())
     val uiState: StateFlow<TrovareEstadoUi> = _estadoUi.asStateFlow()
 
@@ -98,7 +101,7 @@ class TrovareViewModel : ViewModel() {
             Place.Field.PHONE_NUMBER,
             Place.Field.WEBSITE_URI,
             Place.Field.LAT_LNG,
-            //Place.Field.PHOTO_METADATAS,
+            Place.Field.PHOTO_METADATAS
             )//campos que se deben obtener de la API de places
         val request = FetchPlaceRequest.newInstance(placeId, placeFields)
 
@@ -115,7 +118,6 @@ class TrovareViewModel : ViewModel() {
 
                 if(place.websiteUri != null){
                     paginaWeb(place.websiteUri.toString())
-                } else {
                 }
 
                 // Obtener metadatos de la foto-----------------------------------------------------
@@ -132,11 +134,9 @@ class TrovareViewModel : ViewModel() {
                     placesClient.fetchPhoto(photoRequest)
                         .addOnSuccessListener { fetchPhotoResponse: FetchPhotoResponse ->
 
-                            var imagen = fetchPhotoResponse.bitmap
-                            val imagenBitmap: ImageBitmap = imagen.asImageBitmap()
-                            //imagen(imagenBitmap)
-                            Log.i("testLugar", "imagen recuperada: ${imagen}")
-                            //imageView.setImageBitmap(bitmap)
+                            val image = fetchPhotoResponse.bitmap
+                            val imagenBitmap: ImageBitmap = image.asImageBitmap()
+                            _imagen.value = imagenBitmap
                         }.addOnFailureListener { exception: Exception ->
                             if (exception is ApiException) {
                                 Log.e("testLugar", "Place not found: " + exception.message)
@@ -144,8 +144,6 @@ class TrovareViewModel : ViewModel() {
                                 TODO("Handle error with given status code.")
                             }
                         }
-                } else {
-
                 }
 
                 /*
