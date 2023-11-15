@@ -323,7 +323,7 @@ fun CrearCuenta(
                                 Log.i("error", "campos imcompletos")
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
-                                        message = "Completa todos los campos",
+                                        message = "Campos obligatorios no completados",
                                         duration = SnackbarDuration.Short
                                     )
                                 }
@@ -331,7 +331,7 @@ fun CrearCuenta(
                                 Log.i("error correo", textoCorreo.text)
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
-                                        message = "Correo inválido",
+                                        message = "El correo no tiene una estructura valida",
                                         duration = SnackbarDuration.Short
                                     )
                                 }

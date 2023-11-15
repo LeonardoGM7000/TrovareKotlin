@@ -1,6 +1,7 @@
 package com.example.trovare.ui.theme.Pantallas
 
 import android.util.Log
+import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -60,6 +61,7 @@ import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv6
 import com.example.trovare.ui.theme.Trv8
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -229,23 +231,26 @@ fun InicioDeSesion(
                             .fillMaxWidth()
                             .padding(start = 25.dp, end = 25.dp, bottom = 10.dp),
                         onClick = {
-
                             if(textoCorreo.text.isBlank() || textoPasswrod.text.isBlank()){
-
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
-                                        message = "Campos vacios",
+                                        message = "Campos obligatorios no completados",
                                         duration = SnackbarDuration.Short
                                     )
                                 }
-                            }else{
-
-
+                            }else if(!Patterns.EMAIL_ADDRESS.matcher(textoCorreo.text).matches()){
+                                Log.i("error correo", textoCorreo.text)
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "El correo no tiene una estructura valida",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }
+                            else {
                                 try{
-
                                     auth.signInWithEmailAndPassword(textoCorreo.text, textoPasswrod.text)
                                         .addOnCompleteListener{ task ->
-
                                             if(task.isSuccessful){
 
                                                 scope.launch {
@@ -254,38 +259,31 @@ fun InicioDeSesion(
                                                         duration = SnackbarDuration.Short
                                                     )
                                                 }
-
                                                 navController.navigate(Pantalla.Inicio.ruta){
                                                     popUpTo(navController.graph.id){
                                                         inclusive = true
                                                     }
                                                 }
-
-
-
                                             }else{
+                                                    scope.launch {
+                                                        snackbarHostState.showSnackbar(
+                                                            message = "Correo o contraseña incorrectos",
+                                                            duration = SnackbarDuration.Short
+                                                        )
 
-                                                scope.launch {
-                                                    snackbarHostState.showSnackbar(
-                                                        message = "Correo o contraseña incorrectos",
-                                                        duration = SnackbarDuration.Short
-                                                    )
                                                 }
                                             }
-
-
                                         }
-
-
                                 }catch(ex:Exception){
-
                                     Log.d("Login", "Error en la conexión de la base de datos")
-
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "Error de conexión",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
                                 }
-
-
                             }
-
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Trv6,
@@ -294,8 +292,6 @@ fun InicioDeSesion(
                     ) {
                         Text(text = "Ingresar")
                     }
-
-
                 }
             }
         }
