@@ -55,6 +55,7 @@ import com.example.trovare.ui.theme.Recursos.Divisor2
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
@@ -75,6 +76,7 @@ fun MapaPrincipal(
 ){
 
     var tiempoRestante by rememberSaveable { mutableIntStateOf(1) }//tiempo antes de que se haga la llamada a la API de places(1 segundo)
+    var tiempoRestante2 by rememberSaveable { mutableIntStateOf(1) }//tiempo antes de que se haga la llamada a la API de places(1 segundo)
     var job: Job? by remember { mutableStateOf(null) }
     val prediccionesBusquedaMapa by remember { mutableStateOf(mutableStateListOf<Places>()) }
     var busquedaEnProgreso by rememberSaveable { mutableStateOf(false) }
@@ -82,6 +84,9 @@ fun MapaPrincipal(
     var textoBuscar by rememberSaveable(stateSaver = TextFieldValue.Saver) {//texto a buscar
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
+
+    var visible by remember { mutableStateOf(true) }
+
 
     fun iniciarTimer() {
         job = CoroutineScope(Dispatchers.Default).launch {
@@ -115,7 +120,6 @@ fun MapaPrincipal(
     val estadoMarcador = rememberMarkerState(position = ubicacion)
 
 
-
     Log.d("Composable", "Ubicación actual: $ubicacion")
 
     //UI--------------------------------------------------------------------------------------------
@@ -129,17 +133,22 @@ fun MapaPrincipal(
 
 
         //Mapa--------------------------------------------------------------------------------------
-        GoogleMap(
-            modifier = modifier
-                .fillMaxSize(),
-            cameraPositionState = cameraPositionState,
-        ){
-            Marker(
-                state = estadoMarcador,
-                title = ubicacion.toString()
-            )
+        if(visible){
+            GoogleMap(
+                modifier = modifier
+                    .fillMaxSize(),
+                cameraPositionState = cameraPositionState,
+            ){
+                Marker(
+                    state = estadoMarcador,
+                    title = ubicacion.toString()
+                )
+
+            }
+        }else{
 
         }
+
         //Busqueda----------------------------------------------------------------------------------
         Column {
             Card(
