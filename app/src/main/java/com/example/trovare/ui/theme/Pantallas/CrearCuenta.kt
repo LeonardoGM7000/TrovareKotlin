@@ -65,6 +65,7 @@ import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv6
 import com.example.trovare.ui.theme.Trv8
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -344,36 +345,43 @@ fun CrearCuenta(
                                     )
                                 }
                             } else {
-                                auth.createUserWithEmailAndPassword(
-                                    textoCorreo.text,
-                                    textoPassword.text
-                                ).addOnCompleteListener { task ->
-
-                                    if (task.isSuccessful) {
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar(
-                                                message = "Cuenta creada exitosamente, se necesita verificación de correo",
-                                                duration = SnackbarDuration.Short
-                                            )
-                                            cuentaCreada = true
-                                        }
-                                        //Guardar datos firebase
-                                        saveUserData(
-                                            textoNombre.text,
+                                    try {
+                                        var firebaseAuth = Firebase.auth
+                                        var user = firebaseAuth.currentUser!!
+                                        user.sendEmailVerification()
+                                        auth.createUserWithEmailAndPassword(
                                             textoCorreo.text,
-                                            firestore
-                                        )
-                                        val user = FirebaseAuth.getInstance().currentUser
-                                        user?.sendEmailVerification()
-                                    } else {
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar(
-                                                message = "El correo ingresado ya está asociado a otra cuenta",
-                                                duration = SnackbarDuration.Short
-                                            )
+                                            textoPassword.text
+                                        ).addOnCompleteListener { task ->
+
+                                            if (task.isSuccessful) {
+                                                scope.launch {
+                                                    snackbarHostState.showSnackbar(
+                                                        message = "Cuenta creada exitosamente, se necesita verificación de correo",
+                                                        duration = SnackbarDuration.Short
+                                                    )
+                                                    cuentaCreada = true
+                                                }
+                                                //Guardar datos firebase
+                                                saveUserData(
+                                                    textoNombre.text,
+                                                    textoCorreo.text,
+                                                    firestore
+                                                )
+                                            } else {
+                                                scope.launch {
+                                                    snackbarHostState.showSnackbar(
+                                                        message = "El correo ingresado ya está asociado a otra cuenta",
+                                                        duration = SnackbarDuration.Short
+                                                    )
+                                                }
+                                            }
                                         }
+                                    } catch(ex:Exception){
+
+                                        Log.d("Login", "Error en la conexión de la base de datos")
+
                                     }
-                                }
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
