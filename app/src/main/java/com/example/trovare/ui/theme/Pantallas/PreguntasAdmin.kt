@@ -2,7 +2,11 @@ package com.example.trovare.ui.theme.Pantallas
 
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -50,13 +55,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.trovare.Pantalla
@@ -64,8 +72,10 @@ import com.example.trovare.ui.theme.Data.Pregunta
 import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
+import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
 import com.example.trovare.ui.theme.Recursos.VentanaDeAlerta
 import com.example.trovare.ui.theme.Trv1
+import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv4
 import com.example.trovare.ui.theme.Trv5
 import com.example.trovare.ui.theme.Trv6
@@ -88,7 +98,6 @@ fun PreguntasAdmin(
 
     val firestore: FirebaseFirestore by lazy { Firebase.firestore }
     var questions by remember { mutableStateOf(emptyList<Question>()) }
-    var expandedQuestionIndex by remember { mutableStateOf(-1) }
     var isAddingNewQuestion by remember { mutableStateOf(false) }
 
     var textoPregunta by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -101,8 +110,6 @@ fun PreguntasAdmin(
         KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done)
 
     var isLoading by remember { mutableStateOf(true) }
-
-    val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {
         Log.i("FaqScreen", "LaunchedEffect: Obtaining questions from Firestore")
@@ -172,31 +179,26 @@ fun PreguntasAdmin(
                 } else{
                     LazyColumn(modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f) // Esto permitirá que LazyColumn ocupe el espacio vertical restante disponible
+                        .weight(1f)
                         .padding(bottom = 16.dp)) {
                         item {
                             TituloAdmin(titulo = "EDITAR PREGUNTAS")
                         }
                         item {
-                            Divisor(modifier = modifier.padding(15.dp))
+                            Divisor()
                         }
                         items(questions.size) { index ->
                             val question = questions[index]
 
                             TarjetaPreguntas(
                                 question = question,
-                                expanded = index == expandedQuestionIndex,
-                                onExpandClick = {
-                                    expandedQuestionIndex =
-                                        if (expandedQuestionIndex == index) -1 else index
-                                },
                                 onDeleteClick = {
                                     // Eliminar la pregunta de Firestore
-                                    firestore.collection("FAQS").document(question.id.toString())
+                                    firestore.collection("FAQS").document(question.id)
                                         .delete()
                                     questions = questions.filterNot { it.id == question.id }
                                 },
-                                modifier = modifier.padding(top = 20.dp),
+                                modifier = modifier.padding(top = 8.dp),
                                 navController = navController
                             )
                         }
@@ -204,9 +206,10 @@ fun PreguntasAdmin(
                 }
 
                 Spacer(modifier = Modifier.height(5.dp))
+
                 if (isAddingNewQuestion) {
                     // Campos de "Nueva Pregunta" y "Nueva Respuesta"
-                    Column {
+                    Column (modifier = Modifier.fillMaxHeight()){
                         OutlinedTextField(
                             modifier = modifier
                                 .fillMaxWidth()
@@ -307,42 +310,54 @@ fun PreguntasAdmin(
 @Composable
 fun TarjetaPreguntas(
     question: Question,
-    expanded: Boolean,
-    onExpandClick: () -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
     var mostrarBorrarCuenta by rememberSaveable { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
+
+    val cardSizeModifier = Modifier
+        .animateContentSize(
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessMediumLow,
+            )
+        )
 
     Card(
         modifier = modifier
             .fillMaxWidth()
+            .then(cardSizeModifier) // Aplicar el modificador de tamaño aquí
             .padding(horizontal = 25.dp),
         colors = CardDefaults
-            .cardColors(containerColor = Trv1),
+            .cardColors(containerColor = Trv1)
     ) {
-        Column {
+        Column(
+            modifier = Modifier
+                .background(
+                    color = if (expanded) Trv2
+                    else Trv1
+                )
+        ) {
             Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .clickable { onExpandClick() }
+                    .fillMaxWidth()
+                    .clickable { expanded = !expanded },
+                        verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     modifier = Modifier
                         .padding(13.dp),
-                    imageVector = Icons.Filled.QuestionMark,
+                    imageVector = Icons.Filled.Info,
                     contentDescription = "",
                     tint = Color.White,
                 )
-                Box(
+                Box(contentAlignment = Alignment.CenterStart,
                     modifier = Modifier
                         .fillMaxWidth(0.64f)
                 ) {
                     Text(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .padding(top = 8.dp),
                         text = question.pregunta,
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White
@@ -353,7 +368,6 @@ fun TarjetaPreguntas(
                         .padding(13.dp)
                         .clickable {
                             navController.navigate(Pantalla.EditarPreguntas.ruta + "/${question.id}")
-                            Log.i("pregunta2", question.id)
                         },
                     imageVector = Icons.Rounded.Edit,
                     contentDescription = "",
@@ -387,13 +401,15 @@ fun TarjetaPreguntas(
             Spacer(modifier = Modifier.height(8.dp))
 
             AnimatedVisibility(visible = expanded) {
-                Text(
-                    text = question.respuesta,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .padding(start = 50.dp, end = 50.dp)
-                        .height(50.dp)
-                )
+                if(expanded){
+                    Text(
+                        modifier = modifier.padding(start = 20.dp, end = 20.dp, bottom = 15.dp),
+                        text = question.respuesta,
+                        textAlign = TextAlign.Justify,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White
+                    )
+                }
             }
         }
     }
