@@ -162,7 +162,6 @@ fun Buscar(
                     Divisor()
                 }
             }
-
         },
         //Contenido de la busqueda *(indicador de progreso circular para busqueda o busquedas encontradas)
     ){

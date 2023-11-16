@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import com.google.maps.android.compose.GoogleMap
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,16 +13,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.FilterList
+import androidx.compose.material.icons.rounded.FilterListOff
 import androidx.compose.material.icons.rounded.TravelExplore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -50,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.trovare.Api.rawJSON
 import com.example.trovare.Data.Places
+import com.example.trovare.Data.categorias
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.Divisor2
 import com.google.android.gms.maps.model.CameraPosition
@@ -76,7 +86,6 @@ fun MapaPrincipal(
 ){
 
     var tiempoRestante by rememberSaveable { mutableIntStateOf(1) }//tiempo antes de que se haga la llamada a la API de places(1 segundo)
-    var tiempoRestante2 by rememberSaveable { mutableIntStateOf(1) }//tiempo antes de que se haga la llamada a la API de places(1 segundo)
     var job: Job? by remember { mutableStateOf(null) }
     val prediccionesBusquedaMapa by remember { mutableStateOf(mutableStateListOf<Places>()) }
     var busquedaEnProgreso by rememberSaveable { mutableStateOf(false) }
@@ -86,6 +95,10 @@ fun MapaPrincipal(
     }
 
     var visible by remember { mutableStateOf(true) }
+
+    var filtroExtendido by rememberSaveable { mutableStateOf(false) }
+
+
 
 
     fun iniciarTimer() {
@@ -119,7 +132,6 @@ fun MapaPrincipal(
 
     val estadoMarcador = rememberMarkerState(position = ubicacion)
 
-
     Log.d("Composable", "Ubicación actual: $ubicacion")
 
     //UI--------------------------------------------------------------------------------------------
@@ -128,32 +140,23 @@ fun MapaPrincipal(
         .fillMaxSize(),
         contentAlignment = Alignment.TopCenter
     ){
-        //val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(locationState.value.latitude, locationState.value.longitude), zoom)
-
-
-
         //Mapa--------------------------------------------------------------------------------------
-        if(visible){
-            GoogleMap(
-                modifier = modifier
-                    .fillMaxSize(),
-                cameraPositionState = cameraPositionState,
-            ){
-                Marker(
-                    state = estadoMarcador,
-                    title = ubicacion.toString()
-                )
-
-            }
-        }else{
+        GoogleMap(
+            modifier = modifier
+                .fillMaxSize(),
+            cameraPositionState = cameraPositionState,
+        ){
+            Marker(
+                state = estadoMarcador,
+                title = ubicacion.toString()
+            )
 
         }
-
-        //Busqueda----------------------------------------------------------------------------------
         Column {
+            //Busqueda------------------------------------------------------------------------------
             Card(
                 modifier = modifier
-                    .padding(horizontal = 25.dp, vertical = 15.dp)
+                    .padding(start = 25.dp, top = 15.dp, end = 25.dp, bottom = 5.dp)
                     .fillMaxWidth(),
                 colors = CardDefaults.cardColors(Color.Black),
                 border = CardDefaults.outlinedCardBorder()
@@ -183,8 +186,35 @@ fun MapaPrincipal(
                         }
                     },
                     trailingIcon = {
-                        IconButton(onClick = { /*TODO*/ }){
+                        IconButton(
+                            onClick = { /*TODO*/ },
+                            colors = IconButtonDefaults.iconButtonColors(
+
+                            )
+                        ){
                             Icon(imageVector = Icons.Rounded.FilterList, contentDescription = "")
+                        }
+                        IconToggleButton(
+                            checked = filtroExtendido,
+                            onCheckedChange = { checked -> filtroExtendido = checked },
+                            colors = IconButtonDefaults.iconToggleButtonColors(
+                                containerColor = Color.Black,
+                                contentColor = Color.White,
+                                checkedContentColor = Color.White
+                            )
+                        ) {
+                            if(filtroExtendido){
+                                Icon(
+                                    imageVector = Icons.Rounded.FilterListOff,
+                                    contentDescription = ""
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Rounded.FilterList,
+                                    contentDescription = ""
+                                )
+                            }
+
                         }
                     },
                     textStyle = MaterialTheme.typography.labelSmall,
@@ -197,11 +227,45 @@ fun MapaPrincipal(
                     )
                 )
             }
+            //Mostrar filtros-----------------------------------------------------------------------
+            if(filtroExtendido){
+                LazyRow(
+                    modifier = modifier
+                        .padding(horizontal = 25.dp)
+                ){
+                    items(categorias){categoria ->
+                        Card(
+                            modifier = modifier.padding(end = 5.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color.Black,
+                                contentColor = Color.White
+                            )
+                        ){
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ){
+                                Icon(
+                                    modifier = modifier.padding(5.dp),
+                                    imageVector = categoria.icono,
+                                    contentDescription = ""
+                                )
+                                Text(
+                                    modifier = modifier.padding(end = 5.dp),
+                                    text = categoria.nombre,
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            }
+                        }
+
+                    }
+                }
+            }
+            //Mostrar resultados de la Busqueda-----------------------------------------------------
             if(!busquedaEnProgreso && textoBuscar.text != ""){
                 if(prediccionesBusquedaMapa.isNotEmpty()){
                     Card(
                         modifier = modifier
-                            .padding(horizontal = 25.dp)
+                            .padding(horizontal = 25.dp, vertical = 5.dp)
                             .fillMaxWidth(),
                         colors = CardDefaults.cardColors(Color.Black),
                         border = CardDefaults.outlinedCardBorder()

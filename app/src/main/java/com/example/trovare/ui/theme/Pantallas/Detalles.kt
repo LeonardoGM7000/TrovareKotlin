@@ -1,6 +1,5 @@
 package com.example.trovare.ui.theme.Pantallas
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -34,13 +33,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -70,15 +67,13 @@ fun Detalles(
     navController: NavController
 ){
 
-    //var lugar by remember { mutableStateOf(Lugar("Nombre del lugar", 3.5, "", null, null)) }
-    var secondChecked by rememberSaveable { mutableStateOf(false) }
+    var favorito by rememberSaveable { mutableStateOf(false) }
     var nombre by rememberSaveable { mutableStateOf("") }
     var direccion by rememberSaveable { mutableStateOf("") }
     var numeroTelefono by rememberSaveable { mutableStateOf("") }
     var paginaWeb by rememberSaveable { mutableStateOf("") }
     var calificacion by rememberSaveable { mutableStateOf(-1.0) }
     var latLng by rememberSaveable { mutableStateOf(LatLng(0.0,0.0)) }
-    //var imagen by rememberSaveable { mutableStateOf(ImageBitmap(500,500)) }
 
 
     LaunchedEffect(key1 = Unit){
@@ -91,7 +86,6 @@ fun Detalles(
             numeroTelefono = {numeroTelefono = it?: ""},
             paginaWeb = {paginaWeb = it?: ""},
             latLng = {latLng = it?: LatLng(0.0,0.0) },
-            //imagen = {imagen = it}
         )
     }
 
@@ -132,7 +126,6 @@ fun Detalles(
                                 contentDescription = ""
                             )
                         }
-
                         Row(
                             modifier = modifier
                                 .padding(5.dp)
@@ -160,8 +153,8 @@ fun Detalles(
                                 shape = CircleShape
                             ) {
                                 IconToggleButton(
-                                    checked = secondChecked,
-                                    onCheckedChange = { checked -> secondChecked = checked },
+                                    checked = favorito,
+                                    onCheckedChange = { checked -> favorito = checked },
                                     colors = IconButtonDefaults.iconToggleButtonColors(
                                         containerColor = Color.White,
                                         checkedContainerColor = Color.White,
@@ -169,7 +162,7 @@ fun Detalles(
                                         checkedContentColor = Color.Red
                                     )
                                 ) {
-                                    if (secondChecked) {
+                                    if (favorito) {
                                         Icon(
                                             imageVector = Icons.Rounded.Favorite,
                                             contentDescription = ""

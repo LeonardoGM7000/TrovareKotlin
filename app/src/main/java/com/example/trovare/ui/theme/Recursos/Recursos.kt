@@ -198,6 +198,7 @@ fun BarraInferior(
     }
 }
 
+
 //No mostrar animación de feedback al interactuar con una tarjeta-----------------------------------
 class NoRippleInteractionSource : MutableInteractionSource {
 

@@ -51,7 +51,6 @@ import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv6
 import com.example.trovare.ui.theme.Trv8
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -199,7 +198,7 @@ fun InicioDeSesion(
                             .padding(horizontal = 25.dp)
                             .fillMaxWidth()
                             .clickable {
-                                //Recuperar contrasena++++++++++++++++++++++++
+                                navController.navigate(Pantalla.RecuperarContrasena.ruta)
                             },
                         text = "Recuperar contraseña",
                         textAlign = TextAlign.Right,
@@ -277,6 +276,4 @@ fun InicioDeSesion(
             }
         }
     }
-
-
 }
