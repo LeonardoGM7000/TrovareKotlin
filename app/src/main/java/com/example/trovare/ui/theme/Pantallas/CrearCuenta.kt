@@ -38,6 +38,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -78,7 +79,7 @@ import kotlinx.coroutines.launch
 fun CrearCuenta(
     modifier: Modifier = Modifier,
     navController: NavController
-) {
+){
     val auth = FirebaseAuth.getInstance()
 
     val firestore = Firebase.firestore
@@ -111,14 +112,38 @@ fun CrearCuenta(
         keyboardType = KeyboardType.Password,
         imeAction = ImeAction.Done
     )
+//funciones y variables para validar campos
+    var isErrorP by rememberSaveable { mutableStateOf(false) }
+    var isErrorL: Int by rememberSaveable { mutableIntStateOf(0) }
+    var isErrorLA: Int by rememberSaveable { mutableIntStateOf(0) }
+    val minimoPassword = 8
+    val maximoLetras = 30
 
-    var isError by rememberSaveable { mutableStateOf(false) }
-    val charLimit = 8
-
-    fun validate(text: String) {
-        Log.i("Erro tamaño",text.length.toString())
-        isError = text.length < charLimit
+    fun validarLetras(text: String) {
+        if(!(text.matches("[a-zA-ZÀ-ÿ ]*".toRegex()))){
+            Log.i("Error Caracter inválido",text)
+            isErrorL = 1
+        } else {
+            if(text.length > maximoLetras){
+                isErrorL = 2
+            }
+        }
     }
+    fun validarLetrasA(text: String) {
+        if(!(text.matches("[a-zA-ZÀ-ÿ ]*".toRegex()))){
+            Log.i("Error Caracter inválido",text)
+            isErrorLA = 1
+        } else {
+            if(text.length > maximoLetras){
+                isErrorLA = 2
+            }
+        }
+    }
+    fun validarPassword(text: String) {
+        Log.i("Error tamaño",text.length.toString())
+        isErrorP = !(text.matches("^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%^&*(),.?\":{}|<>])(?=.*[a-z]).{8,}\$".toRegex()))
+    }
+
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
@@ -163,7 +188,27 @@ fun CrearCuenta(
                             .fillMaxWidth()
                             .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
                         value = textoNombre,
-                        onValueChange = { textoNombre = it },
+                        onValueChange = { textoNombre = it
+                            isErrorL = 0
+                            validarLetras(textoNombre.text)
+                        },
+                        //parametro para mostrar eltipo de error
+                        supportingText = {
+                            isErrorL = isErrorL
+                            if(isErrorL == 1){
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Ingresa solo letras",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            } else if(isErrorL == 2){
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Máximo $maximoLetras carácteres",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
                         label = {
                             Text(
                                 text = "Nombre(s)",
@@ -189,7 +234,26 @@ fun CrearCuenta(
                             .fillMaxWidth()
                             .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
                         value = textoApellido,
-                        onValueChange = { textoApellido = it },
+                        onValueChange = { textoApellido = it
+                            isErrorLA = 0
+                            validarLetrasA(textoApellido.text)},
+                        //parametro para mostrar eltipo de error
+                        supportingText = {
+                            isErrorLA = isErrorLA
+                            if(isErrorLA == 1){
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Ingresa solo letras",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            } else if(isErrorLA == 2){
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Máximo $maximoLetras carácteres",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
                         label = {
                             Text(
                                 text = "Apellido(s)",
@@ -248,13 +312,14 @@ fun CrearCuenta(
                             .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
                         value = textoPassword,
                         onValueChange = { textoPassword = it
-                            validate(textoPassword.text)},
+                            validarPassword(textoPassword.text)},
+                        //parametro para mostrar eltipo de error
                         supportingText = {
-                            isError = isError
-                            if (isError) {
+                            isErrorP = isErrorP
+                            if (isErrorP) {
                                 Text(
                                     modifier = Modifier.fillMaxWidth(),
-                                    text = "Al menos $charLimit carácteres",
+                                    text = "Min $minimoPassword carácteres, una mayúscula, un número y carácter especial.",
                                     color = MaterialTheme.colorScheme.error
                                 )
                             }
@@ -295,7 +360,7 @@ fun CrearCuenta(
                     //Aceptar terminos y condiciones----------------------------------------------------
                     Row(
                         verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    ){
                         RadioButton(
                             modifier = modifier.padding(start = 25.dp),
                             selected = aceptarTyC,
@@ -305,26 +370,43 @@ fun CrearCuenta(
                         Text(
                             modifier = modifier.padding(end = 25.dp),
                             text = "Aceptar Términos y Condiciones",
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = TextAlign.Justify,
+                            style = MaterialTheme.typography.labelSmall,
                             textDecoration = TextDecoration.Underline,
                             color = Color.White
                         )
                     }
-                    Spacer(modifier = modifier.fillMaxHeight(0.7f))
+                    Spacer(modifier = modifier.fillMaxHeight(0.6f))
+
                     //Boton registro--------------------------------------------------------------------
                     TextButton(
                         enabled = aceptarTyC,
                         modifier = modifier
                             .fillMaxWidth()
+
                             .padding(start = 25.dp, end = 25.dp, bottom = 10.dp),
                         onClick = {
                             //Iniciar-------------------------------------------------------------------
-                            if(textoNombre.text.isBlank() || textoApellido.text.isBlank() || textoCorreo.text.isBlank() || textoPassword.text.isBlank()){
+                            if(textoNombre.text.isBlank() || textoApellido.text.isBlank() || textoCorreo.text.isBlank() || textoPassword.text.isBlank()) {
                                 Log.i("error", "campos imcompletos")
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
-                                        message = "Campos obligatorios no completados",
+                                        message = "Completa todos los campos",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            } else if(isErrorL>0) {
+                                Log.i("error campo nombre", textoNombre.text)
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Nombre(s) inválido(s)",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            } else if(isErrorLA>0){
+                                Log.i("error campo apellido", textoApellido.text)
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Apellidos(s) inválido(s)",
                                         duration = SnackbarDuration.Short
                                     )
                                 }
@@ -332,11 +414,11 @@ fun CrearCuenta(
                                 Log.i("error correo", textoCorreo.text)
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
-                                        message = "El correo no tiene una estructura valida",
+                                        message = "Correo inválido",
                                         duration = SnackbarDuration.Short
                                     )
                                 }
-                            } else if(textoPassword.text.length < charLimit) {
+                            } else if(isErrorP) {
                                 Log.i("error contraseña", textoPassword.text.length.toString())
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
@@ -345,43 +427,36 @@ fun CrearCuenta(
                                     )
                                 }
                             } else {
-                                    try {
-                                        var firebaseAuth = Firebase.auth
-                                        var user = firebaseAuth.currentUser!!
-                                        user.sendEmailVerification()
-                                        auth.createUserWithEmailAndPassword(
-                                            textoCorreo.text,
-                                            textoPassword.text
-                                        ).addOnCompleteListener { task ->
+                                auth.createUserWithEmailAndPassword(
+                                    textoCorreo.text,
+                                    textoPassword.text
+                                ).addOnCompleteListener { task ->
 
-                                            if (task.isSuccessful) {
-                                                scope.launch {
-                                                    snackbarHostState.showSnackbar(
-                                                        message = "Cuenta creada exitosamente, se necesita verificación de correo",
-                                                        duration = SnackbarDuration.Short
-                                                    )
-                                                    cuentaCreada = true
-                                                }
-                                                //Guardar datos firebase
-                                                saveUserData(
-                                                    textoNombre.text,
-                                                    textoCorreo.text,
-                                                    firestore
-                                                )
-                                            } else {
-                                                scope.launch {
-                                                    snackbarHostState.showSnackbar(
-                                                        message = "El correo ingresado ya está asociado a otra cuenta",
-                                                        duration = SnackbarDuration.Short
-                                                    )
-                                                }
-                                            }
+                                    if (task.isSuccessful) {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = "Cuenta creada exitosamente, se necesita verificación de correo",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                            cuentaCreada = true
                                         }
-                                    } catch(ex:Exception){
-
-                                        Log.d("Login", "Error en la conexión de la base de datos")
-
+                                        //Guardar datos firebase
+                                        saveUserData(
+                                            textoNombre.text,
+                                            textoCorreo.text,
+                                            firestore
+                                        )
+                                        val user = FirebaseAuth.getInstance().currentUser
+                                        user?.sendEmailVerification()
+                                    } else {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = "El correo ingresado ya está asociado a otra cuenta",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
                                     }
+                                }
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
@@ -401,12 +476,12 @@ fun CrearCuenta(
                             }
                         }
                     }
+
                 }
             }
         }
     }
 }
-
 //Guardar datos del usuario en firestore
 private fun saveUserData(
     textoNombre: String,
