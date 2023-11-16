@@ -1,7 +1,5 @@
-package com.example.trovare.ui.theme.Pantallas
+package com.example.trovare.ui.theme.Pantallas.Ingreso
 
-import android.util.Log
-import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -25,10 +23,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,11 +30,8 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -54,14 +45,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.trovare.Pantalla
 import com.example.trovare.R
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv6
 import com.example.trovare.ui.theme.Trv8
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import android.util.Log
+import android.util.Patterns
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import com.example.trovare.Pantalla
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -231,6 +228,7 @@ fun InicioDeSesion(
                             .fillMaxWidth()
                             .padding(start = 25.dp, end = 25.dp, bottom = 10.dp),
                         onClick = {
+
                             if(textoCorreo.text.isBlank() || textoPasswrod.text.isBlank()){
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
@@ -239,49 +237,51 @@ fun InicioDeSesion(
                                     )
                                 }
                             }else if(!Patterns.EMAIL_ADDRESS.matcher(textoCorreo.text).matches()){
-                                Log.i("error correo", textoCorreo.text)
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
-                                        message = "El correo no tiene una estructura valida",
+                                        message = "El correo no tiene una estructura válida",
                                         duration = SnackbarDuration.Short
                                     )
                                 }
-                            }
-                            else {
+                            }else{
                                 try{
+                                    val user = FirebaseAuth.getInstance().currentUser
+
                                     auth.signInWithEmailAndPassword(textoCorreo.text, textoPasswrod.text)
                                         .addOnCompleteListener{ task ->
-                                            if(task.isSuccessful){
 
-                                                scope.launch {
-                                                    snackbarHostState.showSnackbar(
-                                                        message = "Iniciando Sesión...",
-                                                        duration = SnackbarDuration.Short
-                                                    )
-                                                }
-                                                navController.navigate(Pantalla.Inicio.ruta){
-                                                    popUpTo(navController.graph.id){
-                                                        inclusive = true
+                                            if(task.isSuccessful){
+                                                if (user?.isEmailVerified == false){
+                                                    scope.launch {
+                                                        snackbarHostState.showSnackbar(
+                                                            message = "Correo no verificado. Verifica tu correo electrónico.",
+                                                            duration = SnackbarDuration.Short
+                                                        )
+                                                    }
+                                                }else{
+                                                    scope.launch {
+                                                        snackbarHostState.showSnackbar(
+                                                            message = "Iniciando Sesión...",
+                                                            duration = SnackbarDuration.Short
+                                                        )
+                                                    }
+                                                    navController.navigate(Pantalla.Inicio.ruta){
+                                                        popUpTo(navController.graph.id){
+                                                            inclusive = true
+                                                        }
                                                     }
                                                 }
                                             }else{
-                                                    scope.launch {
-                                                        snackbarHostState.showSnackbar(
-                                                            message = "Correo o contraseña incorrectos",
-                                                            duration = SnackbarDuration.Short
-                                                        )
-
+                                                scope.launch {
+                                                    snackbarHostState.showSnackbar(
+                                                        message = "Correo o contraseña incorrectos",
+                                                        duration = SnackbarDuration.Short
+                                                    )
                                                 }
                                             }
                                         }
                                 }catch(ex:Exception){
                                     Log.d("Login", "Error en la conexión de la base de datos")
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            message = "Error de conexión",
-                                            duration = SnackbarDuration.Short
-                                        )
-                                    }
                                 }
                             }
                         },
@@ -296,6 +296,4 @@ fun InicioDeSesion(
             }
         }
     }
-
-
 }

@@ -24,7 +24,7 @@ import com.example.trovare.ui.theme.Pantallas.EditarPerfil
 import com.example.trovare.ui.theme.Pantallas.EditarPreguntas
 import com.example.trovare.ui.theme.Pantallas.EliminarComentarios
 import com.example.trovare.ui.theme.Pantallas.EliminarCuentas
-import com.example.trovare.ui.theme.Pantallas.InicioDeSesion
+import com.example.trovare.ui.theme.Pantallas.Ingreso.InicioDeSesion
 import com.example.trovare.ui.theme.Pantallas.PerfilConfiguracion
 import com.example.trovare.ui.theme.Pantallas.PerfilInicio
 import com.example.trovare.ui.theme.Pantallas.PreguntasAdmin
