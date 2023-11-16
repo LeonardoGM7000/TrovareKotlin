@@ -16,12 +16,22 @@ data class Places (
     @SerializedName("id" ) var id : String,
     @SerializedName("formattedAddress" ) var formattedAddress : String?,
     @SerializedName("displayName" ) var displayName : DisplayName?,
-
 )
 
 data class DisplayName(
     @SerializedName("text" ) var text : String?,
     @SerializedName("languageCode" ) var languageCode : String?
 )
+
+//Lugares cercanos----------------------------------------------------------------------------------
+data class PlacesNearbyClass (
+    @SerializedName("places" ) var placesNearby : List<PlacesNearby?> = arrayListOf()
+)
+
+data class PlacesNearby (
+    @SerializedName("id" ) var id : String,
+    //@SerializedName("displayName" ) var displayName : DisplayName?,
+)
+
 
 

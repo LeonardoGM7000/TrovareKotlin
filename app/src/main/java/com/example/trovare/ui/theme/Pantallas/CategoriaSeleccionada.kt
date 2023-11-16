@@ -1,5 +1,6 @@
 package com.example.trovare.ui.theme.Pantallas
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,15 +12,18 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
+import com.example.trovare.Api.rawJSONLugarCercano
 import com.example.trovare.Data.Categoria
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
+import com.google.android.gms.maps.model.LatLng
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,6 +33,12 @@ fun CategoriaSeleccionada(
     navController: NavController,
     modifier: Modifier = Modifier
 ){
+
+    LaunchedEffect(key1 = Unit){
+        Log.e("pretty", "test")
+        rawJSONLugarCercano()
+    }
+
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)

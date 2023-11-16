@@ -11,5 +11,7 @@ data class TrovareEstadoUi(
     val unidad: String = ConfiguracionDataSource.Unidades[0],
     val moneda: String = ConfiguracionDataSource.Monedas[0],
     val resultoUtil: String = SoporteDatasource.ResultoUtil[0],
+
+
 )
 
