@@ -24,13 +24,15 @@ data class DisplayName(
 )
 
 //Lugares cercanos----------------------------------------------------------------------------------
-data class PlacesNearbyClass (
-    @SerializedName("places" ) var placesNearby : List<PlacesNearby?> = arrayListOf()
+data class NearbyPlacesClass (
+    @SerializedName("places" ) var placesNearby : List<NearbyPlaces?> = arrayListOf()
 )
 
-data class PlacesNearby (
+data class NearbyPlaces (
     @SerializedName("id" ) var id : String,
-    //@SerializedName("displayName" ) var displayName : DisplayName?,
+    @SerializedName("displayName" ) var displayName : DisplayName?,
+    @SerializedName("shortFormattedAddress" ) var shortFormattedAddress : String?,
+
 )
 
 

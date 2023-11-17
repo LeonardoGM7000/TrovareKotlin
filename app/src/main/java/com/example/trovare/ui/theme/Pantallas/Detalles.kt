@@ -30,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -315,7 +316,6 @@ fun Detalles(
                             )
                         }
                     }
-
                 }
             }
             item {
@@ -331,16 +331,11 @@ fun Detalles(
                     style = MaterialTheme.typography.displaySmall
                 )
             }
-            item {
-
-                /*
-                Image(
-                    bitmap = imagen,
-                    contentDescription = null, // Puedes proporcionar una descripción si es necesario
-                    modifier = Modifier.fillMaxSize() // Ajusta el tamaño de la imagen según sea necesario
-                )*/
-
-            }
+        }
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.reiniciarImagen()
         }
     }
 }

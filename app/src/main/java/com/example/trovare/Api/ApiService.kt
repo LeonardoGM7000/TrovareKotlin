@@ -1,9 +1,10 @@
 package com.example.trovare.Api
 
 import android.util.Log
+import com.example.trovare.Data.NearbyPlaces
+import com.example.trovare.Data.NearbyPlacesClass
 import com.example.trovare.Data.Places
 import com.example.trovare.Data.PlacesClass
-import com.example.trovare.Data.PlacesNearbyClass
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
@@ -15,6 +16,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
+import org.json.JSONArray
 import org.json.JSONObject
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -96,35 +98,37 @@ fun rawJSON(
             }
         }
     }
-
 }
 //Buscar lugares cercanos por ubicacion-------------------------------------------------------------
 
 //Radio de busqueda-----------------------------
-data class Circle(
-    val center: Center,
-    val radius: Double
-)
-data class Center(
-    val latitude: Double,
-    val longitude: Double,
-)
-
-
-
 interface APIServiceBuscarPorUbicacion {
     @Headers(
         "Content-Type: application/json",
         "X-Goog-Api-Key: AIzaSyBpmAJRF6PsRJVNm6oq1qmfXbdaBjNA5mQ",
-        "X-Goog-FieldMask: places.displayName,places.id",
+        "X-Goog-FieldMask: places.shortFormattedAddress,places.displayName,places.id",
 
     )
     @POST("/v1/places:searchNearby")
     suspend fun createPlaceNearby(@Body requestBody: RequestBody): Response<ResponseBody>//cambiar import de response?
 }
 
-fun rawJSONLugarCercano() {
+fun rawJSONLugarCercano(
+    filtro: String,
+    recuperarResultados: MutableList<NearbyPlaces>,
+    recuperarId: MutableList<String>
+) {
 
+    fun traducirOpcion(opcion: String): String {
+        return when (opcion) {
+            "Restaurantes" -> "restaurant"
+            "Atracciones" -> "tourist_attraction"
+            "Museos" -> "museum"
+            "Parques" -> "park"
+            "Hoteles" -> "hotel"
+            else -> "tourist_attraction"
+        }
+    }
 
     // Crear Retrofit
     val retrofit = Retrofit.Builder()
@@ -136,18 +140,24 @@ fun rawJSONLugarCercano() {
 
     // Crear JSON usando JSONObject
 
+    val jsonObject = JSONObject()
+    jsonObject.put("includedTypes", JSONArray().put(traducirOpcion(filtro)))
+    jsonObject.put("maxResultCount", 5)
+    jsonObject.put("languageCode", "es")
+
+    val locationRestriction = JSONObject()
+    val circle = JSONObject()
     val center = JSONObject()
+
     center.put("latitude", 19.504507)
     center.put("longitude", -99.147314)
 
-    val circle = JSONObject()
     circle.put("center", center)
-    circle.put("radius", 500.0)
+    circle.put("radius", 5000.0)
 
-    val jsonObject = JSONObject()
-    jsonObject.put("includedTypes", circle)
-    jsonObject.put("maxResultCount", 5)
-    jsonObject.put("locationRestriction", circle)
+    locationRestriction.put("circle", circle)
+
+    jsonObject.put("locationRestriction", locationRestriction)
 
 
 
@@ -160,9 +170,9 @@ fun rawJSONLugarCercano() {
     //recuperarResultados.clear()
 
     CoroutineScope(Dispatchers.IO).launch {
-        // Hacer el request POST y obtener respuesta
+        //Hacer el request POST y obtener respuesta
         val response = service.createPlaceNearby(requestBody)
-
+        Log.e("ultratest", "primerisismo")
         withContext(Dispatchers.Main) {
             if (response.isSuccessful) {
 
@@ -178,16 +188,15 @@ fun rawJSONLugarCercano() {
                 Log.d("Pretty Printed JSON :", prettyJson)
 
                 val gson1 = Gson()
-                var mUser = gson1.fromJson(prettyJson, PlacesNearbyClass::class.java)
+                var mUser = gson1.fromJson(prettyJson, NearbyPlacesClass::class.java)
                 mUser.placesNearby.forEach { lugar ->
                     if (lugar != null) {
-                        //recuperarResultados.add(Places(id = lugar.id, formattedAddress = lugar.formattedAddress, displayName = lugar.displayName))
+                        recuperarResultados.add(NearbyPlaces(id = lugar.id, displayName = lugar.displayName, shortFormattedAddress = lugar.shortFormattedAddress))
+                        recuperarId.add(lugar.id)
                     } else {
                         //manejar error no se eonctraron resultados
                     }
                 }
-
-
             } else {
                 Log.e("RETROFIT_ERROR", response.code().toString())
             }

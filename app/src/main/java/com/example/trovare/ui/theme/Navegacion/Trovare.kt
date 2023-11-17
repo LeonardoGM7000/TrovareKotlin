@@ -210,6 +210,8 @@ fun Trovare(
         ) {
             CategoriaSeleccionada(
                 categoria = it.arguments?.getString("categoria") ?: "Atracciones",
+                viewModel = viewModel,
+                placesClient = placesClient,
                 navController = navController
             )
         }
