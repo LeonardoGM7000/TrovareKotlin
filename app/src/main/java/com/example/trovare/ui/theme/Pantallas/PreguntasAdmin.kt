@@ -287,7 +287,10 @@ fun PreguntasAdmin(
                     modifier = Modifier
                         .fillMaxHeight()
                         .background(Trv1)
+                        .padding(bottom = 16.dp)
                 ) {
+                    TituloAdmin(titulo = "Agregar pregunta")
+                    Divisor()
                     OutlinedTextField(
                         modifier = modifier
                             .fillMaxWidth()
