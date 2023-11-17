@@ -44,6 +44,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -51,14 +54,17 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
@@ -85,6 +91,8 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 data class Question(val pregunta: String = "", val respuesta: String = "", val id: String = "")
@@ -99,6 +107,7 @@ fun PreguntasAdmin(
     val firestore: FirebaseFirestore by lazy { Firebase.firestore }
     var questions by remember { mutableStateOf(emptyList<Question>()) }
     var isAddingNewQuestion by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
 
     var textoPregunta by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
@@ -111,6 +120,12 @@ fun PreguntasAdmin(
 
     var isLoading by remember { mutableStateOf(true) }
 
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    var isErrorL: Int by rememberSaveable { mutableIntStateOf(0) }
+    val maximoLetras = 30
+
     LaunchedEffect(Unit) {
         Log.i("FaqScreen", "LaunchedEffect: Obtaining questions from Firestore")
         try {
@@ -119,14 +134,29 @@ fun PreguntasAdmin(
             Log.i("FaqScreen", "Questions obtained successfully: $questions")
         } catch (e: Exception) {
             Log.i("FaqScreen", "Error obtaining questions from Firestore", e)
-        }finally {
+        } finally {
             isLoading = false
+        }
+    }
+
+    fun validarLetras(text: String) {
+        if (!(text.matches("[a-zA-ZÀ-ÿ ]*".toRegex()))) {
+            Log.i("Error Caracter inválido", text)
+            isErrorL = 1
+        } else {
+            if (text.length > maximoLetras) {
+                isErrorL = 2
+            }
         }
     }
 
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
+        }, snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState
+            )
         },
         bottomBar = {
             Row(
@@ -134,22 +164,24 @@ fun PreguntasAdmin(
                     .background(Trv1)
                     .fillMaxWidth()
             ) {
-                FloatingActionButton(
-                    onClick = {
-                        isAddingNewQuestion = !isAddingNewQuestion
-                    },
-                    containerColor = Trv4,
-                    modifier = Modifier
-                        .padding(start = 300.dp, bottom = 50.dp)
-                        .size(60.dp)
-                ) {
-                    Icon(
-                        imageVector = if (isAddingNewQuestion) Icons.Filled.Cancel else Icons.Filled.Add,
-                        contentDescription = "",
-                        tint = Trv5,
+                if (!isLoading) {
+                    FloatingActionButton(
+                        onClick = {
+                            isAddingNewQuestion = !isAddingNewQuestion
+                        },
+                        containerColor = Trv4,
                         modifier = Modifier
-                            .size(40.dp)
-                    )
+                            .padding(start = 300.dp, bottom = 50.dp)
+                            .size(60.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isAddingNewQuestion) Icons.Filled.Cancel else Icons.Filled.Add,
+                            contentDescription = "",
+                            tint = Trv5,
+                            modifier = Modifier
+                                .size(40.dp)
+                        )
+                    }
                 }
             }
         }
@@ -160,10 +192,11 @@ fun PreguntasAdmin(
                 .padding(it),
             color = Trv1
         ) {
-            Column ( modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp) // Añadir esta línea para el desplazamiento vertical
-                ){
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp) // Añadir esta línea para el desplazamiento vertical
+            ) {
                 if (isLoading) {
                     // Muestra el CircularProgressIndicator mientras se cargan las preguntas
                     Box(
@@ -176,11 +209,13 @@ fun PreguntasAdmin(
                             color = Color.White
                         )
                     }
-                } else{
-                    LazyColumn(modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .padding(bottom = 16.dp)) {
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(bottom = 16.dp)
+                    ) {
                         item {
                             TituloAdmin(titulo = "EDITAR PREGUNTAS")
                         }
@@ -193,10 +228,12 @@ fun PreguntasAdmin(
                             TarjetaPreguntas(
                                 question = question,
                                 onDeleteClick = {
+
                                     // Eliminar la pregunta de Firestore
                                     firestore.collection("FAQS").document(question.id)
                                         .delete()
                                     questions = questions.filterNot { it.id == question.id }
+
                                 },
                                 modifier = modifier.padding(top = 8.dp),
                                 navController = navController
@@ -209,13 +246,17 @@ fun PreguntasAdmin(
 
                 if (isAddingNewQuestion) {
                     // Campos de "Nueva Pregunta" y "Nueva Respuesta"
-                    Column (modifier = Modifier.fillMaxHeight()){
+                    Column(modifier = Modifier.fillMaxHeight()) {
                         OutlinedTextField(
                             modifier = modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 15.dp, start = 50.dp, end = 50.dp),
                             value = textoPregunta,
-                            onValueChange = { textoPregunta = it },
+                            onValueChange = {
+                                textoPregunta = it
+                                isErrorL = 0
+                                validarLetras(textoPregunta.text)
+                            },
                             label = {
                                 Text(
                                     text = "Pregunta",
@@ -234,6 +275,23 @@ fun PreguntasAdmin(
                             ),
                             singleLine = true,
                             keyboardOptions = keyboardOptionsTexto,
+                            //parametro para mostrar eltipo de error
+                            supportingText = {
+                                isErrorL = isErrorL
+                                if (isErrorL == 1) {
+                                    Text(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        text = "Ingresa solo letras",
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                } else if (isErrorL == 2) {
+                                    Text(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        text = "Máximo $maximoLetras carácteres",
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            },
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
@@ -270,9 +328,28 @@ fun PreguntasAdmin(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.End
                         ) {
-                            Button(
+                            TextButton(
+                                modifier = modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 25.dp, end = 25.dp, bottom = 10.dp),
                                 onClick = {
-                                    if (textoPregunta.text.isNotBlank() && textoPregunta.text.isNotBlank()) {
+                                    focusManager.clearFocus()
+                                    if (textoPregunta.text.isBlank() || textoRespuesta.text.isBlank()) {
+
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = "Campos obligatorios no completados",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
+                                    } else if (isErrorL > 0) {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = "Pregunta inválida",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
+                                    } else {
                                         // Agregar nueva pregunta a Firestore
                                         val newQuestionDocument =
                                             firestore.collection("FAQS").document()
@@ -290,12 +367,20 @@ fun PreguntasAdmin(
                                         )
                                         textoPregunta = TextFieldValue("", TextRange(0, 0))
                                         textoRespuesta = TextFieldValue("", TextRange(0, 0))
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = "Pregunta añadida exitosamente",
+                                                duration = SnackbarDuration.Short
+                                            )
+
+                                        }
                                         isAddingNewQuestion = false
                                     }
                                 },
-                                modifier = Modifier
-                                    .heightIn(min = 56.dp)
-                                    .padding(start = 8.dp, end = 50.dp)
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Trv6,
+                                    contentColor = Color.White
+                                )
                             ) {
                                 Text("Agregar pregunta")
                             }
@@ -325,6 +410,8 @@ fun TarjetaPreguntas(
             )
         )
 
+
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -344,7 +431,7 @@ fun TarjetaPreguntas(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { expanded = !expanded },
-                        verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     modifier = Modifier
@@ -353,7 +440,8 @@ fun TarjetaPreguntas(
                     contentDescription = "",
                     tint = Color.White,
                 )
-                Box(contentAlignment = Alignment.CenterStart,
+                Box(
+                    contentAlignment = Alignment.CenterStart,
                     modifier = Modifier
                         .fillMaxWidth(0.64f)
                 ) {
@@ -401,7 +489,7 @@ fun TarjetaPreguntas(
             Spacer(modifier = Modifier.height(8.dp))
 
             AnimatedVisibility(visible = expanded) {
-                if(expanded){
+                if (expanded) {
                     Text(
                         modifier = modifier.padding(start = 20.dp, end = 20.dp, bottom = 15.dp),
                         text = question.respuesta,

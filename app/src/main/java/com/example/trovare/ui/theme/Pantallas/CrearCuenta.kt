@@ -112,7 +112,7 @@ fun CrearCuenta(
         keyboardType = KeyboardType.Password,
         imeAction = ImeAction.Done
     )
-//funciones y variables para validar campos
+    //funciones y variables para validar campos
     var isErrorP by rememberSaveable { mutableStateOf(false) }
     var isErrorL: Int by rememberSaveable { mutableIntStateOf(0) }
     var isErrorLA: Int by rememberSaveable { mutableIntStateOf(0) }
@@ -390,7 +390,7 @@ fun CrearCuenta(
                                 Log.i("error", "campos imcompletos")
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
-                                        message = "Completa todos los campos",
+                                        message = "Campos obligatorios no completados",
                                         duration = SnackbarDuration.Short
                                     )
                                 }

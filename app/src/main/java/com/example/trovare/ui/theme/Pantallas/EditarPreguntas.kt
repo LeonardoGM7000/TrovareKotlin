@@ -15,6 +15,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -37,6 +40,7 @@ import com.example.trovare.ui.theme.Trv6
 import com.example.trovare.ui.theme.Trv7
 import com.example.trovare.ui.theme.Trv8
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -61,6 +65,9 @@ fun EditarPreguntas(
     val keyboardOptionsTexto: KeyboardOptions =
         KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done)
 
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
     // Utilizar LaunchedEffect para cargar la pregunta una vez al ingresar a la pantalla
     LaunchedEffect(preguntaId) {
         // Simulación de carga de datos desde Firestore
@@ -78,6 +85,7 @@ fun EditarPreguntas(
 
     LaunchedEffect(guardadoExitoso) {
         if (guardadoExitoso) {
+            delay(1000)
             try {
                 // Lógica de guardado en Firestore
                 savePreguntaToFirestore(preguntaId!!, textoPregunta.text, textoRespuesta.text)
@@ -88,6 +96,7 @@ fun EditarPreguntas(
                 // Navegar de vuelta a la pantalla anterior
                 navController.popBackStack()
             } catch (e: Exception) {
+                Log.i("guardadoExitoso", e.toString())
             }
         }
     }
@@ -95,6 +104,9 @@ fun EditarPreguntas(
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
+        },snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState)
         },
         bottomBar = {
             Column(
@@ -104,11 +116,16 @@ fun EditarPreguntas(
             ) {
                 Button(
                     onClick = {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = "Pregunta guardada exitosamente",
+                                duration = SnackbarDuration.Short
+                            )
+                        }
                         // Guardar la pregunta editada en Firestore
                         guardadoExitoso = true
-
                         // Navegar de vuelta a la pantalla anterior
-                        navController.popBackStack()
+                        //navController.popBackStack()
                     },
                     modifier = Modifier
                         .padding(start = 250.dp, bottom = 50.dp)
