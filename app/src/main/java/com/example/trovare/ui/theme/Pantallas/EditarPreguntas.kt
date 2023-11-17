@@ -56,6 +56,8 @@ fun EditarPreguntas(
     var textoRespuesta by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
+    var isErrorL: Int by rememberSaveable { mutableIntStateOf(0) }
+    val maximoLetras = 30
 
     // Estado para manejar la carga de la pregunta desde Firestore
     var preguntaActual by remember(preguntaId) { mutableStateOf("") }
@@ -67,6 +69,17 @@ fun EditarPreguntas(
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    fun validarLetras(text: String) {
+        if (!(text.matches("[a-zA-ZÀ-ÿ ]*".toRegex()))) {
+            Log.i("Error Caracter inválido", text)
+            isErrorL = 1
+        } else {
+            if (text.length > maximoLetras) {
+                isErrorL = 2
+            }
+        }
+    }
 
     // Utilizar LaunchedEffect para cargar la pregunta una vez al ingresar a la pantalla
     LaunchedEffect(preguntaId) {
@@ -116,16 +129,25 @@ fun EditarPreguntas(
             ) {
                 Button(
                     onClick = {
-                        scope.launch {
-                            snackbarHostState.showSnackbar(
-                                message = "Pregunta guardada exitosamente",
-                                duration = SnackbarDuration.Short
-                            )
+                        if(textoPregunta.text.isBlank() || textoRespuesta.text.isBlank()){
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "Campos obligatorios no completados",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                        }else{
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "Pregunta guardada exitosamente",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                            // Guardar la pregunta editada en Firestore
+                            guardadoExitoso = true
+                            // Navegar de vuelta a la pantalla anterior
+                            //navController.popBackStack()
                         }
-                        // Guardar la pregunta editada en Firestore
-                        guardadoExitoso = true
-                        // Navegar de vuelta a la pantalla anterior
-                        //navController.popBackStack()
                     },
                     modifier = Modifier
                         .padding(start = 250.dp, bottom = 50.dp)
@@ -156,7 +178,11 @@ fun EditarPreguntas(
                             .fillMaxWidth()
                             .padding(bottom = 15.dp, start = 50.dp, end = 50.dp),
                         value = textoPregunta,
-                        onValueChange = { textoPregunta = it },
+                        onValueChange = {
+                                            textoPregunta = it
+                                            isErrorL = 0
+                                            validarLetras(textoPregunta.text)
+                                        },
                         label = {
                             Text(
                                 text = "Pregunta",
@@ -175,6 +201,22 @@ fun EditarPreguntas(
                         ),
                         singleLine = true,
                         keyboardOptions = keyboardOptionsTexto,
+                        supportingText = {
+                            isErrorL = isErrorL
+                            if (isErrorL == 1) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Ingresa solo letras",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            } else if (isErrorL == 2) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Máximo $maximoLetras carácteres",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
                     )
                     OutlinedTextField(
                         modifier = modifier
@@ -239,5 +281,6 @@ suspend fun savePreguntaToFirestore(
             )
         ).await()
     } catch (e: Exception) {
+        Log.i("savePregunta",e.toString())
     }
 }

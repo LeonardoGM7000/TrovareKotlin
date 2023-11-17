@@ -119,6 +119,7 @@ fun PreguntasAdmin(
         KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done)
 
     var isLoading by remember { mutableStateOf(true) }
+    var borrarPregunta by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -136,6 +137,17 @@ fun PreguntasAdmin(
             Log.i("FaqScreen", "Error obtaining questions from Firestore", e)
         } finally {
             isLoading = false
+        }
+    }
+    LaunchedEffect(borrarPregunta){
+        if(borrarPregunta){
+            delay(1000)
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = "Pregunta eliminada exitosamente",
+                    duration = SnackbarDuration.Short
+                )
+            }
         }
     }
 
@@ -228,12 +240,11 @@ fun PreguntasAdmin(
                             TarjetaPreguntas(
                                 question = question,
                                 onDeleteClick = {
-
                                     // Eliminar la pregunta de Firestore
                                     firestore.collection("FAQS").document(question.id)
                                         .delete()
                                     questions = questions.filterNot { it.id == question.id }
-
+                                    borrarPregunta=true
                                 },
                                 modifier = modifier.padding(top = 8.dp),
                                 navController = navController
@@ -335,7 +346,6 @@ fun PreguntasAdmin(
                                 onClick = {
                                     focusManager.clearFocus()
                                     if (textoPregunta.text.isBlank() || textoRespuesta.text.isBlank()) {
-
                                         scope.launch {
                                             snackbarHostState.showSnackbar(
                                                 message = "Campos obligatorios no completados",
@@ -409,9 +419,6 @@ fun TarjetaPreguntas(
                 stiffness = Spring.StiffnessMediumLow,
             )
         )
-
-
-
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -477,7 +484,6 @@ fun TarjetaPreguntas(
                 alRechazar = { mostrarBorrarCuenta = false },
                 alConfirmar = { //Necesita eliminar la pregunta
                     onDeleteClick()
-                    navController.navigate(Pantalla.PreguntasAdmin.ruta)
                 },
                 textoConfirmar = "Borrar Pregunta",
                 titulo = "Borrar Pregunta",
