@@ -46,6 +46,11 @@ val Typography = Typography(
                 fontWeight = FontWeight.Light,
                 fontSize = 20.sp
         ),
+        labelMedium = TextStyle(
+                fontFamily = Inder,
+                fontWeight = FontWeight.Normal,
+                fontSize = 20.sp
+        ),
         labelSmall = TextStyle(
                 fontFamily = Inder,
                 fontWeight = FontWeight.Normal,

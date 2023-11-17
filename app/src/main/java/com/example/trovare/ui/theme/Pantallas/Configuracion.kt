@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,7 +33,6 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,21 +49,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.trovare.PantallasTrovare
-import com.example.trovare.ui.theme.Data.Configuracion
-import com.example.trovare.ui.theme.Data.Usuario
-import com.example.trovare.ui.theme.Data.listaDeConfiguracion
-import com.example.trovare.ui.theme.Data.usuarioPrueba
-import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
+import com.example.trovare.ui.theme.Navegacion.Pantalla
+import com.example.trovare.Data.Configuracion
+import com.example.trovare.Data.Usuario
+import com.example.trovare.Data.listaDeConfiguracion
+import com.example.trovare.Data.usuarioPrueba
+import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
 import com.example.trovare.ui.theme.Recursos.VentanaDeAlerta
-import com.example.trovare.ui.theme.TrovareTheme
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv6
@@ -142,12 +137,12 @@ fun Configuracion(
                     TarjetaNormal(
                         titulo = "Soporte",
                         icono = Icons.Filled.Help,
-                        accion = {navController.navigate(PantallasTrovare.Soporte.name)}
+                        accion = {navController.navigate(Pantalla.Soporte.ruta)}
                     )
                     TarjetaNormal(
                         titulo = "FAQs",
                         icono = Icons.Filled.Info,
-                        accion = {navController.navigate(PantallasTrovare.FAQS.name)}
+                        accion = {navController.navigate(Pantalla.FAQS.ruta)}
                     )
                     Divisor()
                     TarjetaNormal(
@@ -164,7 +159,13 @@ fun Configuracion(
                     VentanaDeAlerta(
                         mostrar = mostrarCerrarSesion,
                         alRechazar = {mostrarCerrarSesion = false},
-                        alConfirmar = {},
+                        alConfirmar = {
+                            navController.navigate(Pantalla.Bienvenida.ruta){
+                                popUpTo(navController.graph.id){
+                                    inclusive = true
+                                }
+                            }
+                        },
                         textoConfirmar = "Cerrar Sesión",
                         titulo = "Cerrar Sesión",
                         texto = "¿Quiéres cerrar sesión en Trovare?",
@@ -173,26 +174,30 @@ fun Configuracion(
                     VentanaDeAlerta(
                         mostrar = mostrarBorrarCuenta,
                         alRechazar = {mostrarBorrarCuenta = false},
-                        alConfirmar = {},
+                        alConfirmar = {
+                            navController.navigate(Pantalla.Bienvenida.ruta){
+                                popUpTo(navController.graph.id){
+                                    inclusive = true
+                                }
+                            }
+                        },
                         textoConfirmar = "Borrar Cuenta",
                         titulo = "Borrar Cuenta",
                         texto = "¿Quiéres borrar tu cuenta de Trovare? No se guardarán tus datos y tendrás que crear una nueva si es que deseas usar la aplicación",
                         icono = Icons.Filled.DeleteForever,
                         colorConfirmar = Color.Red
                     )
-
                 }
             }
         }
-
     }
 }
 
 @Composable
 fun TarjetaPerfil(
-        modifier: Modifier = Modifier,
-        usuario: Usuario = usuarioPrueba,
-        navController: NavController,
+    modifier: Modifier = Modifier,
+    usuario: Usuario = usuarioPrueba,
+    navController: NavController,
     ){
     Card(
         modifier = modifier
@@ -232,7 +237,7 @@ fun TarjetaPerfil(
                 )
                 Text(
                     modifier = modifier
-                        .clickable { navController.navigate(PantallasTrovare.Perfil.name) },
+                        .clickable { navController.navigate(Pantalla.PerfilConfiguracion.ruta) },
                     text = "Ver Perfil",
                     style = MaterialTheme.typography.bodySmall,
                     textDecoration = TextDecoration.Underline,

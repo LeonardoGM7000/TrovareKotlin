@@ -13,26 +13,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Attractions
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Hotel
-import androidx.compose.material.icons.filled.Museum
-import androidx.compose.material.icons.filled.Park
-import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.rounded.TravelExplore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -43,30 +32,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.navigation.NavController
+import androidx.navigation.navArgument
 import coil.compose.AsyncImage
-import com.example.trovare.PantallasTrovare
+import com.example.trovare.Data.Categoria
+import com.example.trovare.Data.categorias
+import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.R
-import com.example.trovare.ui.theme.Data.listaDeExplorar
+import com.example.trovare.Data.listaDeExplorar
 import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
 import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
-import com.example.trovare.ui.theme.TrovareTheme
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
-import com.example.trovare.ui.theme.Trv4
-import com.example.trovare.ui.theme.Trv5
 import kotlin.math.absoluteValue
 
 
@@ -76,17 +58,12 @@ fun Inicio(
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
-
     val pagerState = rememberPagerState(initialPage = 1) { listaDeExplorar.size }
 
     Scaffold(
         topBar = {
             BarraSuperiorConfig(navController)
         },
-        bottomBar = {
-            MenuInferior()
-        },
-
     ) { it ->
         Surface(
             modifier = modifier
@@ -106,7 +83,7 @@ fun Inicio(
                         .clickable(
                             indication = null,
                             interactionSource = NoRippleInteractionSource()
-                        ) { navController.navigate(PantallasTrovare.Buscar.name) },
+                        ) { navController.navigate(Pantalla.Buscar.ruta) },
                     colors = CardDefaults.cardColors(Color.Black),
                     border = CardDefaults.outlinedCardBorder()
                 ){
@@ -127,32 +104,28 @@ fun Inicio(
 
                 }
                 //Categorías------------------------------------------------------------------------
-
-
-
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         modifier = modifier
                             .fillMaxWidth()
-                            .padding(bottom = 15.dp, top = 15.dp),
+                            .padding(horizontal = 25.dp),
                         textAlign = TextAlign.Center,
                         color = Color.White,
                         text = "Categorías",
                         style = MaterialTheme.typography.displaySmall
                     )
-                    TarjetaCategorias()
-                    Text(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .padding(top = 15.dp, bottom = 15.dp),
-                        textAlign = TextAlign.Center,
-                        color = Color.White,
-                        text = "Explora más sitios",
-                        style = MaterialTheme.typography.displaySmall
-                    )
+                    TarjetaCategorias(navController = navController)
                 }
-
                 //Carrusel-explorar-mas-sitios------------------------------------------------------
+                Text(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 15.dp),
+                    textAlign = TextAlign.Center,
+                    color = Color.White,
+                    text = "Explora más sitios",
+                    style = MaterialTheme.typography.displaySmall
+                )
                 Row (
                     modifier = modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -229,160 +202,89 @@ fun Inicio(
                                                         modifier = modifier.fillMaxWidth(),
                                                         text = ("${listaDeExplorar[pagina].lugar}"),
                                                         textAlign = TextAlign.Center,
-
                                                     )
                                                 }
-
                                             }
                                         }
-
                                     }
                                 }
                             }
-
                         }
-
-
                     }
                 }
-
             }
+        }
+    }
+}
 
+//Tarjeta para mostrar categorías-------------------------------------------------------------------
+@Composable
+fun TarjetaCategorias(navController: NavController, modifier: Modifier = Modifier){
+    LazyRow (
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(horizontal = 25.dp)
+    ){
+        item {
+            Column(
+                modifier = modifier.
+                padding(top = 15.dp, bottom = 15.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Categoria(categoria = categorias[0], navContoller = navController)
+                Categoria(categoria = categorias[1], navContoller = navController)
+            }
+        }
+        item {
+            Column(
+                modifier = modifier.
+                padding(top = 15.dp, bottom = 15.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Categoria(categoria = categorias[2], navContoller = navController)
+                Categoria(categoria = categorias[3], navContoller = navController)
+            }
+        }
+        item {
+            Column(
+                modifier = modifier.
+                padding(top = 15.dp, bottom = 15.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Categoria(categoria = categorias[4], navContoller = navController)
+                Categoria(categoria = categorias[5], navContoller = navController)
+            }
         }
     }
 }
 
 
-
 @Composable
-fun TarjetaCategorias(modifier: Modifier = Modifier){
+fun Categoria(categoria: Categoria, navContoller: NavController, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 30.dp),
+            .size(width = 300.dp, height = 70.dp)
+            .padding(5.dp)
+            .clickable {
+                navContoller.navigate(Pantalla.CategoriaSeleccionada.conArgs(categoria.nombre))
+            },
         colors = CardDefaults.cardColors(
-            containerColor = Trv2
-        ),
-    ){
-        Row (
-            modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ){
-            Column(
-                modifier = modifier.
-                    padding(top = 15.dp, bottom = 15.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Categoria(icono = Icons.Filled.Attractions, nombre = "Atracciones")
-                Categoria(icono = Icons.Filled.Restaurant, nombre = "Restaurante")
-            }
-            Column(
-                modifier = modifier.
-                    padding(top = 15.dp, bottom = 15.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Categoria(icono = Icons.Filled.Museum, nombre = "Museos")
-                Categoria(icono = Icons.Filled.Park, nombre = "Parques")
-            }
-            Column(
-                modifier = modifier.
-                    padding(top = 15.dp, bottom = 15.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Categoria(icono = Icons.Filled.Hotel, nombre = "Hoteles")
-                Categoria(icono = Icons.Filled.Favorite, nombre = "Favoritos")
-            }
-        }
-
-
-    }
-}
-@Composable
-fun Categoria(icono: ImageVector, nombre: String,  modifier: Modifier = Modifier) {
-        Column(
-            modifier = modifier
-                .size(width = 105.dp, height = 85.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            FloatingActionButton(
-                onClick = { /*TODO*/ },
-                containerColor = Color.White
-            )
-
-            {
-                Icon(
-                    imageVector = icono,
-                    contentDescription = ""
-                )
-            }
-            Text(
-                text = nombre,
-                textAlign = TextAlign.Center,
-                color = Color.White,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MenuInferior(modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = Trv1
+            containerColor = Trv2,
+            contentColor = Color.White
+        )
     ) {
-        Card(
-            modifier = modifier.padding(horizontal = 30.dp, vertical = 15.dp),
-            colors = CardDefaults.cardColors(Trv4)
-
+        Row(
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 10.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(
-                        modifier = modifier
-                            .size(40.dp),
-                        imageVector = Icons.Filled.Home,
-                        contentDescription =  "",
-                        tint = Trv5
-                    )
-                }
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(
-                        modifier = modifier
-                            .size(40.dp),
-                        imageVector = Icons.Filled.AccountCircle,
-                        contentDescription =  "",
-                        tint = Color.White
-                    )
-                }
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(
-                        modifier = modifier
-                            .size(40.dp),
-                        imageVector = Icons.Filled.Explore,
-                        contentDescription =  "",
-                        tint = Color.White
-                    )
-                }
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(
-                        modifier = modifier
-                            .size(40.dp),
-                        imageVector = Icons.Filled.CalendarToday,
-                        contentDescription =  "",
-                        tint = Color.White
-                    )
-                }
-            }
+            Icon(
+                modifier = modifier.padding(15.dp),
+                imageVector = categoria.icono,
+                contentDescription = "")
+            Text(text = categoria.nombre)
         }
-
     }
 }
+
+
+
 
 

@@ -1,11 +1,10 @@
-package com.example.trovare.ui.theme.Data
+package com.example.trovare.Data
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.SocialDistance
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
 
 data class Configuracion(
     val nombreDeConfig: String,
@@ -29,8 +28,6 @@ object ConfiguracionDataSource {
         "USD"
     )
 }
-
-
 
 val listaDeConfiguracion = listOf(
     Configuracion(nombreDeConfig = "Idioma", icono = Icons.Filled.Language, opciones = ConfiguracionDataSource.Idiomas),
