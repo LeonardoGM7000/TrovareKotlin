@@ -339,7 +339,3 @@ fun Detalles(
         }
     }
 }
-
-
-
-

@@ -13,10 +13,8 @@ import com.example.trovare.ui.theme.Pantallas.FAQS
 import com.example.trovare.ui.theme.Pantallas.Soporte
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.example.trovare.Data.Categoria
 import com.example.trovare.ui.theme.Pantallas.Ingreso.Bienvenida
 import com.example.trovare.ui.theme.Pantallas.Buscar
-import com.example.trovare.ui.theme.Pantallas.Ingreso.CrearCuenta
 import com.example.trovare.ui.theme.Pantallas.Detalles
 import com.example.trovare.ui.theme.Pantallas.Perfil.EditarPerfil
 import com.example.trovare.ui.theme.Pantallas.Ingreso.InicioDeSesion
@@ -25,10 +23,10 @@ import com.example.trovare.ui.theme.Pantallas.Perfil.PerfilConfiguracion
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Pantallas.Administrador
 import com.example.trovare.ui.theme.Pantallas.CategoriaSeleccionada
+import com.example.trovare.ui.theme.Pantallas.CrearCuenta
 import com.example.trovare.ui.theme.Pantallas.EditarPreguntas
 import com.example.trovare.ui.theme.Pantallas.EliminarComentarios
 import com.example.trovare.ui.theme.Pantallas.EliminarCuentas
-//import com.example.trovare.ui.theme.Pantallas.Ingreso.RecuperarContrasena
 import com.example.trovare.ui.theme.Pantallas.PreguntasAdmin
 import com.google.android.libraries.places.api.net.PlacesClient
 
