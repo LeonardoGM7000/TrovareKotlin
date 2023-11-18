@@ -24,10 +24,13 @@ import com.example.trovare.ui.theme.Pantallas.EditarPerfil
 import com.example.trovare.ui.theme.Pantallas.EditarPreguntas
 import com.example.trovare.ui.theme.Pantallas.EliminarComentarios
 import com.example.trovare.ui.theme.Pantallas.EliminarCuentas
+import com.example.trovare.ui.theme.Pantallas.IngresoToken
 import com.example.trovare.ui.theme.Pantallas.InicioDeSesion
 import com.example.trovare.ui.theme.Pantallas.PerfilConfiguracion
 import com.example.trovare.ui.theme.Pantallas.PerfilInicio
 import com.example.trovare.ui.theme.Pantallas.PreguntasAdmin
+import com.example.trovare.ui.theme.Pantallas.RecuperarPassword
+import com.example.trovare.ui.theme.Pantallas.ReestablecerPassword
 import com.google.android.libraries.places.api.net.PlacesClient
 
 
@@ -49,6 +52,11 @@ sealed class Pantalla(val ruta: String){
     object EditarPreguntas:Pantalla("EditarPreguntas")
     object EliminarCuentas: Pantalla("EliminarCuentas")
     object EliminarComentarios: Pantalla("EliminarComentarios")
+
+    object RecuperarPassword: Pantalla("RecuperarPassword")
+
+    object IngresoToken: Pantalla("IngresoToken")
+    object ReestablecerPassword: Pantalla("ReestablecerPassword")
 
     fun conArgs(vararg args: String): String {
         return buildString {
@@ -87,6 +95,21 @@ fun Trovare(
         }
         composable(route = Pantalla.InicioDeSesion.ruta){
             InicioDeSesion(
+                navController = navController
+            )
+        }
+        composable(route = Pantalla.RecuperarPassword.ruta){
+            RecuperarPassword(
+                navController = navController
+            )
+        }
+        composable(route = Pantalla.IngresoToken.ruta){
+            IngresoToken(
+                navController = navController
+            )
+        }
+        composable(route = Pantalla.ReestablecerPassword.ruta){
+            ReestablecerPassword(
                 navController = navController
             )
         }
