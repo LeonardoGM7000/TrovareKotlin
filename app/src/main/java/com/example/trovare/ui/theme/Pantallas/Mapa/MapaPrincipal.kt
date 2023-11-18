@@ -62,10 +62,12 @@ import com.example.trovare.Data.Places
 import com.example.trovare.Data.categorias
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.Divisor2
+import com.example.trovare.ui.theme.Trv9
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
@@ -85,22 +87,17 @@ fun MapaPrincipal(
     placesClient: PlacesClient
 ){
 
+    //Variables-------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------
+
+    //Busqueda---------------------------
     var tiempoRestante by rememberSaveable { mutableIntStateOf(1) }//tiempo antes de que se haga la llamada a la API de places(1 segundo)
     var job: Job? by remember { mutableStateOf(null) }
-    val prediccionesBusquedaMapa by remember { mutableStateOf(mutableStateListOf<Places>()) }
-    var busquedaEnProgreso by rememberSaveable { mutableStateOf(false) }
-
+    val prediccionesBusquedaMapa by remember { mutableStateOf(mutableStateListOf<Places>()) }//lista de lugares
+    var busquedaEnProgreso by rememberSaveable { mutableStateOf(false) }//
     var textoBuscar by rememberSaveable(stateSaver = TextFieldValue.Saver) {//texto a buscar
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
-
-    var visible by remember { mutableStateOf(true) }
-
-    var filtroExtendido by rememberSaveable { mutableStateOf(false) }
-
-
-
-
     fun iniciarTimer() {
         job = CoroutineScope(Dispatchers.Default).launch {
 
@@ -121,37 +118,68 @@ fun MapaPrincipal(
         }
     }
 
-    //variables para el mapa------------------------------------------------------------------------
+    //Mapa-------------------------------
+    val visible by viewModel.visible.collectAsState()
+    val nombreLugar by remember { mutableStateOf(null) }
 
+    //Filtros----------------------------
+    var filtroExtendido by rememberSaveable { mutableStateOf(false) }
 
-    val ubicacion by viewModel.ubicacion.collectAsState()
-
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(ubicacion, 15f)
-    }
-
-    val estadoMarcador = rememberMarkerState(position = ubicacion)
-
-    Log.d("Composable", "Ubicación actual: $ubicacion")
 
     //UI--------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------
 
     Box(modifier = modifier
         .fillMaxSize(),
         contentAlignment = Alignment.TopCenter
     ){
         //Mapa--------------------------------------------------------------------------------------
-        GoogleMap(
-            modifier = modifier
-                .fillMaxSize(),
-            cameraPositionState = cameraPositionState,
-        ){
-            Marker(
-                state = estadoMarcador,
-                title = ubicacion.toString()
-            )
+        if(visible){
+
+            //variables------------------
+            val ubicacion by viewModel.ubicacion.collectAsState()
+            val cameraPositionState = rememberCameraPositionState {
+                position = CameraPosition.fromLatLngZoom(ubicacion, 15f)
+            }
+            val estadoMarcador = rememberMarkerState(key = "1", position = ubicacion)
+
+
+            GoogleMap(
+                modifier = modifier
+                    .fillMaxSize(),
+                cameraPositionState = cameraPositionState,
+                //locationSource = LocationSource
+            ){
+                Marker(
+                    state = estadoMarcador,
+                    title = nombreLugar,
+                    //onClick =
+                )
+
+            }
+        }
+        else{
+            Box(
+                modifier = modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ){
+                Surface(
+                    modifier = modifier.fillMaxSize(),
+                    color = Trv9
+                ) {
+                    Box(modifier = modifier.fillMaxSize()){
+                        CircularProgressIndicator(
+                            modifier = modifier.align(Alignment.Center),
+                            color = Color.Black
+                        )
+                    }
+                }
+
+            }
+
 
         }
+
         Column {
             //Busqueda------------------------------------------------------------------------------
             Card(
@@ -278,10 +306,11 @@ fun MapaPrincipal(
                                     modifier = modifier.clickable {
                                         viewModel.obtenerMarcador(
                                             placesClient = placesClient,
-                                            viewModel = viewModel,
                                             placeId = lugar.id,
                                         )
+                                        viewModel.setVisible(false)
                                         textoBuscar = TextFieldValue("")
+
                                     }
                                 ){
                                     Column(

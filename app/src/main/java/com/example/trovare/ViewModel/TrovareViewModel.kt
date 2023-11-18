@@ -1,6 +1,5 @@
 package com.example.trovare.ViewModel
 
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -85,6 +84,13 @@ class TrovareViewModel : ViewModel() {
     fun setUbicacion(nuevaUbicacion: LatLng) {
         _ubicacion.value = nuevaUbicacion
         Log.i("pruebaqas","${ubicacion}")
+    }
+    //Controlar la navegaci[on del mapa-------------------------------------------------------------
+    private val _visible = MutableStateFlow(true)
+    val visible: StateFlow<Boolean> = _visible.asStateFlow()
+
+    fun setVisible(newValue: Boolean) {
+        _visible.value = newValue
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -246,7 +252,6 @@ class TrovareViewModel : ViewModel() {
     //funci[on para obtener informacion para el mapa------------------------------------------------
     fun obtenerMarcador(
         placesClient: PlacesClient,
-        viewModel: TrovareViewModel,
         placeId: String,
     ){
         val placeFields = listOf(
@@ -259,7 +264,8 @@ class TrovareViewModel : ViewModel() {
             .addOnSuccessListener { response: FetchPlaceResponse ->
                 val place = response.place
 
-                viewModel.setUbicacion(place.latLng)
+                setUbicacion(place.latLng)
+                setVisible(true)
 
             }.addOnFailureListener { exception: Exception ->
                 if (exception is ApiException) {

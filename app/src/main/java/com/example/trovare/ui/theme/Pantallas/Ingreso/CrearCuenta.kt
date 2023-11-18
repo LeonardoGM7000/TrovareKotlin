@@ -63,7 +63,6 @@ import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv6
 import com.example.trovare.ui.theme.Trv8
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -385,6 +384,7 @@ fun CrearCuenta(
                             } else if(!Patterns.EMAIL_ADDRESS.matcher(textoCorreo.text).matches()){
                                 Log.i("error correo", textoCorreo.text)
                                 scope.launch {
+                                    isErrorC = true
                                     snackbarHostState.showSnackbar(
                                         message = "Correo inválido",
                                         duration = SnackbarDuration.Short
