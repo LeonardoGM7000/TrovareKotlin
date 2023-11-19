@@ -40,6 +40,7 @@ data class NearbyLocationsClass (
 
 data class NearbyLocations (
     @SerializedName("location" ) var location : Location,
+    @SerializedName("id") var id: String
 )
 
 data class Location (

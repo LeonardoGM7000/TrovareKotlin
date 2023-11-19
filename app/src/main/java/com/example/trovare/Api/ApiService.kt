@@ -1,28 +1,25 @@
 package com.example.trovare.Api
 
 import android.util.Log
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import com.example.trovare.Data.NearbyLocationsClass
 import com.example.trovare.Data.NearbyPlaces
 import com.example.trovare.Data.NearbyPlacesClass
 import com.example.trovare.Data.Places
 import com.example.trovare.Data.PlacesClass
 import com.example.trovare.ViewModel.TrovareViewModel
+import com.example.trovare.ui.theme.Pantallas.Mapa.Marcador
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
-import okhttp3.internal.wait
 import org.json.JSONArray
 import org.json.JSONObject
 import retrofit2.Response
@@ -215,7 +212,7 @@ interface APIServiceBuscarUbicacionesCercanas {
     @Headers(
         "Content-Type: application/json",
         "X-Goog-Api-Key: AIzaSyBpmAJRF6PsRJVNm6oq1qmfXbdaBjNA5mQ",
-        "X-Goog-FieldMask: places.location",
+        "X-Goog-FieldMask: places.location,places.id",
         )
     @POST("/v1/places:searchNearby")
     suspend fun createPlaceNearbyLocation(@Body requestBody: RequestBody): Response<ResponseBody>//cambiar import de response?
@@ -223,7 +220,7 @@ interface APIServiceBuscarUbicacionesCercanas {
 
 fun rawJSONUbicacionesCercanas(
     filtro: String,
-    recuperarResultados: MutableList<LatLng>,
+    recuperarResultados: MutableList<Marcador>,
     viewModel: TrovareViewModel,
     ubicacion: LatLng
 ) {
@@ -305,14 +302,12 @@ fun rawJSONUbicacionesCercanas(
 
                 mUser.nearbyLocations.forEach { lugar ->
                     if (lugar != null) {
-                        recuperarResultados.add(LatLng(lugar.location.latitude, lugar.location.longitude))
+                        recuperarResultados.add(Marcador(ubicacion = LatLng(lugar.location.latitude, lugar.location.longitude), id = lugar.id))
                     } else {
                         //TODO No se encontraorn resultados
                     }
                 }
                 viewModel.setMarcadoresInicializado(true)
-
-
             } else {
                 //TODO Error retrofit
             }
