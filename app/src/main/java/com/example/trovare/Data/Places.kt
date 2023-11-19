@@ -32,7 +32,19 @@ data class NearbyPlaces (
     @SerializedName("id" ) var id : String,
     @SerializedName("displayName" ) var displayName : DisplayName?,
     @SerializedName("shortFormattedAddress" ) var shortFormattedAddress : String?,
+)
 
+data class NearbyLocationsClass (
+    @SerializedName("places" ) var nearbyLocations : List<NearbyLocations?> = arrayListOf()
+)
+
+data class NearbyLocations (
+    @SerializedName("location" ) var location : Location,
+)
+
+data class Location (
+    @SerializedName("latitude" ) var latitude : Double,
+    @SerializedName("longitude" ) var longitude : Double,
 )
 
 

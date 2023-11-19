@@ -24,6 +24,7 @@ import com.example.trovare.ui.theme.Pantallas.Itinerarios.Itinerarios
 import com.example.trovare.ui.theme.Pantallas.Mapa.MapaPrincipal
 import com.example.trovare.ui.theme.Pantallas.Perfil.PerfilInicio
 import com.example.trovare.ui.theme.Recursos.BarraInferior
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.libraries.places.api.net.PlacesClient
 
 data class NavegacionSecundaria2(
@@ -62,7 +63,8 @@ fun NavegacionSecundaria(
     viewModel: TrovareViewModel,
     navController: NavHostController,
     navControllerSecundario: NavHostController = rememberNavController(),
-    placesClient: PlacesClient
+    placesClient: PlacesClient,
+    fusedLocationProviderClient: FusedLocationProviderClient
 ){
 
     Scaffold(
@@ -92,9 +94,11 @@ fun NavegacionSecundaria(
             }
             composable(route = Pantalla.Mapa.ruta){
                 MapaPrincipal(
+                    state = viewModel.state.value,
                     navController = navController,
                     viewModel = viewModel,
-                    placesClient = placesClient
+                    placesClient = placesClient,
+                    fusedLocationProviderClient = fusedLocationProviderClient
                 )
             }
             composable(route = Pantalla.Itinerarios.ruta){

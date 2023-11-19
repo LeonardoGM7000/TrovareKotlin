@@ -28,6 +28,7 @@ import com.example.trovare.ui.theme.Pantallas.EditarPreguntas
 import com.example.trovare.ui.theme.Pantallas.EliminarComentarios
 import com.example.trovare.ui.theme.Pantallas.EliminarCuentas
 import com.example.trovare.ui.theme.Pantallas.PreguntasAdmin
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.libraries.places.api.net.PlacesClient
 
 
@@ -72,7 +73,8 @@ sealed class Pantalla(val ruta: String) {
 fun Trovare(
     viewModel: TrovareViewModel = viewModel(),
     navController: NavHostController = rememberNavController(),
-    placesClient: PlacesClient
+    placesClient: PlacesClient,
+    fusedLocationProviderClient: FusedLocationProviderClient
 ){
 
     NavHost(
@@ -104,7 +106,8 @@ fun Trovare(
             NavegacionSecundaria(
                 viewModel = viewModel,
                 navController = navController,
-                placesClient = placesClient
+                placesClient = placesClient,
+                fusedLocationProviderClient = fusedLocationProviderClient
             )
         }
         composable(route = Pantalla.Configuracion.ruta) {

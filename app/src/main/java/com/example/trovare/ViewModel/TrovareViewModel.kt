@@ -1,12 +1,16 @@
 package com.example.trovare.ViewModel
 
+import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
+import com.example.trovare.ui.theme.Pantallas.Mapa.MapState
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FetchPhotoRequest
@@ -24,6 +28,7 @@ import kotlinx.coroutines.flow.update
  */
 
 class TrovareViewModel : ViewModel() {
+
     //Manejo de imagenes----------------------------------------------------------------------------
     private val _imagen = mutableStateOf<ImageBitmap?>(null)
     val imagen: State<ImageBitmap?> = _imagen
@@ -33,14 +38,13 @@ class TrovareViewModel : ViewModel() {
 
     fun reiniciarImagen() {
         _imagen.value = null
-    } // Asegura que la corrutina se cancele al salir del composable
+    }
 
     //guardar variables de estado de la UI----------------------------------------------------------
 
     private val _estadoUi = MutableStateFlow(TrovareEstadoUi())
     val uiState: StateFlow<TrovareEstadoUi> = _estadoUi.asStateFlow()
 
-    //Pantalla-configuración------------------------------------------------------------------------
     fun setIdioma(nuevoIdioma: String) {
         _estadoUi.update { estadoActual ->
             estadoActual.copy(
@@ -65,8 +69,6 @@ class TrovareViewModel : ViewModel() {
         }
     }
 
-    //Pantalla-soporte------------------------------------------------------------------------------
-
     fun setResultoUtil(nuevaSeleccion: String){
         _estadoUi.update { estadoActual ->
             estadoActual.copy(
@@ -77,22 +79,92 @@ class TrovareViewModel : ViewModel() {
 
     //Ubicacion-------------------------------------------------------------------------------------
 
+    val state: MutableState<MapState> = mutableStateOf(
+        MapState(
+            lastKnownLocation = null,
+        )
+    )
+    //Obtener ubicacion en tiempo real
+    @SuppressLint("MissingPermission")
+    fun getDeviceLocation(
+        fusedLocationProviderClient: FusedLocationProviderClient
+    ) {
+        try {
+            val locationResult = fusedLocationProviderClient.lastLocation
+            locationResult.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    state.value = state.value.copy(
+                        lastKnownLocation = task.result,
+                    )
+                }
+            }
+        } catch (e: SecurityException) {
+            //TODO
+        }
+    }
+    //Obtener ubicacion en temporal en LatLng y cargarla al viewmodel
+    fun getLastLocation(
+        fusedLocationProviderClient: FusedLocationProviderClient
+    ) {
+        try {
+            fusedLocationProviderClient.lastLocation
+                .addOnSuccessListener { location ->
+                    location?.let {
+                        val latitude = it.latitude
+                        val longitude = it.longitude
+                        // Aquí tienes la latitud y longitud.
+                        // Puedes usar estas variables en tu lógica o pasárselas al ViewModel según sea necesario.
+                        setUbicacion(LatLng(latitude, longitude))
+
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    //TODO
+                }
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
+    }
 
     private val _ubicacion = MutableStateFlow(LatLng(19.504507, -99.147314))
     val ubicacion = _ubicacion.asStateFlow()
     // Función para actualizar el valor de la ubicación
     fun setUbicacion(nuevaUbicacion: LatLng) {
         _ubicacion.value = nuevaUbicacion
-        Log.i("pruebaqas","${ubicacion}")
-    }
-    //Controlar la navegaci[on del mapa-------------------------------------------------------------
-    private val _visible = MutableStateFlow(true)
-    val visible: StateFlow<Boolean> = _visible.asStateFlow()
-
-    fun setVisible(newValue: Boolean) {
-        _visible.value = newValue
     }
 
+    private val _marcadorInicializado = MutableStateFlow(false)
+    val marcadorInicializado: StateFlow<Boolean> = _marcadorInicializado.asStateFlow()
+    fun setMarcadorInicializado(newValue: Boolean) {
+        _marcadorInicializado.value = newValue
+    }
+
+    private val _marcadoresInicializado = MutableStateFlow(false)
+    val marcadoresInicializado: StateFlow<Boolean> = _marcadoresInicializado.asStateFlow()
+    fun setMarcadoresInicializado(newValue: Boolean) {
+        _marcadoresInicializado.value = newValue
+    }
+
+    private val _nombreLugar = MutableStateFlow("")
+    val nombreLugar = _nombreLugar.asStateFlow()
+
+    fun setNombreLugar(nuevoNombre: String) {
+        _nombreLugar.value = nuevoNombre
+    }
+
+    private val _ratingLugar = MutableStateFlow(-1.0)
+    val ratingLugar = _ratingLugar.asStateFlow()
+
+    fun setRatingLugar(nuevoRating: Double) {
+        _ratingLugar.value = nuevoRating
+    }
+
+    private val _idLugar = MutableStateFlow("")
+    val idLugar = _idLugar.asStateFlow()
+
+    fun setIdLugar(nuevoId: String) {
+        _idLugar.value = nuevoId
+    }
     //--------------------------------------------------------------------------------------------//
     //-------------------------------------API----------------------------------------------------//
     //--------------------------------------------------------------------------------------------//
@@ -109,7 +181,6 @@ class TrovareViewModel : ViewModel() {
         numeroTelefono: (String?) -> Unit,
         paginaWeb: (String?) -> Unit,
         latLng: (LatLng?) -> Unit,
-        //imagen: (ImageBitmap) -> Unit
     ){
         val placeFields = listOf(
             Place.Field.NAME,
@@ -134,7 +205,7 @@ class TrovareViewModel : ViewModel() {
                 latLng(place.latLng)
 
                 if(place.websiteUri != null){
-                    paginaWeb(place.websiteUri.toString())
+                    paginaWeb(place.websiteUri?.toString())
                 }
 
                 // Obtener metadatos de la foto-----------------------------------------------------
@@ -156,7 +227,6 @@ class TrovareViewModel : ViewModel() {
                             _imagen.value = imagenBitmap
                         }.addOnFailureListener { exception: Exception ->
                             if (exception is ApiException) {
-                                Log.e("testLugar", "Place not found: " + exception.message)
                                 val statusCode = exception.statusCode
                                 TODO("Handle error with given status code.")
                             }
@@ -165,7 +235,6 @@ class TrovareViewModel : ViewModel() {
 
             }.addOnFailureListener { exception: Exception ->
                 if (exception is ApiException) {
-                    Log.e("testLugar", "Place not found: ${exception.message}")
                     val statusCode = exception.statusCode
                     TODO("Handle error with given status code")
                 }
@@ -181,11 +250,9 @@ class TrovareViewModel : ViewModel() {
             Place.Field.PHOTO_METADATAS
         )//campos que se deben obtener de la API de places
 
-        Log.e("testLugar", "entrada")
 
 
         placesId.forEachIndexed{ index, placeId ->
-            Log.e("testLugar", "entrada2")
 
             val request = FetchPlaceRequest.newInstance(placeId, placeFields)
 
@@ -206,39 +273,26 @@ class TrovareViewModel : ViewModel() {
                             .build()
                         placesClient.fetchPhoto(photoRequest)
                             .addOnSuccessListener { fetchPhotoResponse: FetchPhotoResponse ->
-                                Log.e("testLugar", "entrada3")
                                 val image = fetchPhotoResponse.bitmap
                                 val imagenBitmap: ImageBitmap = image.asImageBitmap()
-                                Log.e("testLugar", "entrada4")
                                 // Asegúrate de que la lista tenga un tamaño suficiente
 
                                 while (_imagenes.value.size <= index) {
                                     _imagenes.value.add(null)
                                 }
-                                Log.e("testLugar", "entrada5")
 
                                 // Agregar la imagen a la lista
                                 _imagenes.value[index] = imagenBitmap
-                                Log.e("testLugar", "entrada6")
-
-
-
-
-                                Log.e("testLugar", "exito cargada imagen ${index}")
-                                Log.e("testLugar", "imagen imagen ${imagenes.value?.get(index)}")
 
                             }.addOnFailureListener { exception: Exception ->
                                 if (exception is ApiException) {
-                                    Log.e("testLugar", "Place not found: " + exception.message)
                                     val statusCode = exception.statusCode
                                     TODO("Handle error with given status code.")
                                 }
                             }
                     }
-
                 }.addOnFailureListener { exception: Exception ->
                     if (exception is ApiException) {
-                        Log.e("testLugar", "Place not found: ${exception.message}")
                         val statusCode = exception.statusCode
                         TODO("Handle error with given status code")
                     }
@@ -255,7 +309,11 @@ class TrovareViewModel : ViewModel() {
         placeId: String,
     ){
         val placeFields = listOf(
+            Place.Field.ID,
             Place.Field.LAT_LNG,
+            Place.Field.NAME,
+            Place.Field.RATING,
+            Place.Field.PHOTO_METADATAS
         )//campos que se deben obtener de la API de places
 
         val request = FetchPlaceRequest.newInstance(placeId, placeFields)
@@ -264,8 +322,37 @@ class TrovareViewModel : ViewModel() {
             .addOnSuccessListener { response: FetchPlaceResponse ->
                 val place = response.place
 
-                setUbicacion(place.latLng)
-                setVisible(true)
+                setUbicacion(place.latLng?:LatLng(ubicacion.value.latitude, ubicacion.value.longitude))
+                setNombreLugar(place.name?:"")
+                setRatingLugar(place.rating?:-1.0)
+                setIdLugar(place.id?:"")
+
+                val metada = place.photoMetadatas
+                if (metada != null) {
+
+                    val photoMetadata = metada.first()
+
+                    // Create a FetchPhotoRequest.
+                    val photoRequest = FetchPhotoRequest.builder(photoMetadata)
+                        .setMaxWidth(200) // Optional.
+                        .setMaxHeight(200) // Optional.
+                        .build()
+                    placesClient.fetchPhoto(photoRequest)
+                        .addOnSuccessListener { fetchPhotoResponse: FetchPhotoResponse ->
+
+                            val image = fetchPhotoResponse.bitmap
+                            val imagenBitmap: ImageBitmap = image.asImageBitmap()
+                            _imagen.value = imagenBitmap
+                        }.addOnFailureListener { exception: Exception ->
+                            if (exception is ApiException) {
+                                Log.e("testLugar", "Place not found: " + exception.message)
+                                val statusCode = exception.statusCode
+                                TODO("Handle error with given status code.")
+                            }
+                        }
+                }
+
+                setMarcadorInicializado(true)
 
             }.addOnFailureListener { exception: Exception ->
                 if (exception is ApiException) {

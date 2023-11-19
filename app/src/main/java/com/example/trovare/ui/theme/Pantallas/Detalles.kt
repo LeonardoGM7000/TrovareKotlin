@@ -78,6 +78,7 @@ fun Detalles(
 
 
     LaunchedEffect(key1 = Unit){
+        viewModel.reiniciarImagen()
         viewModel.obtenerLugar(
             placesClient = placesClient,
             placeId = placeId?: "",
@@ -333,9 +334,12 @@ fun Detalles(
             }
         }
     }
+    /*
     DisposableEffect(Unit) {
         onDispose {
             viewModel.reiniciarImagen()
         }
     }
+
+     */
 }

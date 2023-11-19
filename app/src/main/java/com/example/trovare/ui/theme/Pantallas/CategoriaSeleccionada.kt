@@ -21,6 +21,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +46,7 @@ import com.example.trovare.ui.theme.Trv1
 import com.google.android.libraries.places.api.net.PlacesClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -65,16 +67,21 @@ fun CategoriaSeleccionada(
 
     val lugaresCercanos by remember { mutableStateOf(mutableStateListOf<NearbyPlaces>()) }
     val lugaresId by remember { mutableStateOf(mutableStateListOf<String>()) }
+    val ubicacion by viewModel.ubicacion.collectAsState()
 
     //Rutina que se ejecuta al componer la página, recupera los lugares cercanos dependiendo del filtro
     LaunchedEffect(key1 = Unit){
         CoroutineScope(Dispatchers.Default).launch {
             //Funcion de API que permite recuperar lugares cercanos con base en un filtro-----------
-            rawJSONLugarCercano(
-                filtro = categoria,
-                recuperarResultados = lugaresCercanos,
-                recuperarId = lugaresId
-            )
+            CoroutineScope(Dispatchers.Default).launch {
+                delay(200)
+                rawJSONLugarCercano(
+                    filtro = categoria,
+                    recuperarResultados = lugaresCercanos,
+                    recuperarId = lugaresId,
+                    ubicacion = ubicacion
+                )
+            }
             viewModel.obtenerFotoLugarCercano(placesClient = placesClient, placesId = lista)
         }
     }
@@ -114,57 +121,23 @@ fun CategoriaSeleccionada(
                         colors = CardDefaults.cardColors(Trv1),
                         border = CardDefaults.outlinedCardBorder()
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
+                        Column(
+                            modifier = modifier.padding(top = 5.dp, end = 5.dp, bottom = 5.dp)
                         ) {
-                            Card(
-                                modifier = modifier
-                                    .size(120.dp)
-                                    .padding(5.dp)
-                                    .aspectRatio(1F),
-                            ) {
-                                Box(
-                                    modifier = modifier.fillMaxSize()
-                                ){
-                                    val imagen = viewModel.imagenes.value?.first()
-
-                                    if (imagen != null) {
-                                        Image(
-                                            bitmap = imagen,
-                                            contentDescription = "",
-                                            modifier = Modifier
-                                                .fillMaxSize(),
-                                            contentScale = ContentScale.FillBounds
-                                        )
-                                    } else {
-                                        Image(
-                                            modifier = modifier
-                                                .fillMaxSize(),
-                                            painter = painterResource(id = R.drawable.image_placeholder),
-                                            contentDescription = ""
-                                        )
-                                    }
-                                }
-
-                            }
-                            Column(
-                                modifier = modifier.padding(top = 5.dp, end = 5.dp, bottom = 5.dp)
-                            ) {
-                                Text(
-                                    modifier = modifier.padding(3.dp),
-                                    text = lugar.displayName?.text ?: "",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
-                                )
-                                Text(
-                                    modifier = modifier.padding(3.dp),
-                                    text = lugar.shortFormattedAddress?: "",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    textAlign = TextAlign.Justify,
-                                    color = Color.White
-                                )
-                            }
+                            Text(
+                                modifier = modifier.padding(3.dp),
+                                text = lugar.displayName?.text ?: "",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                            Text(
+                                modifier = modifier.padding(3.dp),
+                                text = lugar.shortFormattedAddress?: "",
+                                style = MaterialTheme.typography.labelSmall,
+                                textAlign = TextAlign.Justify,
+                                color = Color.White
+                            )
                         }
                     }
                 }
