@@ -93,6 +93,7 @@ dependencies {
 
     implementation ("com.google.maps.android:maps-compose:2.11.4")
     implementation ("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 
     //Para manejo de las API
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
@@ -106,4 +107,6 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.5.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-firestore:24.9.1")
+
+    //Compilación
 }

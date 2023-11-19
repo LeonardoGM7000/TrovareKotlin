@@ -13,20 +13,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Attractions
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Hotel
-import androidx.compose.material.icons.filled.Museum
-import androidx.compose.material.icons.filled.Park
-import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.rounded.TravelExplore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -38,14 +32,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.navigation.NavController
+import androidx.navigation.navArgument
 import coil.compose.AsyncImage
+import com.example.trovare.Data.Categoria
+import com.example.trovare.Data.categorias
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.R
 import com.example.trovare.Data.listaDeExplorar
@@ -108,32 +104,28 @@ fun Inicio(
 
                 }
                 //Categorías------------------------------------------------------------------------
-
-
-
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         modifier = modifier
                             .fillMaxWidth()
-                            .padding(bottom = 15.dp, top = 15.dp),
+                            .padding(horizontal = 25.dp),
                         textAlign = TextAlign.Center,
                         color = Color.White,
                         text = "Categorías",
                         style = MaterialTheme.typography.displaySmall
                     )
-                    TarjetaCategorias()
-                    Text(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .padding(top = 15.dp, bottom = 15.dp),
-                        textAlign = TextAlign.Center,
-                        color = Color.White,
-                        text = "Explora más sitios",
-                        style = MaterialTheme.typography.displaySmall
-                    )
+                    TarjetaCategorias(navController = navController)
                 }
-
                 //Carrusel-explorar-mas-sitios------------------------------------------------------
+                Text(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 15.dp),
+                    textAlign = TextAlign.Center,
+                    color = Color.White,
+                    text = "Explora más sitios",
+                    style = MaterialTheme.typography.displaySmall
+                )
                 Row (
                     modifier = modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -210,7 +202,6 @@ fun Inicio(
                                                         modifier = modifier.fillMaxWidth(),
                                                         text = ("${listaDeExplorar[pagina].lugar}"),
                                                         textAlign = TextAlign.Center,
-
                                                     )
                                                 }
                                             }
@@ -226,75 +217,71 @@ fun Inicio(
     }
 }
 
-
 //Tarjeta para mostrar categorías-------------------------------------------------------------------
 @Composable
-fun TarjetaCategorias(modifier: Modifier = Modifier){
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 30.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Trv2
-        ),
+fun TarjetaCategorias(navController: NavController, modifier: Modifier = Modifier){
+    LazyRow (
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(horizontal = 25.dp)
     ){
-        Row (
-            modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ){
+        item {
             Column(
                 modifier = modifier.
-                    padding(top = 15.dp, bottom = 15.dp),
+                padding(top = 15.dp, bottom = 15.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Categoria(icono = Icons.Filled.Attractions, nombre = "Atracciones")
-                Categoria(icono = Icons.Filled.Restaurant, nombre = "Restaurante")
-            }
-            Column(
-                modifier = modifier.
-                    padding(top = 15.dp, bottom = 15.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Categoria(icono = Icons.Filled.Museum, nombre = "Museos")
-                Categoria(icono = Icons.Filled.Park, nombre = "Parques")
-            }
-            Column(
-                modifier = modifier.
-                    padding(top = 15.dp, bottom = 15.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Categoria(icono = Icons.Filled.Hotel, nombre = "Hoteles")
-                Categoria(icono = Icons.Filled.Favorite, nombre = "Favoritos")
+                Categoria(categoria = categorias[0], navContoller = navController)
+                Categoria(categoria = categorias[1], navContoller = navController)
             }
         }
-
-
+        item {
+            Column(
+                modifier = modifier.
+                padding(top = 15.dp, bottom = 15.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Categoria(categoria = categorias[2], navContoller = navController)
+                Categoria(categoria = categorias[3], navContoller = navController)
+            }
+        }
+        item {
+            Column(
+                modifier = modifier.
+                padding(top = 15.dp, bottom = 15.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Categoria(categoria = categorias[4], navContoller = navController)
+                Categoria(categoria = categorias[5], navContoller = navController)
+            }
+        }
     }
 }
-//Categoria para ser mostrada en la tarjeta de categorías-------------------------------------------
+
+
 @Composable
-fun Categoria(icono: ImageVector, nombre: String,  modifier: Modifier = Modifier) {
-        Column(
-            modifier = modifier
-                .size(width = 105.dp, height = 85.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+fun Categoria(categoria: Categoria, navContoller: NavController, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier
+            .size(width = 300.dp, height = 70.dp)
+            .padding(5.dp)
+            .clickable {
+                navContoller.navigate(Pantalla.CategoriaSeleccionada.conArgs(categoria.nombre))
+            },
+        colors = CardDefaults.cardColors(
+            containerColor = Trv2,
+            contentColor = Color.White
+        )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            FloatingActionButton(
-                onClick = { /*TODO*/ },
-                containerColor = Color.White
-            ){
-                Icon(
-                    imageVector = icono,
-                    contentDescription = ""
-                )
-            }
-            Text(
-                text = nombre,
-                textAlign = TextAlign.Center,
-                color = Color.White,
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Icon(
+                modifier = modifier.padding(15.dp),
+                imageVector = categoria.icono,
+                contentDescription = "")
+            Text(text = categoria.nombre)
         }
+    }
 }
 
 

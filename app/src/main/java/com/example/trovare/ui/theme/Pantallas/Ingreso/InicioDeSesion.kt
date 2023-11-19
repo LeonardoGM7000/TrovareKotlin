@@ -51,7 +51,6 @@ import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv6
 import com.example.trovare.ui.theme.Trv8
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -60,6 +59,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
+import android.util.Patterns
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -199,7 +200,7 @@ fun InicioDeSesion(
                             .padding(horizontal = 25.dp)
                             .fillMaxWidth()
                             .clickable {
-                                //Recuperar contrasena++++++++++++++++++++++++
+                                navController.navigate(Pantalla.RecuperarContrasena.ruta)
                             },
                         text = "Recuperar contraseña",
                         textAlign = TextAlign.Right,
@@ -232,24 +233,43 @@ fun InicioDeSesion(
                             if(textoCorreo.text.isBlank() || textoPasswrod.text.isBlank()){
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
-                                        message = "Campos vacios",
+                                        message = "Campos obligatorios no completados",
                                         duration = SnackbarDuration.Short
                                     )
                                 }
-                            }else{
+                            }else if(!Patterns.EMAIL_ADDRESS.matcher(textoCorreo.text).matches()){
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "El correo no tiene una estructura válida",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }
+                            else {
                                 try{
+                                    val user = FirebaseAuth.getInstance().currentUser
+
                                     auth.signInWithEmailAndPassword(textoCorreo.text, textoPasswrod.text)
                                         .addOnCompleteListener{ task ->
                                             if(task.isSuccessful){
+                                                if (user?.isEmailVerified == false){
+                                                    scope.launch {
+                                                        snackbarHostState.showSnackbar(
+                                                            message = "Correo no verificado. Verifica tu correo electrónico.",
+                                                            duration = SnackbarDuration.Short
+                                                        )
+                                                    }
+                                            }else{
                                                 scope.launch {
                                                     snackbarHostState.showSnackbar(
                                                         message = "Iniciando Sesión...",
                                                         duration = SnackbarDuration.Short
                                                     )
                                                 }
-                                                navController.navigate(Pantalla.NavegacionSecundaria.ruta){
-                                                    popUpTo(navController.graph.id){
-                                                        inclusive = true
+                                                    navController.navigate(Pantalla.Inicio.ruta){
+                                                        popUpTo(navController.graph.id){
+                                                            inclusive = true
+                                                        }
                                                     }
                                                 }
                                             }else{
@@ -277,6 +297,4 @@ fun InicioDeSesion(
             }
         }
     }
-
-
 }

@@ -1,6 +1,7 @@
 package com.example.trovare.ui.theme.Pantallas
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -162,7 +163,6 @@ fun Buscar(
                     Divisor()
                 }
             }
-
         },
         //Contenido de la busqueda *(indicador de progreso circular para busqueda o busquedas encontradas)
     ){
@@ -218,6 +218,7 @@ fun Buscar(
             }
         }
     }
+    //al cerrar la pagina---------------------------------------------------------------------------
     DisposableEffect(Unit) {
         onDispose {
             job?.cancel() // Asegura que la corrutina se cancele al salir del composable

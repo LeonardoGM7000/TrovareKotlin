@@ -1,6 +1,5 @@
 package com.example.trovare.ui.theme.Pantallas
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -31,16 +30,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -69,18 +68,17 @@ fun Detalles(
     navController: NavController
 ){
 
-    //var lugar by remember { mutableStateOf(Lugar("Nombre del lugar", 3.5, "", null, null)) }
-    var secondChecked by rememberSaveable { mutableStateOf(false) }
+    var favorito by rememberSaveable { mutableStateOf(false) }
     var nombre by rememberSaveable { mutableStateOf("") }
     var direccion by rememberSaveable { mutableStateOf("") }
     var numeroTelefono by rememberSaveable { mutableStateOf("") }
     var paginaWeb by rememberSaveable { mutableStateOf("") }
     var calificacion by rememberSaveable { mutableStateOf(-1.0) }
     var latLng by rememberSaveable { mutableStateOf(LatLng(0.0,0.0)) }
-    //var imagen by rememberSaveable { mutableStateOf(ImageBitmap(500,500)) }
 
 
     LaunchedEffect(key1 = Unit){
+        viewModel.reiniciarImagen()
         viewModel.obtenerLugar(
             placesClient = placesClient,
             placeId = placeId?: "",
@@ -90,7 +88,6 @@ fun Detalles(
             numeroTelefono = {numeroTelefono = it?: ""},
             paginaWeb = {paginaWeb = it?: ""},
             latLng = {latLng = it?: LatLng(0.0,0.0) },
-            //imagen = {imagen = it}
         )
     }
 
@@ -112,7 +109,6 @@ fun Detalles(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(5.dp)
                     ) {
                         val imagen = viewModel.imagen.value
 
@@ -121,7 +117,8 @@ fun Detalles(
                                 bitmap = imagen,
                                 contentDescription = "",
                                 modifier = Modifier
-                                    .fillMaxSize()
+                                    .fillMaxSize(),
+                                contentScale = ContentScale.FillBounds
                             )
                         } else {
                             Image(
@@ -131,7 +128,6 @@ fun Detalles(
                                 contentDescription = ""
                             )
                         }
-
                         Row(
                             modifier = modifier
                                 .padding(5.dp)
@@ -159,8 +155,8 @@ fun Detalles(
                                 shape = CircleShape
                             ) {
                                 IconToggleButton(
-                                    checked = secondChecked,
-                                    onCheckedChange = { checked -> secondChecked = checked },
+                                    checked = favorito,
+                                    onCheckedChange = { checked -> favorito = checked },
                                     colors = IconButtonDefaults.iconToggleButtonColors(
                                         containerColor = Color.White,
                                         checkedContainerColor = Color.White,
@@ -168,7 +164,7 @@ fun Detalles(
                                         checkedContentColor = Color.Red
                                     )
                                 ) {
-                                    if (secondChecked) {
+                                    if (favorito) {
                                         Icon(
                                             imageVector = Icons.Rounded.Favorite,
                                             contentDescription = ""
@@ -321,7 +317,6 @@ fun Detalles(
                             )
                         }
                     }
-
                 }
             }
             item {
@@ -337,20 +332,14 @@ fun Detalles(
                     style = MaterialTheme.typography.displaySmall
                 )
             }
-            item {
-
-                /*
-                Image(
-                    bitmap = imagen,
-                    contentDescription = null, // Puedes proporcionar una descripción si es necesario
-                    modifier = Modifier.fillMaxSize() // Ajusta el tamaño de la imagen según sea necesario
-                )*/
-
-            }
         }
     }
+    /*
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.reiniciarImagen()
+        }
+    }
+
+     */
 }
-
-
-
-

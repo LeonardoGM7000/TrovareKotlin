@@ -1,5 +1,7 @@
-package com.example.trovare.ui.theme.Pantallas.Ingreso
+package com.example.trovare.ui.theme.Pantallas
 
+import android.util.Log
+import android.util.Patterns
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,13 +26,20 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,41 +55,40 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.trovare.Data.Usuario
+import com.example.trovare.R
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv6
 import com.example.trovare.ui.theme.Trv8
-import android.util.Log
-import android.util.Patterns
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import com.example.trovare.Data.Usuario
-import com.example.trovare.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CrearCuenta(
     modifier: Modifier = Modifier,
     navController: NavController
-){
+) {
+
+    //Variables-------------------------------------------------------------------------------------
+    //Guardar estado de errores---------------------------------------------------------------------
+    var isErrorP by rememberSaveable { mutableStateOf(false) }
+    var isErrorL: Int by rememberSaveable { mutableIntStateOf(0) }
+    var isErrorLA: Int by rememberSaveable { mutableIntStateOf(0) }
+    var isErrorC by rememberSaveable { mutableStateOf(false) }
+    val minimoPassword = 8
+    val maximoLetras = 30
+    //Guardar estado de errores---------------------------------------------------------------------
+
     val auth = FirebaseAuth.getInstance()
-
     val firestore = Firebase.firestore
-
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-
     var textoNombre by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
@@ -93,28 +101,52 @@ fun CrearCuenta(
     var textoPassword by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
-
     var passwordOculta by rememberSaveable { mutableStateOf(true) }
     var aceptarTyC by rememberSaveable { mutableStateOf(false) }
     var cuentaCreada by remember { mutableStateOf(false) }
-
-    val keyboardOptionsTexto: KeyboardOptions =
-        KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done)
-    val keyboardOptionsCorreo: KeyboardOptions =
-        KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email, imeAction = ImeAction.Done)
-    val keyboardOptionsPassword: KeyboardOptions = KeyboardOptions.Default.copy(
-        keyboardType = KeyboardType.Password,
-        imeAction = ImeAction.Done
+    val keyboardOptionsTexto: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next)
+    val keyboardOptionsCorreo: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next)
+    val keyboardOptionsPassword: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done)
+    //Configuracion de colores para campos de texto-------------------------------------------------
+    val colores = TextFieldDefaults.textFieldColors(
+        containerColor = Trv8,
+        focusedLabelColor = Color.White,
+        unfocusedLabelColor = Color.White,
+        cursorColor = Color.White,
+        focusedIndicatorColor = Color.White,
+        unfocusedIndicatorColor = Color.White,
+        errorCursorColor = MaterialTheme.colorScheme.error,
+        errorIndicatorColor = MaterialTheme.colorScheme.error,
+        errorLabelColor = MaterialTheme.colorScheme.error,
+        errorSupportingTextColor = MaterialTheme.colorScheme.error,
     )
 
-    var isError by rememberSaveable { mutableStateOf(false) }
-    val charLimit = 8
-
-    fun validate(text: String) {
-        Log.i("Erro tamaño",text.length.toString())
-        isError = text.length < charLimit
+    fun validarLetras(text: String) {
+        if(!(text.matches("[a-zA-ZÀ-ÿ ]*".toRegex()))){
+            Log.i("Error Caracter inválido",text)
+            isErrorL = 1
+        } else {
+            if(text.length > maximoLetras){
+                isErrorL = 2
+            }
+        }
+    }
+    fun validarLetrasA(text: String) {
+        if(!(text.matches("[a-zA-ZÀ-ÿ ]*".toRegex()))){
+            Log.i("Error Caracter inválido",text)
+            isErrorLA = 1
+        } else {
+            if(text.length > maximoLetras){
+                isErrorLA = 2
+            }
+        }
+    }
+    fun validarPassword(text: String) {
+        Log.i("Error tamaño",text.length.toString())
+        isErrorP = !(text.matches("^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%^&*(),.?\":{}|<>])(?=.*[a-z]).{8,}\$".toRegex()))
     }
 
+    //Interfaz usuario------------------------------------------------------------------------------
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
@@ -158,8 +190,27 @@ fun CrearCuenta(
                         modifier = modifier
                             .fillMaxWidth()
                             .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
+                        isError = isErrorL != 0,
                         value = textoNombre,
-                        onValueChange = { textoNombre = it },
+                        onValueChange = { textoNombre = it
+                            isErrorL = 0
+                            validarLetras(textoNombre.text)
+                        },
+                        //parametro para mostrar eltipo de error
+                        supportingText = {
+                            isErrorL = isErrorL
+                            if(isErrorL == 1){
+                                Text(
+                                    text = "Ingresa solo letras",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            } else if(isErrorL == 2){
+                                Text(
+                                    text = "Máximo $maximoLetras carácteres",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
                         label = {
                             Text(
                                 text = "Nombre(s)",
@@ -167,15 +218,7 @@ fun CrearCuenta(
                             )
                         },
                         textStyle = MaterialTheme.typography.labelSmall,
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = Color.White,
-                            focusedLabelColor = Color.White,
-                            unfocusedLabelColor = Color.White,
-                            containerColor = Trv8,
-                            cursorColor = Color.White,
-                            focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White
-                        ),
+                        colors = colores,
                         singleLine = true,
                         keyboardOptions = keyboardOptionsTexto,
                     )
@@ -184,8 +227,28 @@ fun CrearCuenta(
                         modifier = modifier
                             .fillMaxWidth()
                             .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
+                        isError = isErrorLA != 0,
                         value = textoApellido,
-                        onValueChange = { textoApellido = it },
+                        onValueChange = { textoApellido = it
+                            isErrorLA = 0
+                            validarLetrasA(textoApellido.text)},
+                        //parametro para mostrar eltipo de error
+                        supportingText = {
+                            isErrorLA = isErrorLA
+                            if(isErrorLA == 1){
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Ingresa solo letras",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            } else if(isErrorLA == 2){
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Máximo $maximoLetras carácteres",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
                         label = {
                             Text(
                                 text = "Apellido(s)",
@@ -193,15 +256,7 @@ fun CrearCuenta(
                             )
                         },
                         textStyle = MaterialTheme.typography.labelSmall,
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = Color.White,
-                            focusedLabelColor = Color.White,
-                            unfocusedLabelColor = Color.White,
-                            containerColor = Trv8,
-                            cursorColor = Color.White,
-                            focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White
-                        ),
+                        colors = colores,
                         singleLine = true,
                         keyboardOptions = keyboardOptionsTexto,
                     )
@@ -210,6 +265,7 @@ fun CrearCuenta(
                         modifier = modifier
                             .fillMaxWidth()
                             .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
+                        isError = isErrorC,
                         value = textoCorreo,
                         onValueChange = { textoCorreo = it },
                         label = {
@@ -225,15 +281,7 @@ fun CrearCuenta(
                             )
                         },
                         textStyle = MaterialTheme.typography.labelSmall,
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = Color.White,
-                            focusedLabelColor = Color.White,
-                            unfocusedLabelColor = Color.White,
-                            containerColor = Trv8,
-                            cursorColor = Color.White,
-                            focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White
-                        ),
+                        colors = colores,
                         singleLine = true,
                         keyboardOptions = keyboardOptionsCorreo,
                     )
@@ -242,15 +290,17 @@ fun CrearCuenta(
                         modifier = modifier
                             .fillMaxWidth()
                             .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
+                        isError = isErrorP,
                         value = textoPassword,
                         onValueChange = { textoPassword = it
-                            validate(textoPassword.text)},
+                            validarPassword(textoPassword.text)},
+                        //parametro para mostrar eltipo de error
                         supportingText = {
-                            isError = isError
-                            if (isError) {
+                            isErrorP = isErrorP
+                            if (isErrorP) {
                                 Text(
                                     modifier = Modifier.fillMaxWidth(),
-                                    text = "Al menos $charLimit carácteres",
+                                    text = "Min $minimoPassword carácteres, una mayúscula, un número y carácter especial.",
                                     color = MaterialTheme.colorScheme.error
                                 )
                             }
@@ -276,22 +326,14 @@ fun CrearCuenta(
                             )
                         },
                         textStyle = MaterialTheme.typography.labelSmall,
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = Color.White,
-                            focusedLabelColor = Color.White,
-                            unfocusedLabelColor = Color.White,
-                            containerColor = Trv8,
-                            cursorColor = Color.White,
-                            focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White
-                        ),
+                        colors = colores,
                         singleLine = true,
                         keyboardOptions = keyboardOptionsPassword,
                     )
                     //Aceptar terminos y condiciones----------------------------------------------------
                     Row(
                         verticalAlignment = Alignment.CenterVertically
-                    ){
+                    ) {
                         RadioButton(
                             modifier = modifier.padding(start = 25.dp),
                             selected = aceptarTyC,
@@ -306,14 +348,12 @@ fun CrearCuenta(
                             color = Color.White
                         )
                     }
-                    Spacer(modifier = modifier.fillMaxHeight(0.7f))
-
+                    Spacer(modifier = modifier.fillMaxHeight(0.6f))
                     //Boton registro--------------------------------------------------------------------
                     TextButton(
                         enabled = aceptarTyC,
                         modifier = modifier
                             .fillMaxWidth()
-
                             .padding(start = 25.dp, end = 25.dp, bottom = 10.dp),
                         onClick = {
                             //Iniciar-------------------------------------------------------------------
@@ -325,15 +365,32 @@ fun CrearCuenta(
                                         duration = SnackbarDuration.Short
                                     )
                                 }
+                            } else if(isErrorL>0) {
+                                Log.i("error campo nombre", textoNombre.text)
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Nombre(s) inválido(s)",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            } else if(isErrorLA>0){
+                                Log.i("error campo apellido", textoApellido.text)
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Apellidos(s) inválido(s)",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
                             } else if(!Patterns.EMAIL_ADDRESS.matcher(textoCorreo.text).matches()){
                                 Log.i("error correo", textoCorreo.text)
                                 scope.launch {
+                                    isErrorC = true
                                     snackbarHostState.showSnackbar(
                                         message = "Correo inválido",
                                         duration = SnackbarDuration.Short
                                     )
                                 }
-                            } else if(textoPassword.text.length < charLimit) {
+                            } else if(isErrorP) {
                                 Log.i("error contraseña", textoPassword.text.length.toString())
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
@@ -347,31 +404,31 @@ fun CrearCuenta(
                                     textoPassword.text
                                 ).addOnCompleteListener { task ->
 
-                                    if (task.isSuccessful) {
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar(
-                                                message = "Cuenta creada exitosamente, se necesita verificación de correo",
-                                                duration = SnackbarDuration.Short
+                                        if (task.isSuccessful) {
+                                            scope.launch {
+                                                snackbarHostState.showSnackbar(
+                                                    message = "Cuenta creada exitosamente, se necesita verificación de correo",
+                                                    duration = SnackbarDuration.Long
+                                                )
+                                                cuentaCreada = true
+                                            }
+                                            //Guardar datos firebase
+                                            saveUserData(
+                                                textoNombre.text,
+                                                textoCorreo.text,
+                                                firestore
                                             )
-                                            cuentaCreada = true
-                                        }
-                                        //Guardar datos firebase
-                                        saveUserData(
-                                            textoNombre.text,
-                                            textoCorreo.text,
-                                            firestore
-                                        )
-                                        val user = FirebaseAuth.getInstance().currentUser
-                                        user?.sendEmailVerification()
-                                    } else {
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar(
-                                                message = "El correo ingresado ya está asociado a otra cuenta",
-                                                duration = SnackbarDuration.Short
-                                            )
+                                        } else {
+
+                                            scope.launch {
+                                                isErrorC = true
+                                                snackbarHostState.showSnackbar(
+                                                    message = "El correo ingresado ya está asociado a otra cuenta",
+                                                    duration = SnackbarDuration.Short
+                                                )
+                                            }
                                         }
                                     }
-                                }
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
@@ -391,13 +448,11 @@ fun CrearCuenta(
                             }
                         }
                     }
-
                 }
             }
         }
     }
 }
-
 //Guardar datos del usuario en firestore
 private fun saveUserData(
     textoNombre: String,
