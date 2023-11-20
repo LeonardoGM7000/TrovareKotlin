@@ -59,6 +59,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import com.example.trovare.Pantalla
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,6 +69,7 @@ fun InicioDeSesion(
     navController: NavController
 ){
     // Declaramos variables
+    val db = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
 
     var textoCorreo by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -245,41 +247,66 @@ fun InicioDeSesion(
                                 }
                             }else{
                                 try{
-                                    val user = FirebaseAuth.getInstance().currentUser
 
-                                    auth.signInWithEmailAndPassword(textoCorreo.text, textoPasswrod.text)
-                                        .addOnCompleteListener{ task ->
+                                    // Verificamos si la cuenta es de administrador
+                                    db.collection("Administrador").whereEqualTo("correo", textoCorreo.text)
+                                        .whereEqualTo("password", textoPasswrod.text)
+                                        .get()
+                                        .addOnSuccessListener { querySnapshot ->
 
-                                            if(task.isSuccessful){
-                                                if (user?.isEmailVerified == false){
-                                                    scope.launch {
-                                                        snackbarHostState.showSnackbar(
-                                                            message = "Correo no verificado. Verifica tu correo electrónico.",
-                                                            duration = SnackbarDuration.Short
-                                                        )
+                                            if(!querySnapshot.isEmpty){
+
+                                                Log.d("Trovare","Ingreso usuario administrador")
+                                                navController.navigate(Pantalla.Administrador.ruta){
+                                                    popUpTo(navController.graph.id){
+                                                        inclusive = true
                                                     }
-                                                }else{
-                                                    scope.launch {
-                                                        snackbarHostState.showSnackbar(
-                                                            message = "Iniciando Sesión...",
-                                                            duration = SnackbarDuration.Short
-                                                        )
-                                                    }
-                                                    navController.navigate(Pantalla.Inicio.ruta){
-                                                        popUpTo(navController.graph.id){
-                                                            inclusive = true
+                                                }
+
+                                            }else{
+
+                                                // Verificamos si la cuenta es de usuario
+                                                val user = FirebaseAuth.getInstance().currentUser
+
+                                                auth.signInWithEmailAndPassword(textoCorreo.text, textoPasswrod.text)
+                                                    .addOnCompleteListener{ task ->
+
+                                                        if(task.isSuccessful){
+                                                            if (user?.isEmailVerified == false){
+                                                                scope.launch {
+                                                                    snackbarHostState.showSnackbar(
+                                                                        message = "Correo no verificado. Verifica tu correo electrónico.",
+                                                                        duration = SnackbarDuration.Short
+                                                                    )
+                                                                }
+                                                            }else{
+                                                                scope.launch {
+                                                                    snackbarHostState.showSnackbar(
+                                                                        message = "Iniciando Sesión...",
+                                                                        duration = SnackbarDuration.Short
+                                                                    )
+                                                                }
+                                                                navController.navigate(Pantalla.Inicio.ruta){
+                                                                    popUpTo(navController.graph.id){
+                                                                        inclusive = true
+                                                                    }
+                                                                }
+                                                            }
+                                                        }else{
+                                                            scope.launch {
+                                                                snackbarHostState.showSnackbar(
+                                                                    message = "Correo o contraseña incorrectos",
+                                                                    duration = SnackbarDuration.Short
+                                                                )
+                                                            }
                                                         }
                                                     }
-                                                }
-                                            }else{
-                                                scope.launch {
-                                                    snackbarHostState.showSnackbar(
-                                                        message = "Correo o contraseña incorrectos",
-                                                        duration = SnackbarDuration.Short
-                                                    )
-                                                }
                                             }
                                         }
+                                        .addOnFailureListener{
+                                            Log.d("Trovare","Error al conectar con la base")
+                                        }
+
                                 }catch(ex:Exception){
                                     Log.d("Login", "Error en la conexión de la base de datos")
                                 }
