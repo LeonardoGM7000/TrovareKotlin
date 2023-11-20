@@ -110,20 +110,6 @@ fun Bienvenida(
                     style = MaterialTheme.typography.bodySmall,
                     textDecoration = TextDecoration.Underline,
                 )
-                //Boton temporal para saltar el inicio de sesión (eliminar para la versión final)---
-                TextButton(
-                    modifier = modifier
-                        .padding(bottom = 10.dp),
-                    onClick = {
-                        navController.navigate(Pantalla.Administrador.ruta)
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Red,
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text(text = "ADMIN")
-                }
             }
 
         }
