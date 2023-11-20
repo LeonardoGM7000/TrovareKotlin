@@ -27,6 +27,9 @@ import com.example.trovare.ui.theme.Pantallas.CrearCuenta
 import com.example.trovare.ui.theme.Pantallas.EditarPreguntas
 import com.example.trovare.ui.theme.Pantallas.EliminarComentarios
 import com.example.trovare.ui.theme.Pantallas.EliminarCuentas
+import com.example.trovare.ui.theme.Pantallas.Ingreso.ActualizarContrasena
+import com.example.trovare.ui.theme.Pantallas.Ingreso.RecuperarContrasena
+import com.example.trovare.ui.theme.Pantallas.Ingreso.TokenRecuperarContrasena
 import com.example.trovare.ui.theme.Pantallas.PreguntasAdmin
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.libraries.places.api.net.PlacesClient
@@ -55,6 +58,8 @@ sealed class Pantalla(val ruta: String) {
     object EliminarCuentas : Pantalla("EliminarCuentas")
     object EliminarComentarios : Pantalla("EliminarComentarios")
     object RecuperarContrasena : Pantalla("RecuperarContrasena")
+    object TokenRecuperarContrasena : Pantalla("TokenRecuperarContrasena")
+    object ActualizarContrasena : Pantalla("ActualizarContrasena")
     object CategoriaSeleccionada : Pantalla("CategoriaSeleccionada")
 
     fun conArgs(vararg args: String): String {
@@ -191,14 +196,22 @@ fun Trovare(
                 navController = navController
             )
         }
-        /*
+
         composable(route = Pantalla.RecuperarContrasena.ruta) {
             RecuperarContrasena(
                 navController = navController
             )
         }
-
-         */
+        composable(route = Pantalla.TokenRecuperarContrasena.ruta) {
+            TokenRecuperarContrasena(
+                navController = navController
+            )
+        }
+        composable(route = Pantalla.ActualizarContrasena.ruta) {
+            ActualizarContrasena(
+                navController = navController
+            )
+        }
         composable(
             route = Pantalla.CategoriaSeleccionada.ruta + "/{categoria}",
             arguments = listOf(
