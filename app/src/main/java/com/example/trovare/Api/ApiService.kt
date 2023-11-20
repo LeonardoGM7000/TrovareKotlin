@@ -8,6 +8,7 @@ import com.example.trovare.Data.NearbyPlaces
 import com.example.trovare.Data.NearbyPlacesClass
 import com.example.trovare.Data.Places
 import com.example.trovare.Data.PlacesClass
+import com.example.trovare.Data.SnappedPointsClass
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
@@ -28,8 +29,10 @@ import org.json.JSONObject
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 
 interface APIServiceBuscarTexto {
@@ -88,7 +91,7 @@ fun rawJSON(
                 Log.d("Pretty Printed JSON :", prettyJson)
 
                 val gson1 = Gson()
-                var mUser = gson1.fromJson(prettyJson, PlacesClass::class.java)
+                val mUser = gson1.fromJson(prettyJson, PlacesClass::class.java)
                 mUser.places.forEach { lugar ->
                     if (lugar != null) {
                         recuperarResultados.add(Places(id = lugar.id, formattedAddress = lugar.formattedAddress, displayName = lugar.displayName))
@@ -195,7 +198,7 @@ fun rawJSONLugarCercano(
                 Log.d("Pretty Printed JSON :", prettyJson)
 
                 val gson1 = Gson()
-                var mUser = gson1.fromJson(prettyJson, NearbyPlacesClass::class.java)
+                val mUser = gson1.fromJson(prettyJson, NearbyPlacesClass::class.java)
                 mUser.placesNearby.forEach { lugar ->
                     if (lugar != null) {
                         recuperarResultados.add(NearbyPlaces(id = lugar.id, displayName = lugar.displayName, shortFormattedAddress = lugar.shortFormattedAddress))
@@ -299,7 +302,7 @@ fun rawJSONUbicacionesCercanas(
                 Log.d("Pretty Printed JSON :", prettyJson)
 
                 val gson1 = Gson()
-                var mUser = gson1.fromJson(prettyJson, NearbyLocationsClass::class.java)
+                val mUser = gson1.fromJson(prettyJson, NearbyLocationsClass::class.java)
 
                 recuperarResultados.clear()
 
@@ -319,3 +322,67 @@ fun rawJSONUbicacionesCercanas(
         }
     }
 }
+
+interface ApiServiceCrearRuta{
+    @GET("/v1/snapToRoads")
+    suspend fun getPuntosParaRuta(@Query("interpolate") interpolate: Boolean?, @Query(value="path", encoded = true) path: String, @Query("key") key: String): Response<ResponseBody>
+}
+
+fun rawJSONCrearRuta(
+    path: String,
+    interpolate: Boolean?,
+    recuperarResultados: MutableList<LatLng>
+){
+    //Create Retrofit
+    val retrofit = Retrofit.Builder()
+        .baseUrl("https://roads.googleapis.com")
+        .build()
+
+   // Create Sevice
+    val service = retrofit.create(ApiServiceCrearRuta::class.java)
+    val key = "AIzaSyDiFpHGDFegDBzku5qKvnGniIN88T6vuQc"
+
+    CoroutineScope(Dispatchers.IO).launch {
+        // Do the GET request and get response
+        val response = service.getPuntosParaRuta(interpolate, path, key)
+
+        withContext(Dispatchers.Main) {
+            if (response.isSuccessful) {
+
+                // Convert raw JSON to pretty JSON using GSON library
+                val gson = GsonBuilder().setPrettyPrinting().create()
+                val prettyJson = gson.toJson(
+                    JsonParser.parseString(
+                        response.body()
+                            ?.string() // About this thread blocking annotation : https://github.com/square/retrofit/issues/3255
+                    )
+                )
+
+                Log.d("Pretty Printed JSON Rutas:", prettyJson)
+
+                val gson1 = Gson()
+                //val mUser = gson1.fromJson(prettyJson, SnappedPointsClass::class.java)
+
+                try {
+                    val mUser = gson1.fromJson(prettyJson, SnappedPointsClass::class.java)
+                    //Log.d("Deserialization Success", mUser.toString())
+                    mUser.snappedPoints.forEach { punto ->
+                        if (punto != null) {
+                            recuperarResultados.add(LatLng(punto.location.latitude, punto.location.longitude))
+                        } else {
+                            //manejar error no se eonctraron resultados
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e("Deserialization Error", e.message ?: "Unknown error")
+                }
+
+
+            } else {
+                Log.e("RETROFIT_ERROR_RUTAS", response.code().toString())
+
+            }
+        }
+    }
+}
+

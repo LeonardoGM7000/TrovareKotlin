@@ -1,5 +1,6 @@
 package com.example.trovare.ui.theme.Pantallas.Mapa
 
+import android.annotation.SuppressLint
 import android.service.controls.ControlsProviderService.TAG
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
@@ -43,6 +44,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -62,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.trovare.Api.rawJSON
+import com.example.trovare.Api.rawJSONCrearRuta
 import com.example.trovare.Api.rawJSONLugarCercano
 import com.example.trovare.Api.rawJSONUbicacionesCercanas
 import com.example.trovare.Data.Places
@@ -92,6 +95,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
+@SuppressLint("MutableCollectionMutableState")
 @OptIn(ExperimentalMaterial3Api::class, MapsComposeExperimentalApi::class)
 @Composable
 fun MapaPrincipal(
@@ -139,7 +143,7 @@ fun MapaPrincipal(
     val nombreLugar by viewModel.nombreLugar.collectAsState()
     val ratingLugar by viewModel.ratingLugar.collectAsState()
     val idLugar by viewModel.idLugar.collectAsState()
-    var zoom by remember { mutableStateOf(15f) }
+    var zoom by remember { mutableFloatStateOf(15f) }
 
 
     val ubicacion by viewModel.ubicacion.collectAsState()
@@ -156,7 +160,10 @@ fun MapaPrincipal(
 
     val marcadores by remember { mutableStateOf(mutableListOf<LatLng>()) }
 
-
+    //Ruta--------------------------------
+    var path by rememberSaveable{ mutableStateOf("") }
+    val interpolate1 by rememberSaveable { mutableStateOf(true) }
+    val puntosRuta by remember { mutableStateOf(mutableListOf<LatLng>()) }
 
     //UI--------------------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------------------
@@ -437,7 +444,24 @@ fun MapaPrincipal(
                                     modifier = modifier
                                         .fillMaxWidth()
                                         .padding(end = 5.dp, bottom = 5.dp),
-                                    onClick = { /*TODO*/ },
+                                    onClick = {
+                                        path = ubicacion.latitude.toString() + "%2C" + ubicacion.longitude.toString() + "%7C" + state.lastKnownLocation?.latitude.toString() + "%2C" + state.lastKnownLocation?.longitude.toString()
+                                        Log.d("rutasss",path)
+                                        rawJSONCrearRuta(
+                                            path = path,
+                                            interpolate = interpolate1,
+                                            recuperarResultados = puntosRuta
+                                        )
+                                        // Acceder a la latitud de la primera coordenada
+                                        val primeraLatitud: Double? = puntosRuta.firstOrNull()?.latitude
+
+                                        if (primeraLatitud != null) {
+                                            Log.d("Primera Latitud", primeraLatitud.toString())
+                                        } else {
+                                            Log.d("Puntos de Ruta", "La lista de puntos de ruta está vacía.")
+                                        }
+                                        //Log.d("Algun punto",puntosRuta[0].latitude.toString())
+                                    },
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = Trv3
                                     )

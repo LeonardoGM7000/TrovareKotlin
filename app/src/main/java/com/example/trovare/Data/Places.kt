@@ -47,5 +47,13 @@ data class Location (
     @SerializedName("longitude" ) var longitude : Double,
 )
 
+data class SnappedPointsClass(
+    @SerializedName("snappedPoints" ) var snappedPoints: List<SnappedPoints?> = arrayListOf()
+)
 
+data class SnappedPoints(
+    @SerializedName("location") var location: Location,
+    @SerializedName("originalIndex") var originalIndex: Int? = null,
+    @SerializedName("placeId") var id: String
+)
 
