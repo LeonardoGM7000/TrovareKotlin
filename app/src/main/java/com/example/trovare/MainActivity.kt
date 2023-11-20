@@ -11,8 +11,6 @@ import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Navegacion.Trovare
-import com.example.trovare.ui.theme.Pantallas.Itinerarios.EditarItinerario
-import com.example.trovare.ui.theme.Pantallas.Mapa.MapScreen
 import com.example.trovare.ui.theme.TrovareTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices

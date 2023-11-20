@@ -145,6 +145,12 @@ class TrovareViewModel : ViewModel() {
         _marcadoresInicializado.value = newValue
     }
 
+    private val _informacionInicializada = MutableStateFlow(false)
+    val informacionInicializada: StateFlow<Boolean> = _informacionInicializada.asStateFlow()
+    fun setInformacionInicializada(newValue: Boolean) {
+        _informacionInicializada.value = newValue
+    }
+
     private val _nombreLugar = MutableStateFlow("")
     val nombreLugar = _nombreLugar.asStateFlow()
 
@@ -353,6 +359,7 @@ class TrovareViewModel : ViewModel() {
                 }
 
                 setMarcadorInicializado(true)
+                setInformacionInicializada(true)
 
             }.addOnFailureListener { exception: Exception ->
                 if (exception is ApiException) {
@@ -362,4 +369,61 @@ class TrovareViewModel : ViewModel() {
                 }
             }
     }
+
+    fun obtenerMarcadorEntreMuchos(
+        placesClient: PlacesClient,
+        placeId: String,
+    ){
+        val placeFields = listOf(
+            Place.Field.ID,
+            Place.Field.NAME,
+            Place.Field.RATING,
+            Place.Field.PHOTO_METADATAS
+        )//campos que se deben obtener de la API de places
+
+        val request = FetchPlaceRequest.newInstance(placeId, placeFields)
+
+        placesClient.fetchPlace(request)
+            .addOnSuccessListener { response: FetchPlaceResponse ->
+                val place = response.place
+
+                setNombreLugar(place.name?:"")
+                setRatingLugar(place.rating?:-1.0)
+                setIdLugar(place.id?:"")
+
+                val metada = place.photoMetadatas
+                if (metada != null) {
+
+                    val photoMetadata = metada.first()
+
+                    // Create a FetchPhotoRequest.
+                    val photoRequest = FetchPhotoRequest.builder(photoMetadata)
+                        .setMaxWidth(200) // Optional.
+                        .setMaxHeight(200) // Optional.
+                        .build()
+                    placesClient.fetchPhoto(photoRequest)
+                        .addOnSuccessListener { fetchPhotoResponse: FetchPhotoResponse ->
+
+                            val image = fetchPhotoResponse.bitmap
+                            val imagenBitmap: ImageBitmap = image.asImageBitmap()
+                            _imagen.value = imagenBitmap
+                        }.addOnFailureListener { exception: Exception ->
+                            if (exception is ApiException) {
+                                val statusCode = exception.statusCode
+                                TODO("Handle error with given status code.")
+                            }
+                        }
+                }
+
+                setInformacionInicializada(true)
+
+            }.addOnFailureListener { exception: Exception ->
+                if (exception is ApiException) {
+                    Log.e("testLugar", "Place not found: ${exception.message}")
+                    val statusCode = exception.statusCode
+                    TODO("Handle error with given status code")
+                }
+            }
+    }
+
 }

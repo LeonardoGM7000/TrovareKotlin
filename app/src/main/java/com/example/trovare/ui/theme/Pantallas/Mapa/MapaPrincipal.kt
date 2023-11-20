@@ -79,9 +79,11 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.maps.android.compose.MapEffect
 import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerInfoWindow
@@ -140,6 +142,7 @@ fun MapaPrincipal(
     //Mapa-------------------------------
     val marcadorInicializado by viewModel.marcadorInicializado.collectAsState()
     val marcadoresInicializado by viewModel.marcadoresInicializado.collectAsState()
+    val informacionInicializada by viewModel.informacionInicializada.collectAsState()
     val nombreLugar by viewModel.nombreLugar.collectAsState()
     val ratingLugar by viewModel.ratingLugar.collectAsState()
     val idLugar by viewModel.idLugar.collectAsState()
@@ -153,12 +156,13 @@ fun MapaPrincipal(
     val mapProperties = MapProperties(
         // Only enable if user has accepted location permissions.
         isMyLocationEnabled = state.lastKnownLocation != null,
+        mapStyleOptions = MapStyleOptions(MapStyle.json)
     )
 
     //Filtros----------------------------
     var filtroExtendido by rememberSaveable { mutableStateOf(false) }
 
-    val marcadores by remember { mutableStateOf(mutableListOf<LatLng>()) }
+    val marcadores by remember { mutableStateOf(mutableListOf<Marcador>()) }
 
     //Ruta--------------------------------
     var path by rememberSaveable{ mutableStateOf("") }
@@ -176,7 +180,8 @@ fun MapaPrincipal(
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             properties = mapProperties,
-            cameraPositionState = cameraPositionState
+            cameraPositionState = cameraPositionState,
+            uiSettings = MapUiSettings(mapToolbarEnabled = false)
         ) {
             //Si cambia la ubicacion,
             MapEffect(ubicacion) {
@@ -189,14 +194,27 @@ fun MapaPrincipal(
                     snippet = "Some stuff",
                     onClick = {
                         Log.e("pruebaclick", "pruebaclick")
-                        true
+                        false
                     },
                     draggable = true
                 )
             }
+            //varios marcadores
             if(marcadoresInicializado){
                 marcadores.forEach { marcador ->
-                    Marker(state = rememberMarkerState(position = marcador))
+                    Marker(
+                        state = rememberMarkerState(position = marcador.ubicacion),
+                        onClick ={
+                            viewModel.setInformacionInicializada(false)
+                            viewModel.obtenerMarcadorEntreMuchos(
+                                placesClient = placesClient,
+                                placeId = marcador.id,
+                            )
+                            //viewModel.set
+                            false
+
+                        }
+                    )
                 }
             }
 
@@ -292,6 +310,7 @@ fun MapaPrincipal(
                                     zoom = 13f
                                     viewModel.setMarcadorInicializado(false)
                                     viewModel.setMarcadoresInicializado(false)
+                                    viewModel.setInformacionInicializada(false)
                                     viewModel.getLastLocation(fusedLocationProviderClient = fusedLocationProviderClient)
                                     CoroutineScope(Dispatchers.Default).launch {
                                         delay(200)
@@ -347,6 +366,7 @@ fun MapaPrincipal(
                                         zoom = 15f
                                         viewModel.setMarcadoresInicializado(false)
                                         viewModel.setMarcadorInicializado(false)
+                                        viewModel.setInformacionInicializada(false)
                                         viewModel.obtenerMarcador(
                                             placesClient = placesClient,
                                             placeId = lugar.id,
@@ -380,7 +400,7 @@ fun MapaPrincipal(
                 }
             }
             //Tarjeta informacion del lugar---------------------------------------------------------
-            if(marcadorInicializado){
+            if(informacionInicializada){
                 Box(
                     modifier = modifier
                         .fillMaxSize(),
