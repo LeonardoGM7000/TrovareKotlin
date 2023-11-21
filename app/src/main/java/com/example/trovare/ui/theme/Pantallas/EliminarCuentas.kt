@@ -366,7 +366,11 @@ fun BusquedaCuenta(
                 //Necesita eliminar la pregunta
                 //borrarCuentas()
                 eliminarCuentasSeleccionadas(cuentasSeleccionadas)
-                navController.navigate(Pantalla.EliminarCuentas.ruta)
+                navController.navigate(Pantalla.EliminarCuentas.ruta) {
+                    popUpTo(navController.graph.id) {
+                        inclusive = true
+                    }
+                }
                 Log.i("cuentas", cuentasSeleccionadas.toString())
 
             },
