@@ -99,7 +99,8 @@ fun Trovare(
         }
         composable(route = Pantalla.InicioDeSesion.ruta) {
             InicioDeSesion(
-                navController = navController
+                navController = navController,
+                viewModel = viewModel
             )
         }
         composable(route = Pantalla.Registro.ruta) {
@@ -140,7 +141,8 @@ fun Trovare(
         }
         composable(route = Pantalla.EditarPerfil.ruta) {
             EditarPerfil(
-                navController = navController
+                navController = navController,
+                viewModel = viewModel
             )
         }
         composable(route = Pantalla.Buscar.ruta) {

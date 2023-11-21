@@ -198,7 +198,6 @@ class TrovareViewModel : ViewModel() {
     //--------------------------------------------------------------------------------------------//
 
     //Obtener preview de los lugares incluyendo el nombre, direccion e ID es ApiService.kt
-
     //Funcion para obtener detalles del lugar con base en un ID de lugar----------------------------
     fun obtenerLugar(
         placesClient: PlacesClient,
@@ -450,8 +449,11 @@ class TrovareViewModel : ViewModel() {
     //--------------------------------------------------------------------------------------------//
     //-------------------------------------FIREBASE-----------------------------------------------//
     //--------------------------------------------------------------------------------------------//
-    private val _dato = mutableStateOf<Usuario>(usuarioPrueba)
-    val dato: State<Usuario> = _dato
+    private val _usuario = MutableStateFlow(usuarioPrueba)
+    val usuario = _usuario.asStateFlow()
+    fun setUsuario(nuevoUsuario: Usuario) {
+        _usuario.value = nuevoUsuario
+    }
 
     // Funciones auxiliares
     fun obtenerDato() {
@@ -466,19 +468,19 @@ class TrovareViewModel : ViewModel() {
                 //firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().result.id
                 val documento =  firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().await()
                 val usuario = Usuario(
-                    documento.getString("nombre").toString(),
-                    R.drawable.perfil,
-                    documento.getString("fechaDeRegistro").toString(),
-                    documento.getString("descripcion").toString(),
-                    documento.getString("lugarDeOrigen").toString(),
-                    null
+                        nombre = documento.getString("nombre").toString(),
+                        foto_perfil = R.drawable.perfil,
+                        fechaDeRegistro = documento.getString("fechaDeRegistro").toString(),
+                        descripcion = documento.getString("descripcion").toString(),
+                        lugarDeOrigen = documento.getString("lugarDeOrigen").toString(),
+                        comentarios = null
                 )
 
-                _dato.value = usuario
+                setUsuario(usuario)
 
             }catch(e: Exception){
 
-                _dato.value = usuarioPrueba
+                setUsuario(usuarioPrueba)
 
             }
         }

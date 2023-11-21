@@ -34,7 +34,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -163,6 +162,7 @@ fun Configuracion(
                                     inclusive = true
                                 }
                             }
+
                         },
                         textoConfirmar = "Cerrar Sesión",
                         titulo = "Cerrar Sesión",
@@ -193,15 +193,11 @@ fun Configuracion(
 @Composable
 fun TarjetaPerfil(
     modifier: Modifier = Modifier,
-    usuario: Usuario = usuarioPrueba,
     viewModel: TrovareViewModel,
     navController: NavController,
 ){
 
-    val usuario by viewModel.dato
-    LaunchedEffect(true){
-        viewModel.obtenerDato()
-    }
+    val usuario by viewModel.usuario.collectAsState()
 
     Card(
         modifier = modifier

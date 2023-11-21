@@ -28,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,7 +44,6 @@ import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import com.example.trovare.ViewModel.TrovareViewModel
 
@@ -103,14 +103,11 @@ fun PerfilInicio(
 @Composable
 fun PerfilPrincipal(
     modifier: Modifier = Modifier,
+    navController: NavController,
     viewModel: TrovareViewModel,
-    navController: NavController
 ){
 
-    val usuario by viewModel.dato
-    LaunchedEffect(true){
-        viewModel.obtenerDato()
-    }
+    val usuario by viewModel.usuario.collectAsState()
 
     Surface(
         modifier = modifier
@@ -295,15 +292,10 @@ fun PerfilPrincipal(
                                     color = Color.White,
                                 )
                             }
-
                         }
                     }
                 }
             }
-
-
-
         }
-
     }
 }

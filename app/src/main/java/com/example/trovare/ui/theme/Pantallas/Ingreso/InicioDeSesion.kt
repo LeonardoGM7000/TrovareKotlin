@@ -60,20 +60,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import android.util.Patterns
-import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.firestore.FirebaseFirestore
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.os.Build
 import androidx.compose.ui.platform.LocalContext
+import com.example.trovare.ViewModel.TrovareViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InicioDeSesion(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    viewModel: TrovareViewModel
 ){
     // Declaramos variables
     val db = FirebaseFirestore.getInstance()
@@ -254,8 +254,14 @@ fun InicioDeSesion(
                                         duration = SnackbarDuration.Short
                                     )
                                 }
-                            }
-                            else {
+                            }else if (!isNetworkAvailable(context)) {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Error de conexión",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            } else {
                                 try{
                                     // Verificamos si la cuenta es de administrador
                                     db.collection("Administrador").whereEqualTo("correo", textoCorreo.text)
@@ -297,6 +303,7 @@ fun InicioDeSesion(
                                                                         inclusive = true
                                                                     }
                                                                 }
+                                                                viewModel.obtenerDato()
                                                             }
                                                         }else{
                                                             scope.launch {
@@ -328,4 +335,17 @@ fun InicioDeSesion(
             }
         }
     }
+}
+
+@SuppressLint("ServiceCast")
+private fun isNetworkAvailable(context: Context): Boolean {
+    val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    val network = connectivityManager.activeNetwork ?: return false
+    val capabilities =
+        connectivityManager.getNetworkCapabilities(network) ?: return false
+
+    return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
 }
