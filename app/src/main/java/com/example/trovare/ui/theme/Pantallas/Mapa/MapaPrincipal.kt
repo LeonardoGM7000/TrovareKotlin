@@ -66,6 +66,7 @@ import androidx.navigation.NavController
 import com.example.trovare.Api.rawJSON
 import com.example.trovare.Api.rawJSONCrearRuta
 import com.example.trovare.Api.rawJSONLugarCercano
+import com.example.trovare.Api.rawJSONRutas
 import com.example.trovare.Api.rawJSONUbicacionesCercanas
 import com.example.trovare.Data.Places
 import com.example.trovare.Data.categorias
@@ -77,9 +78,12 @@ import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv3
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.maps.android.compose.MapEffect
 import com.google.maps.android.compose.MapProperties
@@ -95,6 +99,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.google.maps.android.PolyUtil
 
 
 @SuppressLint("MutableCollectionMutableState")
@@ -168,7 +173,9 @@ fun MapaPrincipal(
     var path by rememberSaveable{ mutableStateOf("") }
     val interpolate1 by rememberSaveable { mutableStateOf(true) }
     val puntosRuta by remember { mutableStateOf(mutableListOf<LatLng>()) }
-
+    val rutaInfo by remember { mutableStateOf(mutableListOf<RutaInfo>()) }
+    var polilineaCod: String?
+    polilineaCod = ""
     //UI--------------------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------------------
 
@@ -183,6 +190,7 @@ fun MapaPrincipal(
             cameraPositionState = cameraPositionState,
             uiSettings = MapUiSettings(mapToolbarEnabled = false)
         ) {
+
             //Si cambia la ubicacion,
             MapEffect(ubicacion) {
                 val cameraPosition = CameraPosition.fromLatLngZoom(ubicacion, zoom)
@@ -216,6 +224,18 @@ fun MapaPrincipal(
                         }
                     )
                 }
+            }
+
+            if(marcadoresInicializado){
+                val encodedPolyline = polilineaCod // Reemplaza con tu encoded polyline
+                val decodedPolyline: List<LatLng> = PolyUtil.decode(encodedPolyline)
+
+                val prueba = decodedPolyline.firstOrNull()?.latitude
+                Log.d("ListadeLats",prueba.toString())
+                /*for (latLng in decodedPolyline) {
+                    Log.d("ListadeLats", "Latitud: ${latLng.latitude}, Longitud: ${latLng.longitude}")
+                }*/
+
             }
 
         }
@@ -481,6 +501,28 @@ fun MapaPrincipal(
                                             Log.d("Puntos de Ruta", "La lista de puntos de ruta está vacía.")
                                         }
                                         //Log.d("Algun punto",puntosRuta[0].latitude.toString())
+
+                                        val origen = LatLng(ubicacion.latitude, ubicacion.longitude)
+                                        val destino =
+                                            state.lastKnownLocation?.latitude?.let { state.lastKnownLocation?.longitude?.let { it1 ->
+                                                LatLng(it,
+                                                    it1
+                                                )
+                                            } }
+                                        if (destino != null) {
+                                            rawJSONRutas(
+                                                origen = origen,
+                                                destino = destino,
+                                                recuperarResultados = rutaInfo
+                                            )
+                                            polilineaCod = rutaInfo.firstOrNull()?.polilinea
+
+                                            if (polilineaCod != null) {
+                                                Log.d("Polilinea codigo", polilineaCod!!)
+                                            } else {
+                                                Log.d("ERROR_POLILINEA_COD", "La lista de puntos de ruta está vacía.")
+                                            }
+                                        }
                                     },
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = Trv3

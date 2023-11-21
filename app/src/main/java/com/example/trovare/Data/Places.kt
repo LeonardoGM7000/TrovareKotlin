@@ -58,3 +58,19 @@ data class SnappedPoints(
     @SerializedName("placeId") var id: String
 )
 
+data class Routes(
+    @SerializedName("routes") var routes: List<InformationRoute?> = arrayListOf()
+)
+
+data class InformationRoute(
+    @SerializedName("distanceMeters") var distance: Float,
+    @SerializedName("duration") var duration: String,
+    @SerializedName("polyline") var polyline: EncodPoly
+)
+
+data class EncodPoly(
+    @SerializedName("encodedPolyline") var encodPolyline: String
+)
+
+
+
