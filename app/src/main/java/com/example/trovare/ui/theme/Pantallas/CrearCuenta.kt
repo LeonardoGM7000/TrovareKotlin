@@ -1,7 +1,11 @@
 package com.example.trovare.ui.theme.Pantallas
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.Intent.getIntent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.util.Log
 import android.util.Patterns
 import androidx.compose.foundation.layout.Column
@@ -47,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -83,7 +88,7 @@ fun CrearCuenta(
     val auth = FirebaseAuth.getInstance()
 
     val firestore = Firebase.firestore
-
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -117,7 +122,7 @@ fun CrearCuenta(
     var isErrorL: Int by rememberSaveable { mutableIntStateOf(0) }
     var isErrorLA: Int by rememberSaveable { mutableIntStateOf(0) }
     val minimoPassword = 8
-    val maximoLetras = 30
+    val maximoLetras = 15
 
     fun validarLetras(text: String) {
         if(!(text.matches("[a-zA-ZÀ-ÿ ]*".toRegex()))){
@@ -426,6 +431,14 @@ fun CrearCuenta(
                                         duration = SnackbarDuration.Short
                                     )
                                 }
+                            } else if(!isNetworkAvailable(context)) {
+                                Log.i("error conexión", "No hay conexión a internet")
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Error de conexión",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
                             } else {
                                 auth.createUserWithEmailAndPassword(
                                     textoCorreo.text,
@@ -496,4 +509,16 @@ private fun saveUserData(
     }.addOnFailureListener {
         Log.i("cuenta", "Datos no guardados")
     }
+}
+@SuppressLint("ServiceCast")
+fun isNetworkAvailable(context: Context): Boolean {
+    val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    val network = connectivityManager.activeNetwork ?: return false
+    val capabilities =
+        connectivityManager.getNetworkCapabilities(network) ?: return false
+
+    return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
 }

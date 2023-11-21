@@ -60,12 +60,14 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import android.util.Log
 import android.util.Patterns
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import com.example.trovare.Pantalla
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,6 +95,8 @@ fun InicioDeSesion(
     val keyboardOptionsCorreo: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email, imeAction = ImeAction.Done)
     val keyboardOptionsPassword: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done)
     val context = LocalContext.current
+    var inicio by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
@@ -295,14 +299,10 @@ fun InicioDeSesion(
                                                             }else{
                                                                 scope.launch {
                                                                     snackbarHostState.showSnackbar(
-                                                                        message = "Iniciando Sesión...",
+                                                                        message = "Bienvenido...",
                                                                         duration = SnackbarDuration.Short
                                                                     )
-                                                                }
-                                                                navController.navigate(Pantalla.Inicio.ruta){
-                                                                    popUpTo(navController.graph.id){
-                                                                        inclusive = true
-                                                                    }
+                                                                    inicio=true
                                                                 }
                                                             }
                                                         }else{
@@ -331,6 +331,16 @@ fun InicioDeSesion(
                         )
                     ) {
                         Text(text = "Ingresar")
+                    }
+                    LaunchedEffect(inicio) {
+                        if (inicio) {
+                            delay(100)
+                            navController.navigate(Pantalla.Inicio.ruta){
+                                popUpTo(navController.graph.id){
+                                    inclusive = true
+                                }
+                            }
+                        }
                     }
                 }
             }
