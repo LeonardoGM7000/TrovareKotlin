@@ -78,7 +78,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-data class Cuenta(val nombre: String = "")
+data class Cuenta(val nombre: String = "", val id: String="")
 var effectKey = 0
 val cuentasSeleccionadas = mutableListOf<Cuenta>()
 
@@ -102,10 +102,15 @@ fun EliminarCuentas(
         Log.i("EliminarCuentas", "LaunchedEffect: Obtaining accounts from Firestore")
         try {
             val cuentasSnapshot = firestore.collection("Usuario").get().await()
-            cuentas = cuentasSnapshot.toObjects(Cuenta::class.java)
-            Log.i("EliminarCuenta", "Accounts obtained successfully: $cuentas")
+
+            cuentas = cuentasSnapshot.documents.map { document ->
+                val cuenta = document.toObject(Cuenta::class.java)
+                cuenta?.copy(id = document.id) ?: Cuenta() // Asigna el ID al objeto Cuenta
+            }
+
+            Log.i("EliminarCuenta", "Cuentas obtenidas exitosamente: $cuentas")
         } catch (e: Exception) {
-            Log.i("EliminarCuenta", "Error obtaining accounts from Firestore", e)
+            Log.e("EliminarCuenta", "Error al obtener cuentas de Firestore", e)
         } finally {
             isLoading = false
         }
@@ -159,27 +164,6 @@ fun EliminarCuentas(
                                 TarjetaUsuario(
                                     cuenta = cuenta,
                                     expanded = index == expandedCuentaIndex,
-                                    onDeleteClick = {
-                                        if(cuentasSeleccionadas.contains(cuenta)){
-                                            Log.i("Entro a eliminar","entro a eliminar")
-                                            firestore.collection("Usuario").document(cuenta.nombre)
-                                                .delete()
-                                                .addOnSuccessListener {
-                                                    // Éxito al eliminar
-                                                    Log.d("EliminarCuenta", "Cuenta eliminada")
-                                                }
-                                                .addOnFailureListener { e ->
-                                                    // Error al eliminar
-                                                    Log.w("EliminarCuenta", "Error al eliminar cuenta", e)
-                                                }
-                                            cuentas = cuentas.filterNot { it.nombre == cuenta.nombre}
-                                            cuentasSeleccionadas.clear();
-                                        }
-                                        // Eliminar la pregunta de Firestore
-
-                                        //  .delete()
-                                        //accounts = accounts.filterNot { it.nombre == account.nombre }
-                                    },
                                     modifier = modifier.padding(top = 20.dp),
                                     navController = navController
                                 )
@@ -207,7 +191,6 @@ fun EliminarCuentas(
 fun TarjetaUsuario(
     cuenta: Cuenta,
     expanded: Boolean,
-    onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
@@ -382,11 +365,10 @@ fun BusquedaCuenta(
             alConfirmar = {
                 //Necesita eliminar la pregunta
                 //borrarCuentas()
-                navController.navigate(Pantalla.Administrador.ruta) {
-                    popUpTo(navController.graph.id) {
-                        inclusive = true
-                    }
-                }
+                eliminarCuentasSeleccionadas(cuentasSeleccionadas)
+                navController.navigate(Pantalla.EliminarCuentas.ruta)
+                Log.i("cuentas", cuentasSeleccionadas.toString())
+
             },
             textoConfirmar = "Eliminar Cuentas",
             titulo = "Eliminar Cuentas",
@@ -394,5 +376,19 @@ fun BusquedaCuenta(
             icono = Icons.Filled.DeleteForever,
             colorConfirmar = Color.Red
         )
+    }
+}
+
+fun eliminarCuentasSeleccionadas(cuentasSeleccionadas: List<Cuenta>) {
+    val firestore: FirebaseFirestore by lazy { Firebase.firestore }
+    try {
+        for (cuenta in cuentasSeleccionadas) {
+            firestore.collection("Usuario").document(cuenta.id).delete()
+        }
+        Log.i("cuentas","se borro")
+    } catch (e: Exception) {
+        // Manejar el error, por ejemplo, mostrar un mensaje al usuario
+        Log.i("cuentas","no se borro")
+
     }
 }
