@@ -34,6 +34,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,13 +51,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.Data.Configuracion
+import com.example.trovare.Data.PerfilDataModel
 import com.example.trovare.Data.Usuario
 import com.example.trovare.Data.listaDeConfiguracion
 import com.example.trovare.Data.usuarioPrueba
 import com.example.trovare.ViewModel.TrovareViewModel
+import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
@@ -64,8 +67,6 @@ import com.example.trovare.ui.theme.Recursos.VentanaDeAlerta
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv6
-import androidx.compose.runtime.LaunchedEffect
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Configuracion(
@@ -73,17 +74,14 @@ fun Configuracion(
     viewModel: TrovareViewModel,
     navController: NavController
 ) {
-
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
         },
     ) { it ->
-
         var mostrarCerrarSesion by rememberSaveable { mutableStateOf(false) }
         var mostrarBorrarCuenta by rememberSaveable { mutableStateOf(false) }
         val uiState by viewModel.uiState.collectAsState()
-
         //CUERPO DE LA PANTALLA CONFIGURACION ------------------------------------------------------
         Surface(
             modifier = modifier
@@ -193,13 +191,19 @@ fun Configuracion(
         }
     }
 }
-
 @Composable
 fun TarjetaPerfil(
     modifier: Modifier = Modifier,
     usuario: Usuario = usuarioPrueba,
+    viewModel: PerfilDataModel = viewModel(),
     navController: NavController,
-    ){
+){
+
+    val usuario by viewModel.dato
+    LaunchedEffect(true){
+        viewModel.obtenerDato()
+    }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -234,7 +238,6 @@ fun TarjetaPerfil(
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
-
                 )
                 Text(
                     modifier = modifier
@@ -248,7 +251,6 @@ fun TarjetaPerfil(
         }
     }
 }
-
 @Composable
 fun TarjetaConfiguracion(
     modifier: Modifier = Modifier,
@@ -258,8 +260,6 @@ fun TarjetaConfiguracion(
 ) {
     var expanded by remember { mutableStateOf(false) }
     var selectedValue by rememberSaveable { mutableStateOf(configuracion.opciones.first()) }
-
-
     // Definir la animación de tamaño de la tarjeta
     val cardSizeModifier = Modifier
         .animateContentSize(
@@ -268,7 +268,6 @@ fun TarjetaConfiguracion(
                 stiffness = Spring.StiffnessMediumLow,
             )
         )
-
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -310,7 +309,6 @@ fun TarjetaConfiguracion(
                 Box(
                     modifier = modifier
                         .fillMaxSize(0.65F)
-
                 ){
                     Text(
                         modifier = modifier
@@ -330,7 +328,6 @@ fun TarjetaConfiguracion(
             if (expanded) {
                 //configuracion.contenido()
                 //OPCIONES DE CONFIGURACION---------------------------------------------------------
-
                 Column(
                     modifier = modifier.padding(start = 35.dp)
                 ){
@@ -366,9 +363,7 @@ fun TarjetaConfiguracion(
     }
     Divisor()
 }
-
 //Configuracion------------------------------------------------
-
 @Composable
 fun TarjetaNormal(
     modifier: Modifier = Modifier,
@@ -421,14 +416,11 @@ fun TarjetaNormal(
         }
     }
 }
-
 /*
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun PreviewConfiguracion() {
     TrovareTheme {
-
     }
 }
-
  */

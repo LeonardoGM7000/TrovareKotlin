@@ -292,7 +292,7 @@ fun InicioDeSesion(
                                                                         duration = SnackbarDuration.Short
                                                                     )
                                                                 }
-                                                                navController.navigate(Pantalla.Inicio.ruta){
+                                                                navController.navigate(Pantalla.NavegacionSecundaria.ruta){
                                                                     popUpTo(navController.graph.id){
                                                                         inclusive = true
                                                                     }
