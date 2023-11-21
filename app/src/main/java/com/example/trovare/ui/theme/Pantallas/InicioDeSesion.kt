@@ -1,5 +1,10 @@
 package com.example.trovare.ui.theme.Pantallas.Ingreso
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -57,6 +62,7 @@ import android.util.Log
 import android.util.Patterns
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import com.example.trovare.Pantalla
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -86,7 +92,7 @@ fun InicioDeSesion(
 
     val keyboardOptionsCorreo: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email, imeAction = ImeAction.Done)
     val keyboardOptionsPassword: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done)
-
+    val context = LocalContext.current
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
@@ -245,6 +251,13 @@ fun InicioDeSesion(
                                         duration = SnackbarDuration.Short
                                     )
                                 }
+                            }else if (!isNetworkAvailable(context)) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "Error de conexión",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
                             }else{
                                 try{
 
@@ -323,4 +336,17 @@ fun InicioDeSesion(
             }
         }
     }
+}
+
+@SuppressLint("ServiceCast")
+private fun isNetworkAvailable(context: Context): Boolean {
+    val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    val network = connectivityManager.activeNetwork ?: return false
+    val capabilities =
+        connectivityManager.getNetworkCapabilities(network) ?: return false
+
+    return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
 }
