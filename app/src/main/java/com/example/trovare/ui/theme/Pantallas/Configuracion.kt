@@ -1,5 +1,8 @@
 package com.example.trovare.ui.theme.Pantallas
 
+import android.content.Context
+import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -76,7 +79,8 @@ import com.example.trovare.ui.theme.Trv6
 fun Configuracion(
     modifier: Modifier = Modifier,
     viewModel: TrovareViewModel,
-    navController: NavController
+    navController: NavController,
+    context: Context,
 ) {
 
     Scaffold(
@@ -171,6 +175,16 @@ fun Configuracion(
                                     inclusive = true
                                 }
                             }
+
+                            // Borramos los datos de sharedPreferences
+                            val sharedPreferences = context.getSharedPreferences("DB", Context.MODE_PRIVATE)
+                            val editor = sharedPreferences.edit()
+                            editor.clear()
+                            editor.apply()
+
+                            Log.d("Main_Trovare", "Configuracion")
+                            Log.d("Main_Trovare", sharedPreferences.getString("correo", null).toString())
+
                         },
                         textoConfirmar = "Cerrar Sesión",
                         titulo = "Cerrar Sesión",
@@ -181,11 +195,15 @@ fun Configuracion(
                         mostrar = mostrarBorrarCuenta,
                         alRechazar = {mostrarBorrarCuenta = false},
                         alConfirmar = {
+
+
                             navController.navigate(Pantalla.Bienvenida.ruta){
                                 popUpTo(navController.graph.id){
                                     inclusive = true
                                 }
                             }
+
+
                         },
                         textoConfirmar = "Borrar Cuenta",
                         titulo = "Borrar Cuenta",

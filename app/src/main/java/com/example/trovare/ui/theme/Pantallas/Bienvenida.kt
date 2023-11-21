@@ -1,5 +1,6 @@
 package com.example.trovare.ui.theme.Pantallas
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -30,89 +31,91 @@ import com.example.trovare.Pantalla
 import com.example.trovare.R
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv6
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun Bienvenida(
     modifier: Modifier = Modifier,
     navController: NavController
-){
-    Surface(
-        modifier = modifier
-            .fillMaxSize(),
-        color = Trv1
-    ) {
-        Card(
+) {
+        Surface(
             modifier = modifier
-                .padding(35.dp)
-                .wrapContentSize(),
-            colors = CardDefaults.cardColors(Trv1)
+                .fillMaxSize(),
+            color = Trv1
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
+            Card(
+                modifier = modifier
+                    .padding(35.dp)
+                    .wrapContentSize(),
+                colors = CardDefaults.cardColors(Trv1)
             ) {
-                //Titulo Trovare--------------------------------------------------------------------
-                Text(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 15.dp),
-                    text = "TROVARE",
-                    color = Color.White,
-                    style = MaterialTheme.typography.displayLarge,
-                    textAlign = TextAlign.Center,
-                )
-                //Texto Bienvenida------------------------------------------------------------------
-                Text(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 15.dp),
-                    text = "BIENVENIDO",
-                    color = Color.White,
-                    style = MaterialTheme.typography.displayMedium,
-                    textAlign = TextAlign.Center,
-                )
-                //Logo------------------------------------------------------------------------------
-                Image(
-                    modifier = modifier
-                        .fillMaxHeight(0.35f)
-                        .fillMaxSize(),
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = ""
-                )
-
-                Spacer(
-                    modifier = modifier
-                        .fillMaxHeight(0.1f)
-                )
-
-                //Boton Iniciar Sesion--------------------------------------------------------------
-                TextButton(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 10.dp),
-                    onClick = {
-                              navController.navigate(Pantalla.InicioDeSesion.ruta)//navegar a pantalla de inicio
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Trv6,
-                        contentColor = Color.White
-                    )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(text = "Iniciar sesión")
-                }
-                //Texto para enviar a página de registro--------------------------------------------
-                Text(
-                    modifier = modifier
-                        .clickable {
-                            navController.navigate(Pantalla.Registro.ruta)
+                    //Titulo Trovare--------------------------------------------------------------------
+                    Text(
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 15.dp),
+                        text = "TROVARE",
+                        color = Color.White,
+                        style = MaterialTheme.typography.displayLarge,
+                        textAlign = TextAlign.Center,
+                    )
+                    //Texto Bienvenida------------------------------------------------------------------
+                    Text(
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 15.dp),
+                        text = "BIENVENIDO",
+                        color = Color.White,
+                        style = MaterialTheme.typography.displayMedium,
+                        textAlign = TextAlign.Center,
+                    )
+                    //Logo------------------------------------------------------------------------------
+                    Image(
+                        modifier = modifier
+                            .fillMaxHeight(0.35f)
+                            .fillMaxSize(),
+                        painter = painterResource(id = R.drawable.logo),
+                        contentDescription = ""
+                    )
+
+                    Spacer(
+                        modifier = modifier
+                            .fillMaxHeight(0.1f)
+                    )
+
+                    //Boton Iniciar Sesion--------------------------------------------------------------
+                    TextButton(
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 10.dp),
+                        onClick = {
+                            navController.navigate(Pantalla.InicioDeSesion.ruta)//navegar a pantalla de inicio
                         },
-                    text = "¿No tienes cuenta? Regístrate",
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodySmall,
-                    textDecoration = TextDecoration.Underline,
-                )
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Trv6,
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text(text = "Iniciar sesión")
+                    }
+                    //Texto para enviar a página de registro--------------------------------------------
+                    Text(
+                        modifier = modifier
+                            .clickable {
+                                navController.navigate(Pantalla.Registro.ruta)
+                            },
+                        text = "¿No tienes cuenta? Regístrate",
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodySmall,
+                        textDecoration = TextDecoration.Underline,
+                    )
+                }
+
             }
 
         }
 
-    }
 }
