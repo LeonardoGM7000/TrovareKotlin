@@ -63,6 +63,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.CircularProgressIndicator
 
 data class Cuenta(val nombre: String = "")
 
@@ -106,52 +109,65 @@ fun EliminarCuentas(
                 .padding(it),
             color = Trv1
         ) {
-            LazyColumn() {
-                item {
-                    TituloAdmin(titulo = "ELIMINAR CUENTAS")
+            if(isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Transparent)
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = Color.White
+                    )
                 }
-                item {
-                    Divisor( modifier = modifier.padding(15.dp))
-                }
-                item {
-                    BusquedaCuenta(navController = navController)
-                }
-                Log.i("Mensaje Eliminar cuenta", buscar)
-                Log.i("Total cuentas", cuentas.size.toString())
-                if(buscar.isNotBlank()){
-                    Log.i("mensaje entro", "entro al effectkey")
-                    effectKey++
-                }
-                Log.i("mensaje entro siguiente", "entro al effectkey")
-                try{
-                    items(cuentas.size) { index ->
-                        val cuenta = cuentas[index]
-                        if((buscar == cuenta.nombre) || buscar.isBlank()){
-                            Log.i("Si hay cuentas",buscar)
-                            TarjetaUsuario(
-                                cuenta = cuenta,
-                                expanded = index == expandedCuentaIndex,
-                                onDeleteClick = {
-                                    // Eliminar la pregunta de Firestore
-                                    //firestore.collection("Usuario").document(cuenta.nombre.toString())
-                                    //  .delete()
-                                    //accounts = accounts.filterNot { it.nombre == account.nombre }
-                                },
-                                modifier = modifier.padding(top = 20.dp),
-                                navController = navController
-                            )
-                        } else {
-                            Log.i("No hay cuentas",buscar)
-                            /* scope.launch {
-                                 snackbarHostState.showSnackbar(
-                                     message = "El correo ingresado ya está asociado a otra cuenta",
-                                     duration = SnackbarDuration.Short
-                                 )
-                             }*/
-                        }
+            } else {
+                LazyColumn() {
+                    item {
+                        TituloAdmin(titulo = "ELIMINAR CUENTAS")
                     }
-                } catch (e: Exception) {
-                    Log.i("No hay cuentas", buscar)
+                    item {
+                        Divisor(modifier = modifier.padding(15.dp))
+                    }
+                    item {
+                        BusquedaCuenta(navController = navController)
+                    }
+                    Log.i("Mensaje Eliminar cuenta", buscar)
+                    Log.i("Total cuentas", cuentas.size.toString())
+                    if (buscar.isNotBlank()) {
+                        Log.i("mensaje entro", "entro al effectkey")
+                        effectKey++
+                    }
+                    Log.i("mensaje entro siguiente", "entro al effectkey")
+                    try {
+                        items(cuentas.size) { index ->
+                            val cuenta = cuentas[index]
+                            if ((buscar == cuenta.nombre) || buscar.isBlank()) {
+                                Log.i("Si hay cuentas", buscar)
+                                TarjetaUsuario(
+                                    cuenta = cuenta,
+                                    expanded = index == expandedCuentaIndex,
+                                    onDeleteClick = {
+                                        // Eliminar la pregunta de Firestore
+                                        //firestore.collection("Usuario").document(cuenta.nombre.toString())
+                                        //  .delete()
+                                        //accounts = accounts.filterNot { it.nombre == account.nombre }
+                                    },
+                                    modifier = modifier.padding(top = 20.dp),
+                                    navController = navController
+                                 )
+                            } else {
+                                Log.i("No hay cuentas", buscar)
+                                /* scope.launch {
+                                     snackbarHostState.showSnackbar(
+                                         message = "El correo ingresado ya está asociado a otra cuenta",
+                                         duration = SnackbarDuration.Short
+                                     )
+                                 }*/
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.i("No hay cuentas", buscar)
+                    }
                 }
             }
         }
@@ -174,11 +190,13 @@ fun TarjetaUsuario(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Card(modifier = Modifier
-            .padding(horizontal = 15.dp, vertical = 5.dp),
+        Card(
+            modifier = Modifier
+                .padding(horizontal = 15.dp, vertical = 5.dp),
             colors = CardDefaults.cardColors(
                 containerColor = Trv1
-            ))
+            )
+        )
         {
             Row() {
                 Card(
@@ -205,8 +223,9 @@ fun TarjetaUsuario(
         Checkbox(
             modifier = Modifier.padding(end = 13.dp),
             checked = checked.value,
-            onCheckedChange = {checked.value = it},
-            colors = CheckboxDefaults.colors(Trv6, Color.White, Trv1))
+            onCheckedChange = { checked.value = it },
+            colors = CheckboxDefaults.colors(Trv6, Color.White, Trv1)
+        )
     }
 }
 @OptIn(ExperimentalMaterial3Api::class)
@@ -216,7 +235,8 @@ fun BusquedaCuenta(
     navController: NavController
 ){
     var mostrarBorrarCuenta by rememberSaveable { mutableStateOf(false) }
-    val focusRequester = remember { FocusRequester() }//permite que se abra el teclado automaticamente al abrir la pantalla
+    val focusRequester =
+        remember { FocusRequester() }//permite que se abra el teclado automaticamente al abrir la pantalla
     var textoBuscar by rememberSaveable(stateSaver = TextFieldValue.Saver) {//texto a buscar
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
@@ -259,7 +279,12 @@ fun BusquedaCuenta(
                 },
                 leadingIcon = { Icon(imageVector = Icons.Rounded.Search, contentDescription = "") },
                 textStyle = MaterialTheme.typography.labelSmall,
-                placeholder = { Text(text = "Buscar Cuenta", style = MaterialTheme.typography.labelSmall) },
+                placeholder = {
+                    Text(
+                        text = "Buscar Cuenta",
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                },
                 singleLine = true,
                 colors = TextFieldDefaults.textFieldColors(
                     textColor = Color.White,

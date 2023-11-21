@@ -1,5 +1,6 @@
 package com.example.trovare.ui.theme.Pantallas
 
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -27,12 +28,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.CardDefaults
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,15 +43,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.Data.Pregunta
-import com.example.trovare.Data.listaDePreguntas
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv3
-
-
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,6 +59,24 @@ fun FAQS(
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
+
+    // Creamos instancias a la base de datos
+    val firestore = FirebaseFirestore.getInstance()
+
+    // Lista que contendrá las preguntas
+    var lista_preguntas by remember { mutableStateOf(emptyList<Pregunta>()) }
+
+
+    LaunchedEffect(true) {
+
+        try {
+            val FAQS = firestore.collection("FAQS").get().await()
+            lista_preguntas = FAQS.toObjects(Pregunta::class.java)
+            Log.i("FAQS", "Preguntas obtenidas correctamente $lista_preguntas")
+        } catch (e: Exception) {
+            Log.i("FAQS", "Error al obtener las preguntas", e)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -90,7 +108,7 @@ fun FAQS(
                 item {
                     Divisor()
                 }
-                items(listaDePreguntas){
+                items(lista_preguntas){
                     TarjetaPregunta(pregunta = it)
                 }
                 item {
@@ -203,7 +221,10 @@ fun TarjetaPregunta(
                     else Trv1
                 )
         ) {
-            Row(modifier = modifier.fillMaxWidth()) {
+            Row(
+                modifier = modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Icon(
                     modifier = modifier
                         .padding(15.dp),
@@ -217,7 +238,7 @@ fun TarjetaPregunta(
                         .padding(1.dp)
                         .fillMaxWidth(0.83F)
                     ,
-                    text = stringResource(id = pregunta.pregunta),
+                    text = pregunta.pregunta,
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White
                 )
@@ -230,7 +251,7 @@ fun TarjetaPregunta(
             if (expanded) {
                 Text(
                     modifier = modifier.padding(start = 20.dp, end = 20.dp, bottom = 15.dp),
-                    text = stringResource(id = pregunta.respuesta),
+                    text = pregunta.respuesta,
                     textAlign = TextAlign.Justify,
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White

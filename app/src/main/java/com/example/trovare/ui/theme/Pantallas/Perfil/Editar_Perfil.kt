@@ -1,5 +1,6 @@
 package com.example.trovare.ui.theme.Pantallas.Perfil
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,21 +46,25 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.trovare.Data.Usuario
-import com.example.trovare.Data.usuarioPrueba
+import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv6
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditarPerfil(
     modifier: Modifier = Modifier,
-    usuario: Usuario = usuarioPrueba,
+    viewModel: TrovareViewModel,
     navController: NavController
 ){
+
+    val usuario by viewModel.usuario.collectAsState()
 
     var textoNombre by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
@@ -96,7 +102,9 @@ fun EditarPerfil(
                     .wrapContentSize(),
                 colors = CardDefaults.cardColors(Trv2)
             ) {
+                //Cuerpo de Editar Perfil-----------------------------------------------------------
                 LazyColumn(){
+                    //titulo
                     item {
                         Text(
                             modifier = modifier
@@ -137,6 +145,7 @@ fun EditarPerfil(
                             }
                         }
                     }
+                    //campo nmbre
                     item {
                         OutlinedTextField(
                             modifier = modifier
@@ -266,15 +275,34 @@ fun EditarPerfil(
                                 Text(text = "Guardar")
                             }
                         }
-
                     }
                 }
             }
-
-
         }
     }
+}
 
+suspend fun editarPerfil(
 
+    nombre: String,
+    pais: String,
+    descripcion: String
+) {
+
+    val auth = FirebaseAuth.getInstance()
+    try {
+        val firestore = FirebaseFirestore.getInstance()
+        val usuario = firestore.collection("Usuario").document(auth.currentUser?.email.toString())
+        usuario.update(
+            mapOf(
+                "nombre" to nombre,
+                "lugarDeOrigen" to pais,
+                "descripcion" to descripcion
+            )
+        ).await()
+
+    } catch (e: Exception) {
+        Log.i("Editar_usuario",e.toString())
+    }
 }
 

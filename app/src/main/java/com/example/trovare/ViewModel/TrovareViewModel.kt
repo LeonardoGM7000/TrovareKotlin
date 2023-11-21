@@ -8,6 +8,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.trovare.Data.Usuario
+import com.example.trovare.Data.usuarioPrueba
+import com.example.trovare.R
 import com.example.trovare.ui.theme.Pantallas.Mapa.MapState
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -18,16 +22,26 @@ import com.google.android.libraries.places.api.net.FetchPhotoResponse
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FetchPlaceResponse
 import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 /**
  * [TrovareViewModel] guarda información de la aplicación dentro del ciclo de vida.
  */
+//F por Uzias
 
 class TrovareViewModel : ViewModel() {
+
+
+    //--------------------------------------------------------------------------------------------//
+    //-------------------------------------IMAGENES-----------------------------------------------//
+    //--------------------------------------------------------------------------------------------//
 
     //Manejo de imagenes----------------------------------------------------------------------------
     private val _imagen = mutableStateOf<ImageBitmap?>(null)
@@ -39,6 +53,10 @@ class TrovareViewModel : ViewModel() {
     fun reiniciarImagen() {
         _imagen.value = null
     }
+
+    //--------------------------------------------------------------------------------------------//
+    //------------------------------ESTADO DE LA UI-----------------------------------------------//
+    //--------------------------------------------------------------------------------------------//
 
     //guardar variables de estado de la UI----------------------------------------------------------
 
@@ -76,6 +94,10 @@ class TrovareViewModel : ViewModel() {
             )
         }
     }
+
+    //--------------------------------------------------------------------------------------------//
+    //-------------------------------------UBICACIÓN----------------------------------------------//
+    //--------------------------------------------------------------------------------------------//
 
     //Ubicacion-------------------------------------------------------------------------------------
 
@@ -125,46 +147,46 @@ class TrovareViewModel : ViewModel() {
             e.printStackTrace()
         }
     }
-
+    //ubicaci[on del usuario
     private val _ubicacion = MutableStateFlow(LatLng(19.504507, -99.147314))
     val ubicacion = _ubicacion.asStateFlow()
     // Función para actualizar el valor de la ubicación
     fun setUbicacion(nuevaUbicacion: LatLng) {
         _ubicacion.value = nuevaUbicacion
     }
-
+    //para mostrar el marcador de un solo lugar
     private val _marcadorInicializado = MutableStateFlow(false)
     val marcadorInicializado: StateFlow<Boolean> = _marcadorInicializado.asStateFlow()
     fun setMarcadorInicializado(newValue: Boolean) {
         _marcadorInicializado.value = newValue
     }
-
+    //mostrar los marcadores de varios lugares
     private val _marcadoresInicializado = MutableStateFlow(false)
     val marcadoresInicializado: StateFlow<Boolean> = _marcadoresInicializado.asStateFlow()
     fun setMarcadoresInicializado(newValue: Boolean) {
         _marcadoresInicializado.value = newValue
     }
-
+    //mostrar la tarjeta de inofmracion del lugar
     private val _informacionInicializada = MutableStateFlow(false)
     val informacionInicializada: StateFlow<Boolean> = _informacionInicializada.asStateFlow()
     fun setInformacionInicializada(newValue: Boolean) {
         _informacionInicializada.value = newValue
     }
-
+    //nombre del lugar seleccionando
     private val _nombreLugar = MutableStateFlow("")
     val nombreLugar = _nombreLugar.asStateFlow()
 
     fun setNombreLugar(nuevoNombre: String) {
         _nombreLugar.value = nuevoNombre
     }
-
+    //rating del lugar seleccionado
     private val _ratingLugar = MutableStateFlow(-1.0)
     val ratingLugar = _ratingLugar.asStateFlow()
 
     fun setRatingLugar(nuevoRating: Double) {
         _ratingLugar.value = nuevoRating
     }
-
+    //id del lugar seleccionado
     private val _idLugar = MutableStateFlow("")
     val idLugar = _idLugar.asStateFlow()
 
@@ -176,7 +198,6 @@ class TrovareViewModel : ViewModel() {
     //--------------------------------------------------------------------------------------------//
 
     //Obtener preview de los lugares incluyendo el nombre, direccion e ID es ApiService.kt
-
     //Funcion para obtener detalles del lugar con base en un ID de lugar----------------------------
     fun obtenerLugar(
         placesClient: PlacesClient,
@@ -425,5 +446,44 @@ class TrovareViewModel : ViewModel() {
                 }
             }
     }
+    //--------------------------------------------------------------------------------------------//
+    //-------------------------------------FIREBASE-----------------------------------------------//
+    //--------------------------------------------------------------------------------------------//
+    private val _usuario = MutableStateFlow(usuarioPrueba)
+    val usuario = _usuario.asStateFlow()
+    fun setUsuario(nuevoUsuario: Usuario) {
+        _usuario.value = nuevoUsuario
+    }
 
+    // Funciones auxiliares
+    fun obtenerDato() {
+        viewModelScope.launch{
+
+            try{
+
+                val auth = FirebaseAuth.getInstance()
+                val firestore = FirebaseFirestore.getInstance()
+
+                //Log.d("TTTT", firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().await().getString("nombre").toString())
+                //firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().result.id
+                val documento =  firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().await()
+                val usuario = Usuario(
+                        nombre = documento.getString("nombre").toString(),
+                        foto_perfil = R.drawable.perfil,
+                        fechaDeRegistro = documento.getString("fechaDeRegistro").toString(),
+                        descripcion = documento.getString("descripcion").toString(),
+                        lugarDeOrigen = documento.getString("lugarDeOrigen").toString(),
+                        comentarios = null
+                )
+
+                setUsuario(usuario)
+
+            }catch(e: Exception){
+
+                setUsuario(usuarioPrueba)
+
+            }
+        }
+    }
 }
+

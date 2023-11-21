@@ -13,20 +13,16 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -70,14 +66,22 @@ import kotlinx.coroutines.tasks.await
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
 import com.example.trovare.ui.theme.Trv2
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalFocusManager
+import com.example.trovare.ui.theme.Trv6
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import androidx.compose.ui.unit.sp
 
 data class Question(val pregunta: String = "", val respuesta: String = "", val id: String = "")
 
@@ -91,6 +95,7 @@ fun PreguntasAdmin(
     val firestore: FirebaseFirestore by lazy { Firebase.firestore }
     var questions by remember { mutableStateOf(emptyList<Question>()) }
     var isAddingNewQuestion by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
 
     var textoPregunta by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
@@ -102,6 +107,13 @@ fun PreguntasAdmin(
         KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done)
 
     var isLoading by remember { mutableStateOf(true) }
+    var borrarPregunta by remember { mutableStateOf(false) }
+
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    var isErrorL: Int by rememberSaveable { mutableIntStateOf(0) }
+    val maximoLetras = 30
 
 
     LaunchedEffect(Unit) {
@@ -116,10 +128,37 @@ fun PreguntasAdmin(
             isLoading = false
         }
     }
+    LaunchedEffect(borrarPregunta) {
+        if (borrarPregunta) {
+            delay(500)
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = "Pregunta eliminada exitosamente",
+                    duration = SnackbarDuration.Short
+                )
+            }
+            borrarPregunta =false
+        }
+    }
+
+    fun validarLetras(text: String) {
+        if (!(text.matches("[a-zA-ZÀ-ÿ ]*".toRegex()))) {
+            Log.i("Error Caracter inválido", text)
+            isErrorL = 1
+        } else {
+            if (text.length > maximoLetras) {
+                isErrorL = 2
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
+        }, snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState
+            )
         },
         bottomBar = {
             Row(
@@ -127,22 +166,24 @@ fun PreguntasAdmin(
                     .background(Trv1)
                     .fillMaxWidth()
             ) {
-                FloatingActionButton(
-                    onClick = {
-                        isAddingNewQuestion = !isAddingNewQuestion
-                    },
-                    containerColor = Trv4,
-                    modifier = Modifier
-                        .padding(start = 300.dp, bottom = 50.dp)
-                        .size(60.dp)
-                ) {
-                    Icon(
-                        imageVector = if (isAddingNewQuestion) Icons.Filled.Cancel else Icons.Filled.Add,
-                        contentDescription = "",
-                        tint = Trv5,
+                if (!isLoading) {
+                    FloatingActionButton(
+                        onClick = {
+                            isAddingNewQuestion = !isAddingNewQuestion
+                        },
+                        containerColor = Trv4,
                         modifier = Modifier
-                            .size(40.dp)
-                    )
+                            .padding(start = 300.dp, bottom = 50.dp)
+                            .size(60.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isAddingNewQuestion) Icons.Filled.Cancel else Icons.Filled.Add,
+                            contentDescription = "",
+                            tint = Trv5,
+                            modifier = Modifier
+                                .size(40.dp)
+                        )
+                    }
                 }
             }
         }
@@ -156,7 +197,7 @@ fun PreguntasAdmin(
             Column ( modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp) // Añadir esta línea para el desplazamiento vertical
-            ){
+            ) {
                 if (isLoading) {
                     // Muestra el CircularProgressIndicator mientras se cargan las preguntas
                     Box(
@@ -169,128 +210,206 @@ fun PreguntasAdmin(
                             color = Color.White
                         )
                     }
-                } else{
-                    LazyColumn(modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f) // Esto permitirá que LazyColumn ocupe el espacio vertical restante disponible
-                        .padding(bottom = 16.dp)) {
+                } else {
+                    LazyColumn(
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .weight(1f) // Esto permitirá que LazyColumn ocupe el espacio vertical restante disponible
+                            .padding(bottom = 16.dp)
+                    ) {
                         item {
                             TituloAdmin(titulo = "EDITAR PREGUNTAS")
                         }
                         item {
                             Divisor()
                         }
-                        items(questions.size) { index ->
-                            val question = questions[index]
+                        if (questions.isEmpty()) {
+                            item {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center,
+                                    modifier = modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 15.dp)
+                                ) {
+                                    Text(
+                                        modifier = modifier.padding(start = 5.dp),
+                                        text = "No hay preguntas",
+                                        color = Color.White,
+                                        fontSize = 25.sp,
+                                        textAlign = TextAlign.Center,
+                                        style = MaterialTheme.typography.displayMedium
+                                    )
+                                }
+                            }
+                        } else {
+                            items(questions.size) { index ->
+                                val question = questions[index]
 
-                            TarjetaPreguntas(
-                                question = question,
-                                onDeleteClick = {
-                                    // Eliminar la pregunta de Firestore
-                                    firestore.collection("FAQS").document(question.id)
-                                        .delete()
-                                    questions = questions.filterNot { it.id == question.id }
-                                },
-                                modifier = modifier.padding(top = 8.dp),
-                                navController = navController
-                            )
+                                TarjetaPreguntas(
+                                    question = question,
+                                    onDeleteClick = {
+                                        // Eliminar la pregunta de Firestore
+                                        firestore.collection("FAQS").document(question.id)
+                                            .delete()
+                                        questions = questions.filterNot { it.id == question.id }
+                                        borrarPregunta = true
+                                    },
+                                    modifier = modifier.padding(top = 8.dp),
+                                    navController = navController
+                                )
+                            }
                         }
                     }
                 }
+            }
 
-                Spacer(modifier = Modifier.height(5.dp))
-                if (isAddingNewQuestion) {
-                    // Campos de "Nueva Pregunta" y "Nueva Respuesta"
-                    Column (modifier = Modifier.fillMaxHeight()){
-                        OutlinedTextField(
+            Spacer(modifier = Modifier.height(5.dp))
+            if (isAddingNewQuestion) {
+                // Campos de "Nueva Pregunta" y "Nueva Respuesta"
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .background(Trv1)
+                        .padding(bottom = 16.dp)
+                ) {
+                    TituloAdmin(titulo = "Agregar pregunta")
+                    Divisor()
+                    OutlinedTextField(
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 15.dp, start = 50.dp, end = 50.dp),
+                        value = textoPregunta,
+                        onValueChange = {
+                            textoPregunta = it
+                            isErrorL = 0
+                            validarLetras(textoPregunta.text)
+                        },
+                        label = {
+                            Text(
+                                text = "Pregunta",
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        },
+                        textStyle = MaterialTheme.typography.labelSmall,
+                        colors = TextFieldDefaults.textFieldColors(
+                            textColor = Color.White,
+                            focusedLabelColor = Color.White,
+                            unfocusedLabelColor = Color.White,
+                            containerColor = Trv8,
+                            cursorColor = Color.White,
+                            focusedIndicatorColor = Color.White,
+                            unfocusedIndicatorColor = Color.White
+                        ),
+                        singleLine = true,
+                        keyboardOptions = keyboardOptionsTexto,
+                        //parametro para mostrar eltipo de error
+                        supportingText = {
+                            isErrorL = isErrorL
+                            if (isErrorL == 1) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Ingresa solo letras",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            } else if (isErrorL == 2) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Máximo $maximoLetras carácteres",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 15.dp, start = 50.dp, end = 50.dp),
+                        value = textoRespuesta,
+                        onValueChange = { textoRespuesta = it },
+                        label = {
+                            Text(
+                                text = "Respuesta",
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        },
+                        textStyle = MaterialTheme.typography.labelSmall,
+                        colors = TextFieldDefaults.textFieldColors(
+                            textColor = Color.White,
+                            focusedLabelColor = Color.White,
+                            unfocusedLabelColor = Color.White,
+                            containerColor = Trv8,
+                            cursorColor = Color.White,
+                            focusedIndicatorColor = Color.White,
+                            unfocusedIndicatorColor = Color.White
+                        ),
+                        singleLine = true,
+                        keyboardOptions = keyboardOptionsTexto,
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(
                             modifier = modifier
                                 .fillMaxWidth()
-                                .padding(bottom = 15.dp, start = 50.dp, end = 50.dp),
-                            value = textoPregunta,
-                            onValueChange = { textoPregunta = it },
-                            label = {
-                                Text(
-                                    text = "Pregunta",
-                                    style = MaterialTheme.typography.labelSmall
-                                )
-                            },
-                            textStyle = MaterialTheme.typography.labelSmall,
-                            colors = TextFieldDefaults.textFieldColors(
-                                textColor = Color.White,
-                                focusedLabelColor = Color.White,
-                                unfocusedLabelColor = Color.White,
-                                containerColor = Trv8,
-                                cursorColor = Color.White,
-                                focusedIndicatorColor = Color.White,
-                                unfocusedIndicatorColor = Color.White
-                            ),
-                            singleLine = true,
-                            keyboardOptions = keyboardOptionsTexto,
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        OutlinedTextField(
-                            modifier = modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 15.dp, start = 50.dp, end = 50.dp),
-                            value = textoRespuesta,
-                            onValueChange = { textoRespuesta = it },
-                            label = {
-                                Text(
-                                    text = "Respuesta",
-                                    style = MaterialTheme.typography.labelSmall
-                                )
-                            },
-                            textStyle = MaterialTheme.typography.labelSmall,
-                            colors = TextFieldDefaults.textFieldColors(
-                                textColor = Color.White,
-                                focusedLabelColor = Color.White,
-                                unfocusedLabelColor = Color.White,
-                                containerColor = Trv8,
-                                cursorColor = Color.White,
-                                focusedIndicatorColor = Color.White,
-                                unfocusedIndicatorColor = Color.White
-                            ),
-                            singleLine = true,
-                            keyboardOptions = keyboardOptionsTexto,
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            Button(
-                                onClick = {
-                                    if (textoPregunta.text.isNotBlank() && textoPregunta.text.isNotBlank()) {
-                                        // Agregar nueva pregunta a Firestore
-                                        val newQuestionDocument =
-                                            firestore.collection("FAQS").document()
-                                        newQuestionDocument.set(
-                                            Question(
-                                                pregunta = textoPregunta.text,
-                                                respuesta = textoRespuesta.text,
-                                                id = newQuestionDocument.id
-                                            )
+                                .padding(start = 25.dp, end = 25.dp, bottom = 10.dp),
+                            onClick = {
+                                focusManager.clearFocus()
+                                if (textoPregunta.text.isBlank() || textoRespuesta.text.isBlank()) {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "Campos obligatorios no completados",
+                                            duration = SnackbarDuration.Short
                                         )
-                                        questions = questions + Question(
+                                    }
+                                } else if (isErrorL > 0) {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "Pregunta inválida",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
+                                } else {
+                                    // Agregar nueva pregunta a Firestore
+                                    val newQuestionDocument =
+                                        firestore.collection("FAQS").document()
+                                    newQuestionDocument.set(
+                                        Question(
                                             pregunta = textoPregunta.text,
                                             respuesta = textoRespuesta.text,
                                             id = newQuestionDocument.id
                                         )
-                                        textoPregunta = TextFieldValue("", TextRange(0, 0))
-                                        textoRespuesta = TextFieldValue("", TextRange(0, 0))
-                                        isAddingNewQuestion = false
+                                    )
+                                    questions = questions + Question(
+                                        pregunta = textoPregunta.text,
+                                        respuesta = textoRespuesta.text,
+                                        id = newQuestionDocument.id
+                                    )
+                                    textoPregunta = TextFieldValue("", TextRange(0, 0))
+                                    textoRespuesta = TextFieldValue("", TextRange(0, 0))
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "Pregunta añadida exitosamente",
+                                            duration = SnackbarDuration.Short
+                                        )
+
                                     }
-                                },
-                                modifier = Modifier
-                                    .heightIn(min = 56.dp)
-                                    .padding(start = 8.dp, end = 50.dp)
-                            ) {
-                                Text("Agregar pregunta")
-                            }
+                                    isAddingNewQuestion = false
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Trv6,
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Text("Agregar pregunta")
                         }
                     }
                 }
@@ -346,7 +465,8 @@ fun TarjetaPreguntas(
                     contentDescription = "",
                     tint = Color.White,
                 )
-                Box(contentAlignment = Alignment.CenterStart,
+                Box(
+                    contentAlignment = Alignment.CenterStart,
                     modifier = Modifier
                         .fillMaxWidth(0.64f)
                 ) {
@@ -382,7 +502,7 @@ fun TarjetaPreguntas(
                 alRechazar = { mostrarBorrarCuenta = false },
                 alConfirmar = { //Necesita eliminar la pregunta
                     onDeleteClick()
-                    navController.navigate(Pantalla.PreguntasAdmin.ruta)
+                    mostrarBorrarCuenta = false
                 },
                 textoConfirmar = "Borrar Pregunta",
                 titulo = "Borrar Pregunta",
