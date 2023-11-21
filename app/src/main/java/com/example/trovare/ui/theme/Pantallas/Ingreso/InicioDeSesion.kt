@@ -61,6 +61,13 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import android.util.Patterns
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.firestore.FirebaseFirestore
+import android.annotation.SuppressLint
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,6 +76,7 @@ fun InicioDeSesion(
     navController: NavController
 ){
     // Declaramos variables
+    val db = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
 
     var textoCorreo by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -85,6 +93,8 @@ fun InicioDeSesion(
 
     val keyboardOptionsCorreo: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email, imeAction = ImeAction.Done)
     val keyboardOptionsPassword: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done)
+
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -247,39 +257,60 @@ fun InicioDeSesion(
                             }
                             else {
                                 try{
-                                    val user = FirebaseAuth.getInstance().currentUser
+                                    // Verificamos si la cuenta es de administrador
+                                    db.collection("Administrador").whereEqualTo("correo", textoCorreo.text)
+                                        .whereEqualTo("password", textoPasswrod.text)
+                                        .get()
+                                        .addOnSuccessListener { querySnapshot ->
+                                            if(!querySnapshot.isEmpty){
 
-                                    auth.signInWithEmailAndPassword(textoCorreo.text, textoPasswrod.text)
-                                        .addOnCompleteListener{ task ->
-                                            if(task.isSuccessful){
-                                                if (user?.isEmailVerified == false){
-                                                    scope.launch {
-                                                        snackbarHostState.showSnackbar(
-                                                            message = "Correo no verificado. Verifica tu correo electrónico.",
-                                                            duration = SnackbarDuration.Short
-                                                        )
+                                                Log.d("Trovare","Ingreso usuario administrador")
+                                                navController.navigate(Pantalla.Administrador.ruta){
+                                                    popUpTo(navController.graph.id){
+                                                        inclusive = true
                                                     }
-                                            }else{
-                                                scope.launch {
-                                                    snackbarHostState.showSnackbar(
-                                                        message = "Iniciando Sesión...",
-                                                        duration = SnackbarDuration.Short
-                                                    )
                                                 }
-                                                    navController.navigate(Pantalla.Inicio.ruta){
-                                                        popUpTo(navController.graph.id){
-                                                            inclusive = true
+                                            }else{
+                                                // Verificamos si la cuenta es de usuario
+                                                val user = FirebaseAuth.getInstance().currentUser
+
+                                                auth.signInWithEmailAndPassword(textoCorreo.text, textoPasswrod.text)
+                                                    .addOnCompleteListener{ task ->
+
+                                                        if(task.isSuccessful){
+                                                            if (user?.isEmailVerified == false){
+                                                                scope.launch {
+                                                                    snackbarHostState.showSnackbar(
+                                                                        message = "Correo no verificado. Verifica tu correo electrónico.",
+                                                                        duration = SnackbarDuration.Short
+                                                                    )
+                                                                }
+                                                            }else{
+                                                                scope.launch {
+                                                                    snackbarHostState.showSnackbar(
+                                                                        message = "Iniciando Sesión...",
+                                                                        duration = SnackbarDuration.Short
+                                                                    )
+                                                                }
+                                                                navController.navigate(Pantalla.Inicio.ruta){
+                                                                    popUpTo(navController.graph.id){
+                                                                        inclusive = true
+                                                                    }
+                                                                }
+                                                            }
+                                                        }else{
+                                                            scope.launch {
+                                                                snackbarHostState.showSnackbar(
+                                                                    message = "Correo o contraseña incorrectos",
+                                                                    duration = SnackbarDuration.Short
+                                                                )
+                                                            }
                                                         }
                                                     }
-                                                }
-                                            }else{
-                                                scope.launch {
-                                                    snackbarHostState.showSnackbar(
-                                                        message = "Correo o contraseña incorrectos",
-                                                        duration = SnackbarDuration.Short
-                                                    )
-                                                }
                                             }
+                                        }
+                                        .addOnFailureListener{
+                                            Log.d("Trovare","Error al conectar con la base")
                                         }
                                 }catch(ex:Exception){
                                     Log.d("Login", "Error en la conexión de la base de datos")

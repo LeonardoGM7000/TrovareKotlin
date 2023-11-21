@@ -45,6 +45,11 @@ import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.trovare.Data.PerfilDataModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,9 +104,15 @@ fun PerfilInicio(
 @Composable
 fun PerfilPrincipal(
     modifier: Modifier = Modifier,
-    usuario: Usuario = usuarioPrueba,
+    viewModel: PerfilDataModel = viewModel(),
     navController: NavController
 ){
+
+    val usuario by viewModel.dato
+    LaunchedEffect(true){
+        viewModel.obtenerDato()
+    }
+
     Surface(
         modifier = modifier
             .fillMaxSize(),
@@ -188,7 +199,7 @@ fun PerfilPrincipal(
                         modifier = modifier
                             .padding(horizontal = 25.dp, vertical = 10.dp)
                             .fillMaxWidth(),
-                        text = usuario.descripcion,
+                        text = usuario.descripcion?: "",
                         textAlign = TextAlign.Justify,
                         color = Color.White,
                         style = MaterialTheme.typography.bodySmall
@@ -240,13 +251,13 @@ fun PerfilPrincipal(
                         modifier = modifier
                             .fillMaxSize()
                             .padding(horizontal = 25.dp),
-                        text = "${usuario.comentarios.size} reseñas",
+                        text = "${usuario.comentarios!!.size} reseñas",
                         style = MaterialTheme.typography.displaySmall,
                         textAlign = TextAlign.Left,
                         color = Color.White
                     )
                 }
-                items(usuario.comentarios){comentario ->
+                items(usuario.comentarios!!){comentario ->
                     Card(modifier = modifier
                         .padding(horizontal = 25.dp, vertical = 5.dp)
                         .fillMaxWidth(),
