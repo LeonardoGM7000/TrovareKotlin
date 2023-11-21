@@ -122,7 +122,7 @@ fun CrearCuenta(
     var isErrorL: Int by rememberSaveable { mutableIntStateOf(0) }
     var isErrorLA: Int by rememberSaveable { mutableIntStateOf(0) }
     val minimoPassword = 8
-    val maximoLetras = 30
+    val maximoLetras = 15
 
     fun validarLetras(text: String) {
         if(!(text.matches("[a-zA-ZÀ-ÿ ]*".toRegex()))){
