@@ -1,5 +1,6 @@
 package com.example.trovare.ui.theme.Pantallas
 
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -37,6 +38,7 @@ import com.example.trovare.ui.theme.TrovareTheme
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.CardDefaults
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,15 +48,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
 import com.example.trovare.Pantalla
 import com.example.trovare.ui.theme.Data.Pregunta
-import com.example.trovare.ui.theme.Data.listaDePreguntas
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv3
-
-
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,6 +64,24 @@ fun FAQS(
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
+
+    // Creamos instancias a la base de datos
+    val firestore = FirebaseFirestore.getInstance()
+
+    // Lista que contendrá las preguntas
+    var lista_preguntas by remember { mutableStateOf(emptyList<Pregunta>()) }
+
+
+    LaunchedEffect(true) {
+
+        try {
+            val FAQS = firestore.collection("FAQS").get().await()
+            lista_preguntas = FAQS.toObjects(Pregunta::class.java)
+            Log.i("FAQS", "Preguntas obtenidas correctamente $lista_preguntas")
+        } catch (e: Exception) {
+            Log.i("FAQS", "Error al obtener las preguntas", e)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -94,7 +113,7 @@ fun FAQS(
                 item {
                     Divisor()
                 }
-                items(listaDePreguntas){
+                items(lista_preguntas){
                     TarjetaPregunta(pregunta = it)
                 }
                 item {
@@ -176,6 +195,7 @@ fun TarjetaPregunta(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
+
     // Definir la animación de tamaño de la tarjeta
     val cardSizeModifier = Modifier
         .animateContentSize(
@@ -221,7 +241,7 @@ fun TarjetaPregunta(
                         .padding(1.dp)
                         .fillMaxWidth(0.83F)
                     ,
-                    text = stringResource(id = pregunta.pregunta),
+                    text = pregunta.pregunta,
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White
                 )
@@ -234,7 +254,7 @@ fun TarjetaPregunta(
             if (expanded) {
                 Text(
                     modifier = modifier.padding(start = 20.dp, end = 20.dp, bottom = 15.dp),
-                    text = stringResource(id = pregunta.respuesta),
+                    text = pregunta.respuesta,
                     textAlign = TextAlign.Justify,
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White

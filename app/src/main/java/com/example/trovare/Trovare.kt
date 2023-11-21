@@ -15,22 +15,14 @@ import com.example.trovare.ui.theme.Pantallas.Soporte
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
-import com.example.trovare.ui.theme.Pantallas.Administrador
 import com.example.trovare.ui.theme.Pantallas.Bienvenida
 import com.example.trovare.ui.theme.Pantallas.Buscar
 import com.example.trovare.ui.theme.Pantallas.CrearCuenta
 import com.example.trovare.ui.theme.Pantallas.Detalles
 import com.example.trovare.ui.theme.Pantallas.EditarPerfil
-import com.example.trovare.ui.theme.Pantallas.EditarPreguntas
-import com.example.trovare.ui.theme.Pantallas.EliminarComentarios
-import com.example.trovare.ui.theme.Pantallas.EliminarCuentas
-import com.example.trovare.ui.theme.Pantallas.IngresoToken
 import com.example.trovare.ui.theme.Pantallas.InicioDeSesion
 import com.example.trovare.ui.theme.Pantallas.PerfilConfiguracion
 import com.example.trovare.ui.theme.Pantallas.PerfilInicio
-import com.example.trovare.ui.theme.Pantallas.PreguntasAdmin
-import com.example.trovare.ui.theme.Pantallas.RecuperarPassword
-import com.example.trovare.ui.theme.Pantallas.ReestablecerPassword
 import com.google.android.libraries.places.api.net.PlacesClient
 
 
@@ -47,16 +39,6 @@ sealed class Pantalla(val ruta: String){
     object Buscar: Pantalla("Buscar")
     object Detalles: Pantalla("Detalles")
     object EditarPerfil: Pantalla("EditarPerfil")
-    object Administrador: Pantalla("Administrador")
-    object PreguntasAdmin:Pantalla("PreguntasAdmin")
-    object EditarPreguntas:Pantalla("EditarPreguntas")
-    object EliminarCuentas: Pantalla("EliminarCuentas")
-    object EliminarComentarios: Pantalla("EliminarComentarios")
-
-    object RecuperarPassword: Pantalla("RecuperarPassword")
-
-    object IngresoToken: Pantalla("IngresoToken")
-    object ReestablecerPassword: Pantalla("ReestablecerPassword")
 
     fun conArgs(vararg args: String): String {
         return buildString {
@@ -95,21 +77,6 @@ fun Trovare(
         }
         composable(route = Pantalla.InicioDeSesion.ruta){
             InicioDeSesion(
-                navController = navController
-            )
-        }
-        composable(route = Pantalla.RecuperarPassword.ruta){
-            RecuperarPassword(
-                navController = navController
-            )
-        }
-        composable(route = Pantalla.IngresoToken.ruta){
-            IngresoToken(
-                navController = navController
-            )
-        }
-        composable(route = Pantalla.ReestablecerPassword.ruta){
-            ReestablecerPassword(
                 navController = navController
             )
         }
@@ -152,31 +119,6 @@ fun Trovare(
         }
         composable(route = Pantalla.EditarPerfil.ruta){
             EditarPerfil(
-                navController = navController
-            )
-        }
-        composable(route = Pantalla.Administrador.ruta){
-            Administrador(
-                navController = navController
-            )
-        }
-        composable(route = Pantalla.PreguntasAdmin.ruta){
-            PreguntasAdmin(
-                navController = navController
-            )
-        }
-        composable(route = Pantalla.EditarPreguntas.ruta){
-            EditarPreguntas(
-                navController = navController
-            )
-        }
-        composable(route = Pantalla.EliminarCuentas.ruta){
-            EliminarCuentas(
-                navController = navController
-            )
-        }
-        composable(route = Pantalla.EliminarComentarios.ruta){
-            EliminarComentarios(
                 navController = navController
             )
         }

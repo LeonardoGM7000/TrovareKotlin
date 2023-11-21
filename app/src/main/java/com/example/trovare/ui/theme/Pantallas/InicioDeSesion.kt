@@ -1,5 +1,10 @@
-package com.example.trovare.ui.theme.Pantallas
+package com.example.trovare.ui.theme.Pantallas.Ingreso
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -32,7 +37,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -46,12 +50,25 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.trovare.Pantalla
 import com.example.trovare.R
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv6
 import com.example.trovare.ui.theme.Trv8
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import android.util.Log
+import android.util.Patterns
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import com.example.trovare.Pantalla
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +76,9 @@ fun InicioDeSesion(
     modifier: Modifier = Modifier,
     navController: NavController
 ){
+    // Declaramos variables
+    val db = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
 
     var textoCorreo by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
@@ -67,14 +87,23 @@ fun InicioDeSesion(
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
 
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
     var passwordOculta by rememberSaveable { mutableStateOf(true) }
 
     val keyboardOptionsCorreo: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email, imeAction = ImeAction.Done)
     val keyboardOptionsPassword: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done)
+    val context = LocalContext.current
+    var inicio by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState)
         },
     ) {
         Surface(
@@ -213,12 +242,89 @@ fun InicioDeSesion(
                             .padding(start = 25.dp, end = 25.dp, bottom = 10.dp),
                         onClick = {
 
-                            navController.navigate(Pantalla.Inicio.ruta){
-                                popUpTo(navController.graph.id){
-                                    inclusive = true
+                            if(textoCorreo.text.isBlank() || textoPasswrod.text.isBlank()){
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Campos obligatorios no completados",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }else if(!Patterns.EMAIL_ADDRESS.matcher(textoCorreo.text).matches()){
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "El correo no tiene una estructura válida",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }else if (!isNetworkAvailable(context)) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "Error de conexión",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                            }else{
+                                try{
+
+                                    // Verificamos si la cuenta es de administrador
+                                    db.collection("Administrador").whereEqualTo("correo", textoCorreo.text)
+                                        .whereEqualTo("password", textoPasswrod.text)
+                                        .get()
+                                        .addOnSuccessListener { querySnapshot ->
+
+                                            if(!querySnapshot.isEmpty){
+
+                                                Log.d("Trovare","Ingreso usuario administrador")
+                                                navController.navigate(Pantalla.Administrador.ruta){
+                                                    popUpTo(navController.graph.id){
+                                                        inclusive = true
+                                                    }
+                                                }
+
+                                            }else{
+
+                                                // Verificamos si la cuenta es de usuario
+                                                val user = FirebaseAuth.getInstance().currentUser
+
+                                                auth.signInWithEmailAndPassword(textoCorreo.text, textoPasswrod.text)
+                                                    .addOnCompleteListener{ task ->
+
+                                                        if(task.isSuccessful){
+                                                            if (user?.isEmailVerified == false){
+                                                                scope.launch {
+                                                                    snackbarHostState.showSnackbar(
+                                                                        message = "Correo no verificado. Verifica tu correo electrónico.",
+                                                                        duration = SnackbarDuration.Short
+                                                                    )
+                                                                }
+                                                            }else{
+                                                                scope.launch {
+                                                                    snackbarHostState.showSnackbar(
+                                                                        message = "Bienvenido...",
+                                                                        duration = SnackbarDuration.Short
+                                                                    )
+                                                                    inicio=true
+                                                                }
+                                                            }
+                                                        }else{
+                                                            scope.launch {
+                                                                snackbarHostState.showSnackbar(
+                                                                    message = "Correo o contraseña incorrectos",
+                                                                    duration = SnackbarDuration.Short
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                            }
+                                        }
+                                        .addOnFailureListener{
+                                            Log.d("Trovare","Error al conectar con la base")
+                                        }
+
+                                }catch(ex:Exception){
+                                    Log.d("Login", "Error en la conexión de la base de datos")
                                 }
                             }
-
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Trv6,
@@ -227,12 +333,31 @@ fun InicioDeSesion(
                     ) {
                         Text(text = "Ingresar")
                     }
-
-
+                    LaunchedEffect(inicio) {
+                        if (inicio) {
+                            delay(100)
+                            navController.navigate(Pantalla.Inicio.ruta){
+                                popUpTo(navController.graph.id){
+                                    inclusive = true
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
     }
+}
 
+@SuppressLint("ServiceCast")
+private fun isNetworkAvailable(context: Context): Boolean {
+    val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
+    val network = connectivityManager.activeNetwork ?: return false
+    val capabilities =
+        connectivityManager.getNetworkCapabilities(network) ?: return false
+
+    return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
 }

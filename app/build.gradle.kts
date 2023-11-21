@@ -2,6 +2,9 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     //id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+
+    // Dependencias de Firebase
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -26,7 +29,10 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -66,6 +72,9 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.5")
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("com.google.accompanist:accompanist-pager:0.20.0")
+    implementation("com.google.firebase:firebase-database:20.3.0")
+    implementation("com.google.firebase:firebase-auth-ktx:22.2.0")
+    implementation("com.google.firebase:firebase-auth:22.2.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
@@ -82,6 +91,11 @@ dependencies {
     //Para Google Maps y Places
     implementation("com.google.android.libraries.places:places:3.2.0")
     implementation("com.google.maps.android:places-ktx:2.0.0")
+
+    // Dependencias de Firebase
+    implementation(platform("com.google.firebase:firebase-bom:32.5.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-firestore:24.9.1")
 
 
 

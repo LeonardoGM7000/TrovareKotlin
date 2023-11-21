@@ -87,10 +87,17 @@ fun EliminarComentarios(
                 item {
                     TituloAdmin(titulo = "ELIMINAR COMENTARIOS")
                 }
+<<<<<<< HEAD
                 item { 
                     Divisor( modifier = modifier.padding(15.dp))
                 }
                 item { 
+=======
+                item {
+                    Divisor( modifier = modifier.padding(15.dp))
+                }
+                item {
+>>>>>>> bf972f322efdd1ef70f150421b2f2df11170b264
                     TarjetaBusqueda(navController = navController)
                 }
                 item {

@@ -1,5 +1,8 @@
 package com.example.trovare.ui.theme.Pantallas
 
+import android.content.Context
+import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -36,6 +39,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -75,7 +79,8 @@ import com.example.trovare.ui.theme.Trv6
 fun Configuracion(
     modifier: Modifier = Modifier,
     viewModel: TrovareViewModel,
-    navController: NavController
+    navController: NavController,
+    context: Context,
 ) {
 
     Scaffold(
@@ -170,6 +175,16 @@ fun Configuracion(
                                     inclusive = true
                                 }
                             }
+
+                            // Borramos los datos de sharedPreferences
+                            val sharedPreferences = context.getSharedPreferences("DB", Context.MODE_PRIVATE)
+                            val editor = sharedPreferences.edit()
+                            editor.clear()
+                            editor.apply()
+
+                            Log.d("Main_Trovare", "Configuracion")
+                            Log.d("Main_Trovare", sharedPreferences.getString("correo", null).toString())
+
                         },
                         textoConfirmar = "Cerrar Sesión",
                         titulo = "Cerrar Sesión",
@@ -180,11 +195,15 @@ fun Configuracion(
                         mostrar = mostrarBorrarCuenta,
                         alRechazar = {mostrarBorrarCuenta = false},
                         alConfirmar = {
+
+
                             navController.navigate(Pantalla.Bienvenida.ruta){
                                 popUpTo(navController.graph.id){
                                     inclusive = true
                                 }
                             }
+
+
                         },
                         textoConfirmar = "Borrar Cuenta",
                         titulo = "Borrar Cuenta",
@@ -203,9 +222,15 @@ fun Configuracion(
 @Composable
 fun TarjetaPerfil(
         modifier: Modifier = Modifier,
-        usuario: Usuario = usuarioPrueba,
+        viewModel: PerfilDataModel = viewModel(),
         navController: NavController,
     ){
+
+    val usuario by viewModel.dato
+    LaunchedEffect(true){
+        viewModel.obtenerDato()
+    }
+
     Card(
         modifier = modifier
             .fillMaxWidth()

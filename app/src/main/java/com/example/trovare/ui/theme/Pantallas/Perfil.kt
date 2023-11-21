@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -29,6 +28,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,8 +37,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import com.example.trovare.Pantalla
 import com.example.trovare.ui.theme.Data.Usuario
@@ -49,6 +50,7 @@ import com.example.trovare.ui.theme.Recursos.MenuInferior
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv5
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -112,9 +114,15 @@ fun PerfilInicio(
 @Composable
 fun PerfilPrincipal(
     modifier: Modifier = Modifier,
-    usuario: Usuario = usuarioPrueba,
+    viewModel: PerfilDataModel = viewModel(),
     navController: NavController
 ){
+
+    val usuario by viewModel.dato
+    LaunchedEffect(true){
+        viewModel.obtenerDato()
+    }
+
     Surface(
         modifier = modifier
             .fillMaxSize(),
@@ -253,13 +261,13 @@ fun PerfilPrincipal(
                         modifier = modifier
                             .fillMaxSize()
                             .padding(horizontal = 25.dp),
-                        text = "${usuario.comentarios.size} reseñas",
+                        text = "${usuario.comentarios!!.size} reseñas",
                         style = MaterialTheme.typography.displaySmall,
                         textAlign = TextAlign.Left,
                         color = Color.White
                     )
                 }
-                items(usuario.comentarios){comentario ->
+                items(usuario.comentarios!!){ comentario ->
                     Card(modifier = modifier
                         .padding(horizontal = 25.dp, vertical = 5.dp)
                         .fillMaxWidth(),
