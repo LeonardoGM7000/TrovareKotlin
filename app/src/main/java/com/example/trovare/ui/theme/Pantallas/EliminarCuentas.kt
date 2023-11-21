@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
@@ -54,6 +56,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -75,12 +78,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 data class Cuenta(val nombre: String = "")
+var effectKey = 0
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EliminarCuentas(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.fillMaxWidth(),
     navController: NavController,
     buscar: String = ""
 ) {
@@ -90,8 +94,7 @@ fun EliminarCuentas(
     var isLoading by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    var effectKey by remember { mutableIntStateOf(0) }
-    Log.i("entro", "entro")
+    Log.i("entro inicial", Buscar)
     LaunchedEffect(effectKey) {
         Log.i("entro", "entro")
         Log.i("EliminarCuentas", "LaunchedEffect: Obtaining accounts from Firestore")
@@ -148,32 +151,32 @@ fun EliminarCuentas(
                     try {
                         items(cuentas.size) { index ->
                             val cuenta = cuentas[index]
-                            if ((buscar == cuenta.nombre) || buscar.isBlank()) {
-                                Log.i("Si hay cuentas", buscar)
-                                TarjetaUsuario(
-                                    cuenta = cuenta,
-                                    expanded = index == expandedCuentaIndex,
-                                    onDeleteClick = {
-                                        // Eliminar la pregunta de Firestore
-                                        //firestore.collection("Usuario").document(cuenta.nombre.toString())
-                                        //  .delete()
-                                        //accounts = accounts.filterNot { it.nombre == account.nombre }
-                                    },
-                                    modifier = modifier.padding(top = 20.dp),
-                                    navController = navController
-                                )
-                            } else {
-                                Log.i("No hay cuentas", buscar)
-                                /* scope.launch {
+                                if ((Buscar == cuenta.nombre) || Buscar.isBlank()) {
+                                    Log.i("Si hay cuentas", Buscar)
+                                    TarjetaUsuario(
+                                        cuenta = cuenta,
+                                        expanded = index == expandedCuentaIndex,
+                                        onDeleteClick = {
+                                            // Eliminar la pregunta de Firestore
+                                            //firestore.collection("Usuario").document(cuenta.nombre.toString())
+                                            //  .delete()
+                                            //accounts = accounts.filterNot { it.nombre == account.nombre }
+                                        },
+                                        modifier = modifier.padding(top = 20.dp),
+                                        navController = navController
+                                    )
+                                } else {
+                                    Log.i("No hay cuentas", Buscar)
+                                    /* scope.launch {
                                      snackbarHostState.showSnackbar(
                                          message = "El correo ingresado ya está asociado a otra cuenta",
                                          duration = SnackbarDuration.Short
                                      )
                                  }*/
-                            }
-                        }
+                                }
+0                        }
                     } catch (e: Exception) {
-                        Log.i("No hay cuentas", buscar)
+                        Log.i("No hay cuentas", Buscar)
                     }
                 }
             }
@@ -255,6 +258,13 @@ fun BusquedaCuenta(
     var tiempoRestante by rememberSaveable { mutableIntStateOf(1) }
 
     var job: Job? by remember { mutableStateOf(null) }
+    val onDoneClick: () -> Unit = {
+        // Aquí llama a la función que deseas ejecutar al hacer clic en la palomita
+        println("Texto ingresado: $textoBuscar")
+        effectKey++
+        Buscar = textoBuscar.text
+        navController.navigate(Pantalla.EliminarCuentas.ruta)
+    }
 
     fun iniciarTimer() {
         job = CoroutineScope(Dispatchers.Default).launch {
@@ -293,6 +303,17 @@ fun BusquedaCuenta(
                     tiempoRestante = 1//resetea el timer a 1 segundo
                     iniciarTimer()//reinicia la cuenta regresiva del timer
                 },
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        // Llama a la función cuando se presiona la tecla de verificación
+                        //EliminarCuentas(navController = navController,
+                             //modifier = Modifier, buscar = textoBuscar.text)
+                        onDoneClick.invoke()
+                    }
+                ),
                 leadingIcon = { Icon(imageVector = Icons.Rounded.Search, contentDescription = "") },
                 textStyle = MaterialTheme.typography.labelSmall,
                 placeholder = {
@@ -311,8 +332,8 @@ fun BusquedaCuenta(
             //Log.i("Texto escrito", textoBuscar.text)
         }
         Log.i("Texto escrito en la función Buscar", textoBuscar.text)
-        /*if(textoBuscar.text.isNotBlank())  EliminarCuentas(navController = navController,
-            modifier = modifier.padding(top = 20.dp), buscar = textoBuscar.text)*/
+        //if(textoBuscar.text.isNotBlank())  EliminarCuentas(navController = navController,
+          //  modifier = Modifier, buscar = textoBuscar.text)
 
         Icon(
             modifier = Modifier
