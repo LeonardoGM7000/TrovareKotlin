@@ -51,10 +51,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.trovare.Data.Configuracion
-import com.example.trovare.Data.PerfilDataModel
 import com.example.trovare.Data.Usuario
 import com.example.trovare.Data.listaDeConfiguracion
 import com.example.trovare.Data.usuarioPrueba
@@ -103,7 +101,8 @@ fun Configuracion(
                 }
                 item{
                     TarjetaPerfil(
-                        navController = navController
+                        navController = navController,
+                        viewModel = viewModel
                     )
                 }
                 item {
@@ -195,7 +194,7 @@ fun Configuracion(
 fun TarjetaPerfil(
     modifier: Modifier = Modifier,
     usuario: Usuario = usuarioPrueba,
-    viewModel: PerfilDataModel = viewModel(),
+    viewModel: TrovareViewModel,
     navController: NavController,
 ){
 

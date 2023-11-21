@@ -89,7 +89,8 @@ fun NavegacionSecundaria(
             }
             composable(route = Pantalla.PerfilInicio.ruta){
                 PerfilInicio(
-                    navController = navController
+                    navController = navController,
+                    viewModel = viewModel
                 )
             }
             composable(route = Pantalla.Mapa.ruta){

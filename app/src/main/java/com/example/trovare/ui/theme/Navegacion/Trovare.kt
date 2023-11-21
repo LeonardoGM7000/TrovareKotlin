@@ -134,7 +134,8 @@ fun Trovare(
         }
         composable(route = Pantalla.PerfilConfiguracion.ruta) {
             PerfilConfiguracion(
-                navController = navController
+                navController = navController,
+                viewModel = viewModel
             )
         }
         composable(route = Pantalla.EditarPerfil.ruta) {

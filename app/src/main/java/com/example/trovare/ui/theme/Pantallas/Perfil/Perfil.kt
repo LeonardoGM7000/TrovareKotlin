@@ -38,8 +38,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.trovare.ui.theme.Navegacion.Pantalla
-import com.example.trovare.Data.Usuario
-import com.example.trovare.Data.usuarioPrueba
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
 import com.example.trovare.ui.theme.Recursos.Divisor
@@ -47,17 +45,15 @@ import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.trovare.Data.PerfilDataModel
+import com.example.trovare.ViewModel.TrovareViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PerfilConfiguracion(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    viewModel: TrovareViewModel
 ) {
-
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
@@ -70,7 +66,8 @@ fun PerfilConfiguracion(
             color = Trv1
         ) {
             PerfilPrincipal(
-                navController = navController
+                navController = navController,
+                viewModel = viewModel
             )
         }
     }
@@ -80,7 +77,8 @@ fun PerfilConfiguracion(
 @Composable
 fun PerfilInicio(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    viewModel: TrovareViewModel
 ) {
     Scaffold(
         topBar = {
@@ -94,7 +92,8 @@ fun PerfilInicio(
             color = Trv1
         ) {
             PerfilPrincipal(
-                navController = navController
+                navController = navController,
+                viewModel = viewModel
             )
         }
     }
@@ -104,7 +103,7 @@ fun PerfilInicio(
 @Composable
 fun PerfilPrincipal(
     modifier: Modifier = Modifier,
-    viewModel: PerfilDataModel = viewModel(),
+    viewModel: TrovareViewModel,
     navController: NavController
 ){
 
