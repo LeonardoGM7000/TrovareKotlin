@@ -2,6 +2,7 @@ package com.example.trovare.Api
 
 import android.util.Log
 import androidx.compose.runtime.MutableFloatState
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.trovare.Data.NearbyLocationsClass
 import com.example.trovare.Data.NearbyPlaces
 import com.example.trovare.Data.NearbyPlacesClass
@@ -397,6 +398,7 @@ interface APIServiceSolicitaPolyline {
 fun rawJSONRutas(
     origen: LatLng,
     destino: LatLng,
+    viewModel: TrovareViewModel,
     recuperarResultados: MutableList<RutaInfo>
 ) {
 
@@ -435,9 +437,9 @@ fun rawJSONRutas(
     destination.put("location", locationd)
     jsonObject.put("destination", destination)
 
-    /*jsonObject.put("travelMode", "DRIVE")
+    jsonObject.put("travelMode", "DRIVE")
     jsonObject.put("computeAlternativeRoutes", false)
-    jsonObject.put("units", "IMPERIAL")*/
+    jsonObject.put("units", "IMPERIAL")
 
     // Convertir JSONObject a String
     val jsonObjectString = jsonObject.toString()
@@ -475,8 +477,7 @@ fun rawJSONRutas(
                         //manejar error no se eonctraron resultados
                     }
                 }
-
-
+                //viewModel.setPolilineaInicializada(true)
             } else {
 
                 Log.e("RETROFIT_ERROR", response.code().toString())
