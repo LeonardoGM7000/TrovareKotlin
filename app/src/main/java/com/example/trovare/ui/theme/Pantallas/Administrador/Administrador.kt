@@ -35,6 +35,8 @@ import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Recursos.VentanaDeAlerta
 import com.example.trovare.ui.theme.Trv1
 
+var Buscar:String = ""
+
 @Composable
 fun Administrador(
     modifier: Modifier = Modifier,

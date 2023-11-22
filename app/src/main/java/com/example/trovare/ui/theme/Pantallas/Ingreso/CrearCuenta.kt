@@ -1,5 +1,9 @@
 package com.example.trovare.ui.theme.Pantallas
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.util.Log
 import android.util.Patterns
 import androidx.compose.foundation.layout.Column
@@ -45,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -82,11 +87,12 @@ fun CrearCuenta(
     var isErrorLA: Int by rememberSaveable { mutableIntStateOf(0) }
     var isErrorC by rememberSaveable { mutableStateOf(false) }
     val minimoPassword = 8
-    val maximoLetras = 30
+    val maximoLetras = 20
     //Guardar estado de errores---------------------------------------------------------------------
 
     val auth = FirebaseAuth.getInstance()
     val firestore = Firebase.firestore
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     var textoNombre by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -390,6 +396,14 @@ fun CrearCuenta(
                                         duration = SnackbarDuration.Short
                                     )
                                 }
+                            } else if(!isNetworkAvailable(context)) {
+                                Log.i("error conexión", "No hay conexión a internet")
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Error de conexión",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
                             } else if(isErrorP) {
                                 Log.i("error contraseña", textoPassword.text.length.toString())
                                 scope.launch {
@@ -467,4 +481,17 @@ private fun saveUserData(
     }.addOnFailureListener {
         Log.i("cuenta", "Datos no guardados")
     }
+}
+
+@SuppressLint("ServiceCast")
+fun isNetworkAvailable(context: Context): Boolean {
+    val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    val network = connectivityManager.activeNetwork ?: return false
+    val capabilities =
+        connectivityManager.getNetworkCapabilities(network) ?: return false
+
+    return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
 }

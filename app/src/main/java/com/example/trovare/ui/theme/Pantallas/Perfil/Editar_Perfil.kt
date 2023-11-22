@@ -67,13 +67,13 @@ fun EditarPerfil(
     val usuario by viewModel.usuario.collectAsState()
 
     var textoNombre by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue("", TextRange(0, 7)))
+        mutableStateOf(TextFieldValue(usuario.nombre, TextRange(0, 7)))
     }
     var textoPais by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue("", TextRange(0, 7)))
+        mutableStateOf(TextFieldValue(usuario.lugarDeOrigen?:"México", TextRange(0, 7)))
     }
     var textoInformacion by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue("", TextRange(0, 7)))
+        mutableStateOf(TextFieldValue(usuario.descripcion?:"", TextRange(0, 7)))
     }
 
     val scope = rememberCoroutineScope()
@@ -173,7 +173,8 @@ fun EditarPerfil(
                                 containerColor = Trv2,
                                 cursorColor = Color.White,
                                 focusedIndicatorColor = Color.White,
-                                unfocusedIndicatorColor = Color.White
+                                unfocusedIndicatorColor = Color.White,
+
                             ),
                             singleLine = true,
                             keyboardOptions = keyboardOptions
@@ -258,14 +259,13 @@ fun EditarPerfil(
                                 onClick = {
                                     //Muestra el mensaje de comentario enviado con éxito----------------
                                     scope.launch {
+                                        editarPerfil(textoNombre.text,textoPais.text, textoInformacion.text, viewModel = viewModel)
                                         snackbarHostState.showSnackbar(
                                             message = "Cambios guardados con éxito",
                                             duration = SnackbarDuration.Short
                                         )
                                     }
-                                    textoNombre = TextFieldValue("")
-                                    textoPais = TextFieldValue("")
-                                    textoInformacion = TextFieldValue("")
+
                                 },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = Trv6,
@@ -286,7 +286,8 @@ suspend fun editarPerfil(
 
     nombre: String,
     pais: String,
-    descripcion: String
+    descripcion: String,
+    viewModel: TrovareViewModel
 ) {
 
     val auth = FirebaseAuth.getInstance()
@@ -300,6 +301,7 @@ suspend fun editarPerfil(
                 "descripcion" to descripcion
             )
         ).await()
+        viewModel.obtenerDato()
 
     } catch (e: Exception) {
         Log.i("Editar_usuario",e.toString())

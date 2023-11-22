@@ -65,9 +65,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.text.input.ImeAction
 
 data class Cuenta(val nombre: String = "")
+
+var effectKey = 0
+val cuentasSeleccionadas = mutableListOf<Cuenta>()
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,7 +89,7 @@ fun EliminarCuentas(
     var isLoading by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    var effectKey by remember { mutableIntStateOf(0) }
+
     Log.i("entro","entro")
     LaunchedEffect(effectKey) {
         Log.i("entro","entro")
@@ -147,6 +153,21 @@ fun EliminarCuentas(
                                     cuenta = cuenta,
                                     expanded = index == expandedCuentaIndex,
                                     onDeleteClick = {
+                                        if(cuentasSeleccionadas.contains(cuenta)){
+                                            Log.i("Entro a eliminar","entro a eliminar")
+                                            firestore.collection("Usuario").document(cuenta.nombre)
+                                                .delete()
+                                                .addOnSuccessListener {
+                                                    // Éxito al eliminar
+                                                    Log.d("EliminarCuenta", "Cuenta eliminada")
+                                                }
+                                                .addOnFailureListener { e ->
+                                                    // Error al eliminar
+                                                    Log.w("EliminarCuenta", "Error al eliminar cuenta", e)
+                                                }
+                                            cuentas = cuentas.filterNot { it.nombre == cuenta.nombre}
+                                            cuentasSeleccionadas.clear();
+                                        }
                                         // Eliminar la pregunta de Firestore
                                         //firestore.collection("Usuario").document(cuenta.nombre.toString())
                                         //  .delete()
@@ -223,7 +244,20 @@ fun TarjetaUsuario(
         Checkbox(
             modifier = Modifier.padding(end = 13.dp),
             checked = checked.value,
-            onCheckedChange = { checked.value = it },
+            onCheckedChange = { isChecked ->
+                if (isChecked) {
+                    // Agregar la cuenta a la lista de cuentas seleccionadas si el Checkbox está marcado
+                    cuentasSeleccionadas.add(cuenta)
+                    Log.i("SE AÑADIO CORRECTAMENTE LA CUENTA: cuenta.nombre",cuenta.nombre);
+                } else {
+                    // Quitar la cuenta de la lista de cuentas seleccionadas si el Checkbox se desmarca
+                    cuentasSeleccionadas.remove(cuenta)
+                    Log.i("SE QUITO DE LA LISTA LA CUENTA: cuenta.nombre",cuenta.nombre);
+                }
+                // Actualizar el valor de checked.value
+
+                checked.value = isChecked
+            },
             colors = CheckboxDefaults.colors(Trv6, Color.White, Trv1)
         )
     }
@@ -243,6 +277,13 @@ fun BusquedaCuenta(
     var busquedaEnProgreso by rememberSaveable { mutableStateOf(false) }//saber si se esta llevando a cabo una busqueda en el momento(permite mostrar el indicador de progreso circular)
     var tiempoRestante by rememberSaveable { mutableIntStateOf(1) }
     var job: Job? by remember { mutableStateOf(null) }
+    val onDoneClick: () -> Unit = {
+        // Aquí llama a la función que deseas ejecutar al hacer clic en la palomita
+        println("Texto ingresado: $textoBuscar")
+        effectKey++
+        Buscar = textoBuscar.text
+        navController.navigate(Pantalla.EliminarCuentas.ruta)
+    }
     fun iniciarTimer() {
         job = CoroutineScope(Dispatchers.Default).launch {
             busquedaEnProgreso = true//establece que hay una busqueda en progreso (para el indicador de progreso)
@@ -277,6 +318,17 @@ fun BusquedaCuenta(
                     tiempoRestante = 1//resetea el timer a 1 segundo
                     iniciarTimer()//reinicia la cuenta regresiva del timer
                 },
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        // Llama a la función cuando se presiona la tecla de verificación
+                        //EliminarCuentas(navController = navController,
+                        //modifier = Modifier, buscar = textoBuscar.text)
+                        onDoneClick.invoke()
+                    }
+                ),
                 leadingIcon = { Icon(imageVector = Icons.Rounded.Search, contentDescription = "") },
                 textStyle = MaterialTheme.typography.labelSmall,
                 placeholder = {

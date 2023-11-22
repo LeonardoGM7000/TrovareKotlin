@@ -1,5 +1,6 @@
 package com.example.trovare.ui.theme.Pantallas
 
+import android.content.Context
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -69,7 +70,8 @@ import com.example.trovare.ui.theme.Trv6
 fun Configuracion(
     modifier: Modifier = Modifier,
     viewModel: TrovareViewModel,
-    navController: NavController
+    navController: NavController,
+    context: Context,
 ) {
     Scaffold(
         topBar = {
@@ -163,6 +165,11 @@ fun Configuracion(
                                 }
                             }
 
+                            // Borramos los datos de sharedPreferences
+                            val sharedPreferences = context.getSharedPreferences("DB", Context.MODE_PRIVATE)
+                            val editor = sharedPreferences.edit()
+                            editor.clear()
+                            editor.apply()
                         },
                         textoConfirmar = "Cerrar Sesión",
                         titulo = "Cerrar Sesión",

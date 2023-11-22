@@ -294,14 +294,14 @@ fun InicioDeSesion(
                                                             }else{
                                                                 scope.launch {
                                                                     snackbarHostState.showSnackbar(
-                                                                        message = "Iniciando Sesión...",
+                                                                        message = "Bienvenido...",
                                                                         duration = SnackbarDuration.Short
                                                                     )
-                                                                }
-                                                                navController.navigate(Pantalla.NavegacionSecundaria.ruta){
-                                                                    popUpTo(navController.graph.id){
-                                                                        inclusive = true
                                                                     }
+                                                                    navController.navigate(Pantalla.NavegacionSecundaria.ruta){
+                                                                        popUpTo(navController.graph.id){
+                                                                            inclusive = true
+                                                                        }
                                                                 }
                                                                 viewModel.obtenerDato()
                                                             }

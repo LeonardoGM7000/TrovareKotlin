@@ -1,5 +1,6 @@
 package com.example.trovare.ui.theme.Navegacion
 
+import android.content.Context
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
@@ -78,13 +79,15 @@ sealed class Pantalla(val ruta: String) {
 fun Trovare(
     viewModel: TrovareViewModel = viewModel(),
     navController: NavHostController = rememberNavController(),
+    pantallaInicial: String,
     placesClient: PlacesClient,
-    fusedLocationProviderClient: FusedLocationProviderClient
+    fusedLocationProviderClient: FusedLocationProviderClient,
+    context: Context
 ){
 
     NavHost(
         navController = navController,
-        startDestination = Pantalla.Bienvenida.ruta,
+        startDestination = pantallaInicial,
         //enterTransition = {  slideInHorizontally(animationSpec = SpringSpec(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium,)) { 0 }  },
         //exitTransition = { slideOutHorizontally(animationSpec = SpringSpec(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium,)) { -300 }  }
         //enterTransition = { fadeIn() },
@@ -119,7 +122,8 @@ fun Trovare(
         composable(route = Pantalla.Configuracion.ruta) {
             Configuracion(
                 viewModel = viewModel,
-                navController = navController
+                navController = navController,
+                context = context
             )
         }
         composable(route = Pantalla.FAQS.ruta) {
