@@ -490,14 +490,7 @@ fun MapaPrincipal(
                                         .fillMaxWidth()
                                         .padding(end = 5.dp, bottom = 5.dp),
                                     onClick = {
-                                        viewModel.setMarcadoresInicializado(false)
-                                        path = ubicacion.latitude.toString() + "%2C" + ubicacion.longitude.toString() + "%7C" + state.lastKnownLocation?.latitude.toString() + "%2C" + state.lastKnownLocation?.longitude.toString()
-                                        Log.d("rutasss",path)
-                                        rawJSONCrearRuta(
-                                            path = path,
-                                            interpolate = interpolate1,
-                                            recuperarResultados = puntosRuta
-                                        )
+
                                         // Acceder a la latitud de la primera coordenada
                                         val primeraLatitud: Double? = puntosRuta.firstOrNull()?.latitude
 
