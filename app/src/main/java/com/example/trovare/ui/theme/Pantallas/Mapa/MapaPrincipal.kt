@@ -206,6 +206,7 @@ fun MapaPrincipal(
                     Marker(
                         state = rememberMarkerState(position = marcador.ubicacion),
                         onClick ={
+                            viewModel.setUbicacion(marcador.ubicacion)
                             viewModel.setInformacionInicializada(false)
                             viewModel.obtenerMarcadorEntreMuchos(
                                 placesClient = placesClient,
@@ -322,6 +323,7 @@ fun MapaPrincipal(
                                 .padding(end = 5.dp)
                                 .clickable {
                                     zoom = 13f
+                                    viewModel.setPolilineaInicializada(false)
                                     viewModel.setMarcadorInicializado(false)
                                     viewModel.setMarcadoresInicializado(false)
                                     viewModel.setInformacionInicializada(false)
@@ -378,6 +380,7 @@ fun MapaPrincipal(
                                 Box(
                                     modifier = modifier.clickable {
                                         zoom = 15f
+                                        viewModel.setPolilineaInicializada(false)
                                         viewModel.setMarcadoresInicializado(false)
                                         viewModel.setMarcadorInicializado(false)
                                         viewModel.setInformacionInicializada(false)
@@ -492,18 +495,6 @@ fun MapaPrincipal(
                                                 viewModel = viewModel,
                                                 //recuperarResultados = rutaInfo
                                             )
-                                            //polilineaCod = rutaInfo.firstOrNull()?.polilinea
-
-                                            if (polilineaCod != null) {
-                                                Log.d("Polilinea codigo", polilineaCod!!)
-                                                viewModel.setPolilineaInicializada(true)
-                                            } else {
-                                                Log.d("ERROR_POLILINEA_COD", "La lista de puntos de ruta está vacía.")
-                                            }
-
-                                            /*val decodedPolyline: List<LatLng> = PolyUtil.decode(polilineaCod)
-                                            val prueba = decodedPolyline.firstOrNull()?.latitude
-                                            Log.d("ListadeLats",prueba.toString())*/
                                         }
                                     },
                                     colors = ButtonDefaults.buttonColors(

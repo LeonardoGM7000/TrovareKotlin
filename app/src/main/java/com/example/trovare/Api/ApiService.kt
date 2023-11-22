@@ -404,19 +404,9 @@ fun rawJSONRutas(
                 val gson1 = Gson()
                 val mUser = gson1.fromJson(prettyJson, Routes::class.java)
                 val rutaInfo = RutaInfo(distancia = mUser.routes.first().distance, duracion = mUser.routes.first().duration, polilinea = mUser.routes.first().polyline.encodPolyline)
-                /*
-                mUser.routes.forEach { ruta ->
-                    if (ruta != null) {
-                        recuperarResultados.add(RutaInfo(distancia = ruta.distance, duracion = ruta.duration, polilinea = ruta.polyline.encodPolyline))
-                        Log.d("Polilineaaaa", ruta.polyline.encodPolyline)
-                    } else {
-                        //manejar error no se eonctraron resultados
-                    }
-                }
 
-                 */
                 viewModel.setPolilineaCod(rutaInfo.polilinea)
-                //polilineaCod = rutaInfo.firstOrNull()?.polilinea
+                viewModel.setPolilineaInicializada(true)
 
 
             } else {
