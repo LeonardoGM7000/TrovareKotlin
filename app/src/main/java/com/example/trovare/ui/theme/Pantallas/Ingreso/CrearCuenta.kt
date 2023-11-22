@@ -2,8 +2,6 @@ package com.example.trovare.ui.theme.Pantallas
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
-import android.content.Intent.getIntent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
@@ -61,37 +59,42 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
-import com.example.trovare.Pantalla
+import com.example.trovare.Data.Usuario
 import com.example.trovare.R
-import com.example.trovare.ui.theme.Data.Usuario
+import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv6
 import com.example.trovare.ui.theme.Trv8
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CrearCuenta(
     modifier: Modifier = Modifier,
     navController: NavController
-){
-    val auth = FirebaseAuth.getInstance()
+) {
 
+    //Variables-------------------------------------------------------------------------------------
+    //Guardar estado de errores---------------------------------------------------------------------
+    var isErrorP by rememberSaveable { mutableStateOf(false) }
+    var isErrorL: Int by rememberSaveable { mutableIntStateOf(0) }
+    var isErrorLA: Int by rememberSaveable { mutableIntStateOf(0) }
+    var isErrorC by rememberSaveable { mutableStateOf(false) }
+    val minimoPassword = 8
+    val maximoLetras = 20
+    //Guardar estado de errores---------------------------------------------------------------------
+
+    val auth = FirebaseAuth.getInstance()
     val firestore = Firebase.firestore
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-
     var textoNombre by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
@@ -104,25 +107,25 @@ fun CrearCuenta(
     var textoPassword by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
-
     var passwordOculta by rememberSaveable { mutableStateOf(true) }
     var aceptarTyC by rememberSaveable { mutableStateOf(false) }
     var cuentaCreada by remember { mutableStateOf(false) }
-
-    val keyboardOptionsTexto: KeyboardOptions =
-        KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done)
-    val keyboardOptionsCorreo: KeyboardOptions =
-        KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email, imeAction = ImeAction.Done)
-    val keyboardOptionsPassword: KeyboardOptions = KeyboardOptions.Default.copy(
-        keyboardType = KeyboardType.Password,
-        imeAction = ImeAction.Done
+    val keyboardOptionsTexto: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next)
+    val keyboardOptionsCorreo: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next)
+    val keyboardOptionsPassword: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done)
+    //Configuracion de colores para campos de texto-------------------------------------------------
+    val colores = TextFieldDefaults.textFieldColors(
+        containerColor = Trv8,
+        focusedLabelColor = Color.White,
+        unfocusedLabelColor = Color.White,
+        cursorColor = Color.White,
+        focusedIndicatorColor = Color.White,
+        unfocusedIndicatorColor = Color.White,
+        errorCursorColor = MaterialTheme.colorScheme.error,
+        errorIndicatorColor = MaterialTheme.colorScheme.error,
+        errorLabelColor = MaterialTheme.colorScheme.error,
+        errorSupportingTextColor = MaterialTheme.colorScheme.error,
     )
-    //funciones y variables para validar campos
-    var isErrorP by rememberSaveable { mutableStateOf(false) }
-    var isErrorL: Int by rememberSaveable { mutableIntStateOf(0) }
-    var isErrorLA: Int by rememberSaveable { mutableIntStateOf(0) }
-    val minimoPassword = 8
-    val maximoLetras = 15
 
     fun validarLetras(text: String) {
         if(!(text.matches("[a-zA-ZÀ-ÿ ]*".toRegex()))){
@@ -149,6 +152,7 @@ fun CrearCuenta(
         isErrorP = !(text.matches("^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%^&*(),.?\":{}|<>])(?=.*[a-z]).{8,}\$".toRegex()))
     }
 
+    //Interfaz usuario------------------------------------------------------------------------------
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
@@ -192,6 +196,7 @@ fun CrearCuenta(
                         modifier = modifier
                             .fillMaxWidth()
                             .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
+                        isError = isErrorL != 0,
                         value = textoNombre,
                         onValueChange = { textoNombre = it
                             isErrorL = 0
@@ -202,13 +207,11 @@ fun CrearCuenta(
                             isErrorL = isErrorL
                             if(isErrorL == 1){
                                 Text(
-                                    modifier = Modifier.fillMaxWidth(),
                                     text = "Ingresa solo letras",
                                     color = MaterialTheme.colorScheme.error
                                 )
                             } else if(isErrorL == 2){
                                 Text(
-                                    modifier = Modifier.fillMaxWidth(),
                                     text = "Máximo $maximoLetras carácteres",
                                     color = MaterialTheme.colorScheme.error
                                 )
@@ -221,15 +224,7 @@ fun CrearCuenta(
                             )
                         },
                         textStyle = MaterialTheme.typography.labelSmall,
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = Color.White,
-                            focusedLabelColor = Color.White,
-                            unfocusedLabelColor = Color.White,
-                            containerColor = Trv8,
-                            cursorColor = Color.White,
-                            focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White
-                        ),
+                        colors = colores,
                         singleLine = true,
                         keyboardOptions = keyboardOptionsTexto,
                     )
@@ -238,6 +233,7 @@ fun CrearCuenta(
                         modifier = modifier
                             .fillMaxWidth()
                             .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
+                        isError = isErrorLA != 0,
                         value = textoApellido,
                         onValueChange = { textoApellido = it
                             isErrorLA = 0
@@ -266,15 +262,7 @@ fun CrearCuenta(
                             )
                         },
                         textStyle = MaterialTheme.typography.labelSmall,
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = Color.White,
-                            focusedLabelColor = Color.White,
-                            unfocusedLabelColor = Color.White,
-                            containerColor = Trv8,
-                            cursorColor = Color.White,
-                            focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White
-                        ),
+                        colors = colores,
                         singleLine = true,
                         keyboardOptions = keyboardOptionsTexto,
                     )
@@ -283,6 +271,7 @@ fun CrearCuenta(
                         modifier = modifier
                             .fillMaxWidth()
                             .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
+                        isError = isErrorC,
                         value = textoCorreo,
                         onValueChange = { textoCorreo = it },
                         label = {
@@ -298,15 +287,7 @@ fun CrearCuenta(
                             )
                         },
                         textStyle = MaterialTheme.typography.labelSmall,
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = Color.White,
-                            focusedLabelColor = Color.White,
-                            unfocusedLabelColor = Color.White,
-                            containerColor = Trv8,
-                            cursorColor = Color.White,
-                            focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White
-                        ),
+                        colors = colores,
                         singleLine = true,
                         keyboardOptions = keyboardOptionsCorreo,
                     )
@@ -315,6 +296,7 @@ fun CrearCuenta(
                         modifier = modifier
                             .fillMaxWidth()
                             .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
+                        isError = isErrorP,
                         value = textoPassword,
                         onValueChange = { textoPassword = it
                             validarPassword(textoPassword.text)},
@@ -350,22 +332,14 @@ fun CrearCuenta(
                             )
                         },
                         textStyle = MaterialTheme.typography.labelSmall,
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = Color.White,
-                            focusedLabelColor = Color.White,
-                            unfocusedLabelColor = Color.White,
-                            containerColor = Trv8,
-                            cursorColor = Color.White,
-                            focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White
-                        ),
+                        colors = colores,
                         singleLine = true,
                         keyboardOptions = keyboardOptionsPassword,
                     )
                     //Aceptar terminos y condiciones----------------------------------------------------
                     Row(
                         verticalAlignment = Alignment.CenterVertically
-                    ){
+                    ) {
                         RadioButton(
                             modifier = modifier.padding(start = 25.dp),
                             selected = aceptarTyC,
@@ -381,17 +355,15 @@ fun CrearCuenta(
                         )
                     }
                     Spacer(modifier = modifier.fillMaxHeight(0.6f))
-
                     //Boton registro--------------------------------------------------------------------
                     TextButton(
                         enabled = aceptarTyC,
                         modifier = modifier
                             .fillMaxWidth()
-
                             .padding(start = 25.dp, end = 25.dp, bottom = 10.dp),
                         onClick = {
                             //Iniciar-------------------------------------------------------------------
-                            if(textoNombre.text.isBlank() || textoApellido.text.isBlank() || textoCorreo.text.isBlank() || textoPassword.text.isBlank()) {
+                            if(textoNombre.text.isBlank() || textoApellido.text.isBlank() || textoCorreo.text.isBlank() || textoPassword.text.isBlank()){
                                 Log.i("error", "campos imcompletos")
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
@@ -418,16 +390,9 @@ fun CrearCuenta(
                             } else if(!Patterns.EMAIL_ADDRESS.matcher(textoCorreo.text).matches()){
                                 Log.i("error correo", textoCorreo.text)
                                 scope.launch {
+                                    isErrorC = true
                                     snackbarHostState.showSnackbar(
                                         message = "Correo inválido",
-                                        duration = SnackbarDuration.Short
-                                    )
-                                }
-                            } else if(isErrorP) {
-                                Log.i("error contraseña", textoPassword.text.length.toString())
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = "Contraseña débil",
                                         duration = SnackbarDuration.Short
                                     )
                                 }
@@ -439,37 +404,45 @@ fun CrearCuenta(
                                         duration = SnackbarDuration.Short
                                     )
                                 }
+                            } else if(isErrorP) {
+                                Log.i("error contraseña", textoPassword.text.length.toString())
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Contraseña débil",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
                             } else {
                                 auth.createUserWithEmailAndPassword(
                                     textoCorreo.text,
                                     textoPassword.text
                                 ).addOnCompleteListener { task ->
 
-                                    if (task.isSuccessful) {
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar(
-                                                message = "Cuenta creada exitosamente, se necesita verificación de correo",
-                                                duration = SnackbarDuration.Short
+                                        if (task.isSuccessful) {
+                                            scope.launch {
+                                                snackbarHostState.showSnackbar(
+                                                    message = "Cuenta creada exitosamente, se necesita verificación de correo",
+                                                    duration = SnackbarDuration.Long
+                                                )
+                                                cuentaCreada = true
+                                            }
+                                            //Guardar datos firebase
+                                            saveUserData(
+                                                textoNombre.text,
+                                                textoCorreo.text,
+                                                firestore
                                             )
-                                            cuentaCreada = true
-                                        }
-                                        //Guardar datos firebase
-                                        saveUserData(
-                                            textoNombre.text,
-                                            textoCorreo.text,
-                                            firestore
-                                        )
-                                        val user = FirebaseAuth.getInstance().currentUser
-                                        user?.sendEmailVerification()
-                                    } else {
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar(
-                                                message = "El correo ingresado ya está asociado a otra cuenta",
-                                                duration = SnackbarDuration.Short
-                                            )
+                                        } else {
+
+                                            scope.launch {
+                                                isErrorC = true
+                                                snackbarHostState.showSnackbar(
+                                                    message = "El correo ingresado ya está asociado a otra cuenta",
+                                                    duration = SnackbarDuration.Short
+                                                )
+                                            }
                                         }
                                     }
-                                }
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
@@ -489,7 +462,6 @@ fun CrearCuenta(
                             }
                         }
                     }
-
                 }
             }
         }
@@ -510,6 +482,7 @@ private fun saveUserData(
         Log.i("cuenta", "Datos no guardados")
     }
 }
+
 @SuppressLint("ServiceCast")
 fun isNetworkAvailable(context: Context): Boolean {
     val connectivityManager =

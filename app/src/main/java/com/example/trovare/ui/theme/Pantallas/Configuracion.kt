@@ -1,8 +1,6 @@
 package com.example.trovare.ui.theme.Pantallas
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -26,7 +24,6 @@ import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,9 +34,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,25 +50,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.trovare.Pantalla
-import com.example.trovare.ui.theme.Data.Configuracion
-import com.example.trovare.ui.theme.Data.Usuario
-import com.example.trovare.ui.theme.Data.listaDeConfiguracion
-import com.example.trovare.ui.theme.Data.usuarioPrueba
-import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
+import com.example.trovare.Data.Configuracion
+import com.example.trovare.Data.Usuario
+import com.example.trovare.Data.listaDeConfiguracion
+import com.example.trovare.Data.usuarioPrueba
+import com.example.trovare.ViewModel.TrovareViewModel
+import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
 import com.example.trovare.ui.theme.Recursos.VentanaDeAlerta
-import com.example.trovare.ui.theme.TrovareTheme
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv6
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Configuracion(
@@ -82,17 +73,14 @@ fun Configuracion(
     navController: NavController,
     context: Context,
 ) {
-
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
         },
     ) { it ->
-
         var mostrarCerrarSesion by rememberSaveable { mutableStateOf(false) }
         var mostrarBorrarCuenta by rememberSaveable { mutableStateOf(false) }
         val uiState by viewModel.uiState.collectAsState()
-
         //CUERPO DE LA PANTALLA CONFIGURACION ------------------------------------------------------
         Surface(
             modifier = modifier
@@ -114,7 +102,8 @@ fun Configuracion(
                 }
                 item{
                     TarjetaPerfil(
-                        navController = navController
+                        navController = navController,
+                        viewModel = viewModel
                     )
                 }
                 item {
@@ -181,10 +170,6 @@ fun Configuracion(
                             val editor = sharedPreferences.edit()
                             editor.clear()
                             editor.apply()
-
-                            Log.d("Main_Trovare", "Configuracion")
-                            Log.d("Main_Trovare", sharedPreferences.getString("correo", null).toString())
-
                         },
                         textoConfirmar = "Cerrar Sesión",
                         titulo = "Cerrar Sesión",
@@ -195,15 +180,11 @@ fun Configuracion(
                         mostrar = mostrarBorrarCuenta,
                         alRechazar = {mostrarBorrarCuenta = false},
                         alConfirmar = {
-
-
                             navController.navigate(Pantalla.Bienvenida.ruta){
                                 popUpTo(navController.graph.id){
                                     inclusive = true
                                 }
                             }
-
-
                         },
                         textoConfirmar = "Borrar Cuenta",
                         titulo = "Borrar Cuenta",
@@ -211,25 +192,19 @@ fun Configuracion(
                         icono = Icons.Filled.DeleteForever,
                         colorConfirmar = Color.Red
                     )
-
                 }
             }
         }
-
     }
 }
-
 @Composable
 fun TarjetaPerfil(
-        modifier: Modifier = Modifier,
-        viewModel: PerfilDataModel = viewModel(),
-        navController: NavController,
-    ){
+    modifier: Modifier = Modifier,
+    viewModel: TrovareViewModel,
+    navController: NavController,
+){
 
-    val usuario by viewModel.dato
-    LaunchedEffect(true){
-        viewModel.obtenerDato()
-    }
+    val usuario by viewModel.usuario.collectAsState()
 
     Card(
         modifier = modifier
@@ -265,7 +240,6 @@ fun TarjetaPerfil(
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
-
                 )
                 Text(
                     modifier = modifier
@@ -279,7 +253,6 @@ fun TarjetaPerfil(
         }
     }
 }
-
 @Composable
 fun TarjetaConfiguracion(
     modifier: Modifier = Modifier,
@@ -289,8 +262,6 @@ fun TarjetaConfiguracion(
 ) {
     var expanded by remember { mutableStateOf(false) }
     var selectedValue by rememberSaveable { mutableStateOf(configuracion.opciones.first()) }
-
-
     // Definir la animación de tamaño de la tarjeta
     val cardSizeModifier = Modifier
         .animateContentSize(
@@ -299,7 +270,6 @@ fun TarjetaConfiguracion(
                 stiffness = Spring.StiffnessMediumLow,
             )
         )
-
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -341,7 +311,6 @@ fun TarjetaConfiguracion(
                 Box(
                     modifier = modifier
                         .fillMaxSize(0.65F)
-
                 ){
                     Text(
                         modifier = modifier
@@ -361,7 +330,6 @@ fun TarjetaConfiguracion(
             if (expanded) {
                 //configuracion.contenido()
                 //OPCIONES DE CONFIGURACION---------------------------------------------------------
-
                 Column(
                     modifier = modifier.padding(start = 35.dp)
                 ){
@@ -397,9 +365,7 @@ fun TarjetaConfiguracion(
     }
     Divisor()
 }
-
 //Configuracion------------------------------------------------
-
 @Composable
 fun TarjetaNormal(
     modifier: Modifier = Modifier,
@@ -452,14 +418,11 @@ fun TarjetaNormal(
         }
     }
 }
-
 /*
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun PreviewConfiguracion() {
     TrovareTheme {
-
     }
 }
-
  */

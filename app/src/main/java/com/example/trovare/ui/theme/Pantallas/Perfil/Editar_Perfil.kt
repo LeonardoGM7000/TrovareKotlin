@@ -1,4 +1,4 @@
-package com.example.trovare.ui.theme.Pantallas
+package com.example.trovare.ui.theme.Pantallas.Perfil
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -28,7 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,19 +44,15 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.trovare.ui.theme.Data.Usuario
-import com.example.trovare.ui.theme.Data.usuarioPrueba
+import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv6
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -64,54 +60,20 @@ import kotlinx.coroutines.tasks.await
 @Composable
 fun EditarPerfil(
     modifier: Modifier = Modifier,
-    viewModel: PerfilDataModel = viewModel(),
+    viewModel: TrovareViewModel,
     navController: NavController
 ){
 
+    val usuario by viewModel.usuario.collectAsState()
+
     var textoNombre by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue("", TextRange(0, 7)))
+        mutableStateOf(TextFieldValue(usuario.nombre, TextRange(0, 7)))
     }
     var textoPais by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue("", TextRange(0, 7)))
+        mutableStateOf(TextFieldValue(usuario.lugarDeOrigen?:"México", TextRange(0, 7)))
     }
     var textoInformacion by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue("", TextRange(0, 7)))
-    }
-
-    var editarUsuario by remember { mutableStateOf(false) }
-
-    val usuario by viewModel.dato
-
-    // Cargamos los datos del usuario
-    LaunchedEffect(usuario){
-
-        viewModel.obtenerDato()
-
-        textoNombre = TextFieldValue(usuario.nombre)
-        textoPais = TextFieldValue(usuario.lugarDeOrigen as String)
-        textoInformacion = TextFieldValue(usuario.descripcion as String)
-    }
-
-    LaunchedEffect(editarUsuario) {
-
-        if (editarUsuario) {
-
-            delay(100)
-
-            try {
-
-                // Actualizar en Firestore
-                editarPerfil(textoNombre.text,textoPais.text, textoInformacion.text)
-
-                editarUsuario = false
-
-                // Navegar de vuelta a la pantalla anterior
-                navController.popBackStack()
-
-            } catch (e: Exception) {
-                Log.i("Editar_usuario", e.toString())
-            }
-        }
+        mutableStateOf(TextFieldValue(usuario.descripcion?:"", TextRange(0, 7)))
     }
 
     val scope = rememberCoroutineScope()
@@ -140,7 +102,9 @@ fun EditarPerfil(
                     .wrapContentSize(),
                 colors = CardDefaults.cardColors(Trv2)
             ) {
+                //Cuerpo de Editar Perfil-----------------------------------------------------------
                 LazyColumn(){
+                    //titulo
                     item {
                         Text(
                             modifier = modifier
@@ -181,6 +145,7 @@ fun EditarPerfil(
                             }
                         }
                     }
+                    //campo nmbre
                     item {
                         OutlinedTextField(
                             modifier = modifier
@@ -208,7 +173,8 @@ fun EditarPerfil(
                                 containerColor = Trv2,
                                 cursorColor = Color.White,
                                 focusedIndicatorColor = Color.White,
-                                unfocusedIndicatorColor = Color.White
+                                unfocusedIndicatorColor = Color.White,
+
                             ),
                             singleLine = true,
                             keyboardOptions = keyboardOptions
@@ -293,14 +259,13 @@ fun EditarPerfil(
                                 onClick = {
                                     //Muestra el mensaje de comentario enviado con éxito----------------
                                     scope.launch {
+                                        editarPerfil(textoNombre.text,textoPais.text, textoInformacion.text, viewModel = viewModel)
                                         snackbarHostState.showSnackbar(
                                             message = "Cambios guardados con éxito",
                                             duration = SnackbarDuration.Short
                                         )
                                     }
 
-                                    // Los datos fueron guardados con éxito
-                                    editarUsuario = true
                                 },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = Trv6,
@@ -310,24 +275,19 @@ fun EditarPerfil(
                                 Text(text = "Guardar")
                             }
                         }
-
                     }
                 }
             }
-
-
         }
     }
-
-
 }
 
-// Función para modificar datos
 suspend fun editarPerfil(
 
     nombre: String,
     pais: String,
-    descripcion: String
+    descripcion: String,
+    viewModel: TrovareViewModel
 ) {
 
     val auth = FirebaseAuth.getInstance()
@@ -341,6 +301,7 @@ suspend fun editarPerfil(
                 "descripcion" to descripcion
             )
         ).await()
+        viewModel.obtenerDato()
 
     } catch (e: Exception) {
         Log.i("Editar_usuario",e.toString())

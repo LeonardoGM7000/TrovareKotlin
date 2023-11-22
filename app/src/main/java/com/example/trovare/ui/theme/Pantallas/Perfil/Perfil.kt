@@ -1,4 +1,4 @@
-package com.example.trovare.ui.theme.Pantallas
+package com.example.trovare.ui.theme.Pantallas.Perfil
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -28,8 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,27 +37,23 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
-import com.example.trovare.Pantalla
-import com.example.trovare.ui.theme.Data.Usuario
-import com.example.trovare.ui.theme.Data.usuarioPrueba
+import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
 import com.example.trovare.ui.theme.Recursos.Divisor
-import com.example.trovare.ui.theme.Recursos.MenuInferior
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
-import com.example.trovare.ui.theme.Trv5
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.getValue
+import com.example.trovare.ViewModel.TrovareViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PerfilConfiguracion(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    viewModel: TrovareViewModel
 ) {
-
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
@@ -71,7 +66,8 @@ fun PerfilConfiguracion(
             color = Trv1
         ) {
             PerfilPrincipal(
-                navController = navController
+                navController = navController,
+                viewModel = viewModel
             )
         }
     }
@@ -81,21 +77,13 @@ fun PerfilConfiguracion(
 @Composable
 fun PerfilInicio(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    viewModel: TrovareViewModel
 ) {
-
     Scaffold(
         topBar = {
             BarraSuperiorConfig(navController = navController)
         },
-        bottomBar = {
-            MenuInferior(
-                presionarHome = { navController.navigate(Pantalla.Inicio.ruta) },
-                presionarPerfil = {  },
-                presionarNavegacion = {  },
-                presionarItinerario = {  },
-                colorPerfil = Trv5)
-        }
     ) { it ->
         Surface(
             modifier = modifier
@@ -104,7 +92,8 @@ fun PerfilInicio(
             color = Trv1
         ) {
             PerfilPrincipal(
-                navController = navController
+                navController = navController,
+                viewModel = viewModel
             )
         }
     }
@@ -114,14 +103,11 @@ fun PerfilInicio(
 @Composable
 fun PerfilPrincipal(
     modifier: Modifier = Modifier,
-    viewModel: PerfilDataModel = viewModel(),
-    navController: NavController
+    navController: NavController,
+    viewModel: TrovareViewModel,
 ){
 
-    val usuario by viewModel.dato
-    LaunchedEffect(true){
-        viewModel.obtenerDato()
-    }
+    val usuario by viewModel.usuario.collectAsState()
 
     Surface(
         modifier = modifier
@@ -209,7 +195,7 @@ fun PerfilPrincipal(
                         modifier = modifier
                             .padding(horizontal = 25.dp, vertical = 10.dp)
                             .fillMaxWidth(),
-                        text = usuario.descripcion ?: "",
+                        text = usuario.descripcion?: "",
                         textAlign = TextAlign.Justify,
                         color = Color.White,
                         style = MaterialTheme.typography.bodySmall
@@ -267,7 +253,7 @@ fun PerfilPrincipal(
                         color = Color.White
                     )
                 }
-                items(usuario.comentarios!!){ comentario ->
+                items(usuario.comentarios!!){comentario ->
                     Card(modifier = modifier
                         .padding(horizontal = 25.dp, vertical = 5.dp)
                         .fillMaxWidth(),
@@ -306,15 +292,10 @@ fun PerfilPrincipal(
                                     color = Color.White,
                                 )
                             }
-
                         }
                     }
                 }
             }
-
-
-
         }
-
     }
 }
