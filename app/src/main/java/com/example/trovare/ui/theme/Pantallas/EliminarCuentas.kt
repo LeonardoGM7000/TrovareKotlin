@@ -81,6 +81,10 @@ import kotlinx.coroutines.tasks.await
 data class Cuenta(val nombre: String = "")
 var effectKey = 0
 val cuentasSeleccionadas = mutableListOf<Cuenta>()
+object FirestoreInstance {
+    val instance: FirebaseFirestore by lazy { Firebase.firestore }
+}
+
 
 @SuppressLint("CoroutineCreationDuringComposition", "SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -88,14 +92,17 @@ val cuentasSeleccionadas = mutableListOf<Cuenta>()
 fun EliminarCuentas(
     modifier: Modifier = Modifier.fillMaxWidth(),
     navController: NavController,
-    buscar: String = ""
+    /*buscar: String = ""*/
 ) {
-    val firestore: FirebaseFirestore by lazy { Firebase.firestore }
+    val firestore = FirestoreInstance.instance
     var cuentas by remember { mutableStateOf(emptyList<Cuenta>()) }
     var expandedCuentaIndex by remember { mutableIntStateOf(-1) }
     var isLoading by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val actualizarCuentas: (List<Cuenta>) -> Unit = { updatedCuentas ->
+        cuentas = updatedCuentas
+    }
     Log.i("entro inicial", Buscar)
     LaunchedEffect(effectKey) {
         Log.i("entro", "entro")
@@ -141,11 +148,11 @@ fun EliminarCuentas(
                         Divisor(modifier = modifier.padding(15.dp))
                     }
                     item {
-                        BusquedaCuenta(navController = navController)
+                        BusquedaCuenta(navController = navController, firestore = firestore, cuentas = cuentas, actualizarCuentas = actualizarCuentas )
                     }
-                    Log.i("Mensaje Eliminar cuenta", buscar)
+                    Log.i("Mensaje Eliminar cuenta", Buscar)
                     Log.i("Total cuentas", cuentas.size.toString())
-                    if (buscar.isNotBlank()) {
+                    if (Buscar.isNotBlank()) {
                         Log.i("mensaje entro", "entro al effectkey")
                         effectKey++
                     }
@@ -159,27 +166,6 @@ fun EliminarCuentas(
                                 TarjetaUsuario(
                                     cuenta = cuenta,
                                     expanded = index == expandedCuentaIndex,
-                                    onDeleteClick = {
-                                        if(cuentasSeleccionadas.contains(cuenta)){
-                                            Log.i("Entro a eliminar","entro a eliminar")
-                                            firestore.collection("Usuario").document(cuenta.nombre)
-                                                .delete()
-                                                .addOnSuccessListener {
-                                                    // Éxito al eliminar
-                                                    Log.d("EliminarCuenta", "Cuenta eliminada")
-                                                }
-                                                .addOnFailureListener { e ->
-                                                    // Error al eliminar
-                                                    Log.w("EliminarCuenta", "Error al eliminar cuenta", e)
-                                                }
-                                            cuentas = cuentas.filterNot { it.nombre == cuenta.nombre}
-                                            cuentasSeleccionadas.clear();
-                                        }
-                                        // Eliminar la pregunta de Firestore
-
-                                        //  .delete()
-                                        //accounts = accounts.filterNot { it.nombre == account.nombre }
-                                    },
                                     modifier = modifier.padding(top = 20.dp),
                                     navController = navController
                                 )
@@ -192,7 +178,7 @@ fun EliminarCuentas(
                                  )
                              }*/
                             }
-                            0                        }
+                        }
                     } catch (e: Exception) {
                         Log.i("No hay cuentas", Buscar)
                     }
@@ -207,10 +193,10 @@ fun EliminarCuentas(
 fun TarjetaUsuario(
     cuenta: Cuenta,
     expanded: Boolean,
-    onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
+
     var mostrarBorrarCuenta by rememberSaveable { mutableStateOf(false) }
     var checked = remember { mutableStateOf(false) }
     Row(
@@ -276,8 +262,14 @@ fun TarjetaUsuario(
 @Composable
 fun BusquedaCuenta(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    firestore: FirebaseFirestore,
+    cuentas:List<Cuenta>,
+    actualizarCuentas: (List<Cuenta>) -> Unit
 ) {
+
+
+
     var mostrarBorrarCuenta by rememberSaveable { mutableStateOf(false) }
 
     val focusRequester =
@@ -380,8 +372,23 @@ fun BusquedaCuenta(
             mostrar = mostrarBorrarCuenta,
             alRechazar = { mostrarBorrarCuenta = false },
             alConfirmar = {
-                //Necesita eliminar la pregunta
-                //borrarCuentas()
+                cuentasSeleccionadas.forEach(){cuenta ->
+                    firestore.collection("Usuario").document(cuenta.nombre)
+                        .delete()
+                        .addOnSuccessListener {
+                            // Éxito al eliminar
+                            Log.d("EliminarCuenta", "Cuenta eliminada")
+                        }
+                        .addOnFailureListener { e ->
+                            // Error al eliminar
+                            Log.w("EliminarCuenta", "Error al eliminar cuenta", e)
+                        }
+                }
+                val updatedCuentas = cuentas.filterNot { it in cuentasSeleccionadas }
+                actualizarCuentas(updatedCuentas)
+                cuentasSeleccionadas.clear()
+
+
                 navController.navigate(Pantalla.Administrador.ruta) {
                     popUpTo(navController.graph.id) {
                         inclusive = true
@@ -394,5 +401,7 @@ fun BusquedaCuenta(
             icono = Icons.Filled.DeleteForever,
             colorConfirmar = Color.Red
         )
+
     }
 }
+
