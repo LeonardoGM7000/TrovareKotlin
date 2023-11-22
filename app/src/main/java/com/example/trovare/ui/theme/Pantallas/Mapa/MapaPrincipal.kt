@@ -491,16 +491,6 @@ fun MapaPrincipal(
                                         .padding(end = 5.dp, bottom = 5.dp),
                                     onClick = {
 
-                                        // Acceder a la latitud de la primera coordenada
-                                        val primeraLatitud: Double? = puntosRuta.firstOrNull()?.latitude
-
-                                        if (primeraLatitud != null) {
-                                            Log.d("Primera Latitud", primeraLatitud.toString())
-                                        } else {
-                                            Log.d("Puntos de Ruta", "La lista de puntos de ruta está vacía.")
-                                        }
-                                        //Log.d("Algun punto",puntosRuta[0].latitude.toString())
-
                                         val origen = LatLng(ubicacion.latitude, ubicacion.longitude)
                                         val destino =
                                             state.lastKnownLocation?.latitude?.let { state.lastKnownLocation?.longitude?.let { it1 ->
