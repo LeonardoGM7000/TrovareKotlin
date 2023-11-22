@@ -257,11 +257,11 @@ fun TarjetaUsuario(
                 if (isChecked) {
                     // Agregar la cuenta a la lista de cuentas seleccionadas si el Checkbox está marcado
                     cuentasSeleccionadas.add(cuenta)
-                    Log.i("SE AÑADIO CORRECTAMENTE LA CUENTA: cuenta.nombre",cuenta.nombre);
+                    Log.i("SE AÑADIO CORRECTAMENTE: cuenta.nombre",cuenta.nombre);
                 } else {
                     // Quitar la cuenta de la lista de cuentas seleccionadas si el Checkbox se desmarca
                     cuentasSeleccionadas.remove(cuenta)
-                    Log.i("SE QUITO DE LA LISTA LA CUENTA: cuenta.nombre",cuenta.nombre);
+                    Log.i("SE QUITO DE LA LISTA: cuenta.nombre",cuenta.nombre);
                 }
                 // Actualizar el valor de checked.value
 
@@ -295,7 +295,11 @@ fun BusquedaCuenta(
         println("Texto ingresado: $textoBuscar")
         effectKey++
         Buscar = textoBuscar.text
-        navController.navigate(Pantalla.EliminarCuentas.ruta)
+        navController.navigate(Pantalla.EliminarCuentas.ruta){
+            popUpTo(Pantalla.EliminarCuentas.ruta){
+                inclusive = true
+            }
+        }
     }
 
     fun iniciarTimer() {
