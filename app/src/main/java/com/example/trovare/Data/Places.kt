@@ -48,5 +48,27 @@ data class Location (
     @SerializedName("longitude" ) var longitude : Double,
 )
 
+data class SnappedPointsClass(
+    @SerializedName("snappedPoints" ) var snappedPoints: List<SnappedPoints?> = arrayListOf()
+)
+
+data class SnappedPoints(
+    @SerializedName("location") var location: Location,
+    @SerializedName("originalIndex") var originalIndex: Int? = null,
+    @SerializedName("placeId") var id: String
+)
+
+data class Routes(
+    @SerializedName("routes") var routes: List<InformationRoute> = arrayListOf()
+)
+
+data class InformationRoute(
+    @SerializedName("distanceMeters") var distance: Float,
+    @SerializedName("duration") var duration: String,
+    @SerializedName("polyline") var polyline: EncodPoly
+)
+data class EncodPoly(
+    @SerializedName("encodedPolyline") var encodPolyline: String
+)
 
 
