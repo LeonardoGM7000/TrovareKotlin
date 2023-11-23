@@ -39,6 +39,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -78,7 +79,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-data class Cuenta(val nombre: String = "")
+data class Cuenta(val nombre: String = "", val id: String="")
 var effectKey = 0
 val cuentasSeleccionadas = mutableListOf<Cuenta>()
 
@@ -96,16 +97,22 @@ fun EliminarCuentas(
     var isLoading by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    var flag by remember { mutableStateOf(true) }
     Log.i("entro inicial", Buscar)
     LaunchedEffect(effectKey) {
         Log.i("entro", "entro")
         Log.i("EliminarCuentas", "LaunchedEffect: Obtaining accounts from Firestore")
         try {
             val cuentasSnapshot = firestore.collection("Usuario").get().await()
-            cuentas = cuentasSnapshot.toObjects(Cuenta::class.java)
-            Log.i("EliminarCuenta", "Accounts obtained successfully: $cuentas")
+
+            cuentas = cuentasSnapshot.documents.map { document ->
+                val cuenta = document.toObject(Cuenta::class.java)
+                cuenta?.copy(id = document.id) ?: Cuenta() // Asigna el ID al objeto Cuenta
+            }
+
+            Log.i("EliminarCuenta", "Cuentas obtenidas exitosamente: $cuentas")
         } catch (e: Exception) {
-            Log.i("EliminarCuenta", "Error obtaining accounts from Firestore", e)
+            Log.e("EliminarCuenta", "Error al obtener cuentas de Firestore", e)
         } finally {
             isLoading = false
         }
@@ -151,48 +158,31 @@ fun EliminarCuentas(
                     }
                     Log.i("mensaje entro siguiente", "entro al effectkey")
                     try {
+                        flag = false
                         items(cuentas.size) { index ->
                             val cuenta = cuentas[index]
                             if ((Buscar == cuenta.nombre) || Buscar.isBlank()) {
                                 Log.i("Si hay cuentas", Buscar)
-
+                                flag = true
                                 TarjetaUsuario(
                                     cuenta = cuenta,
                                     expanded = index == expandedCuentaIndex,
-                                    onDeleteClick = {
-                                        if(cuentasSeleccionadas.contains(cuenta)){
-                                            Log.i("Entro a eliminar","entro a eliminar")
-                                            firestore.collection("Usuario").document(cuenta.nombre)
-                                                .delete()
-                                                .addOnSuccessListener {
-                                                    // Éxito al eliminar
-                                                    Log.d("EliminarCuenta", "Cuenta eliminada")
-                                                }
-                                                .addOnFailureListener { e ->
-                                                    // Error al eliminar
-                                                    Log.w("EliminarCuenta", "Error al eliminar cuenta", e)
-                                                }
-                                            cuentas = cuentas.filterNot { it.nombre == cuenta.nombre}
-                                            cuentasSeleccionadas.clear();
-                                        }
-                                        // Eliminar la pregunta de Firestore
-
-                                        //  .delete()
-                                        //accounts = accounts.filterNot { it.nombre == account.nombre }
-                                    },
                                     modifier = modifier.padding(top = 20.dp),
                                     navController = navController
                                 )
                             } else {
                                 Log.i("No hay cuentas", Buscar)
-                                /* scope.launch {
-                                 snackbarHostState.showSnackbar(
-                                     message = "El correo ingresado ya está asociado a otra cuenta",
-                                     duration = SnackbarDuration.Short
-                                 )
-                             }*/
                             }
-                            0                        }
+                            Log.i("total cuentas",cuentas.size.toString())
+                            if(flag){
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "No existen cuentas",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }
+                        }
                     } catch (e: Exception) {
                         Log.i("No hay cuentas", Buscar)
                     }
@@ -207,12 +197,13 @@ fun EliminarCuentas(
 fun TarjetaUsuario(
     cuenta: Cuenta,
     expanded: Boolean,
-    onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
     var mostrarBorrarCuenta by rememberSaveable { mutableStateOf(false) }
     var checked = remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     Row(
         modifier = Modifier
             .padding(15.dp)
@@ -257,11 +248,11 @@ fun TarjetaUsuario(
                 if (isChecked) {
                     // Agregar la cuenta a la lista de cuentas seleccionadas si el Checkbox está marcado
                     cuentasSeleccionadas.add(cuenta)
-                    Log.i("SE AÑADIO CORRECTAMENTE: cuenta.nombre",cuenta.nombre);
+                    Log.i("SE AÑADIO CORRECTAMENTE LA CUENTA: cuenta.nombre",cuenta.nombre);
                 } else {
                     // Quitar la cuenta de la lista de cuentas seleccionadas si el Checkbox se desmarca
                     cuentasSeleccionadas.remove(cuenta)
-                    Log.i("SE QUITO DE LA LISTA: cuenta.nombre",cuenta.nombre);
+                    Log.i("SE QUITO DE LA LISTA LA CUENTA: cuenta.nombre",cuenta.nombre);
                 }
                 // Actualizar el valor de checked.value
 
@@ -296,11 +287,13 @@ fun BusquedaCuenta(
         effectKey++
         Buscar = textoBuscar.text
         navController.navigate(Pantalla.EliminarCuentas.ruta){
-            popUpTo(Pantalla.EliminarCuentas.ruta){
+            popUpTo(Pantalla.EliminarCuentas.ruta) {
                 inclusive = true
             }
         }
     }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     fun iniciarTimer() {
         job = CoroutineScope(Dispatchers.Default).launch {
@@ -386,10 +379,19 @@ fun BusquedaCuenta(
             alConfirmar = {
                 //Necesita eliminar la pregunta
                 //borrarCuentas()
-                navController.navigate(Pantalla.Administrador.ruta) {
-                    popUpTo(navController.graph.id) {
+                eliminarCuentasSeleccionadas(cuentasSeleccionadas)
+                navController.navigate(Pantalla.EliminarCuentas.ruta) {
+                    popUpTo(Pantalla.EliminarCuentas.ruta) {
                         inclusive = true
                     }
+                }
+                Log.i("cuentas", cuentasSeleccionadas.toString())
+                Log.i("Mensaje", "Se elimino correctamente")
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = "Se eliminaron correctamente las cuentas",
+                        duration = SnackbarDuration.Short
+                    )
                 }
             },
             textoConfirmar = "Eliminar Cuentas",
@@ -398,5 +400,19 @@ fun BusquedaCuenta(
             icono = Icons.Filled.DeleteForever,
             colorConfirmar = Color.Red
         )
+    }
+}
+
+fun eliminarCuentasSeleccionadas(cuentasSeleccionadas: List<Cuenta>) {
+    val firestore: FirebaseFirestore by lazy { Firebase.firestore }
+    try {
+        for (cuenta in cuentasSeleccionadas) {
+            firestore.collection("Usuario").document(cuenta.id).delete()
+        }
+        Log.i("cuentas","se borro")
+    } catch (e: Exception) {
+        // Manejar el error, por ejemplo, mostrar un mensaje al usuario
+        Log.i("cuentas","no se borro")
+
     }
 }

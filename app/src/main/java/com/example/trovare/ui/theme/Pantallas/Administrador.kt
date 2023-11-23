@@ -47,7 +47,6 @@ fun Administrador(
 
     var mostrarCerrarSesion by rememberSaveable { mutableStateOf(false) }
     Buscar = ""
-
     Surface(
         modifier = modifier
             .fillMaxSize(),
