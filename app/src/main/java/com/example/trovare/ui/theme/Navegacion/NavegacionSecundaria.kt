@@ -104,7 +104,8 @@ fun NavegacionSecundaria(
             }
             composable(route = Pantalla.Itinerarios.ruta){
                 Itinerarios(
-                    navController = navController
+                    navController = navController,
+                    viewModel = viewModel
                 )
             }
         }

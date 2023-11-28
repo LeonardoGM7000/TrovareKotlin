@@ -100,13 +100,15 @@ dependencies {
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.okhttp3:okhttp:4.10.0")
     implementation ("com.google.code.gson:gson:2.9.0")
+    implementation ("com.google.maps.android:android-maps-utils:2.2.0")
 
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
 
     //Dependencias firebase
     implementation(platform("com.google.firebase:firebase-bom:32.5.0"))
-    implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-firestore:24.9.1")
+    implementation("com.google.firebase:firebase-analytics")
+
 
     //Compilación
 }

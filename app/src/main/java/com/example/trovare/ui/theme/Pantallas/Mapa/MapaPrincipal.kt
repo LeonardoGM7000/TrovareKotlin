@@ -1,5 +1,6 @@
 package com.example.trovare.ui.theme.Pantallas.Mapa
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -39,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +59,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.trovare.Api.rawJSON
+import com.example.trovare.Api.rawJSONRutas
 import com.example.trovare.Api.rawJSONUbicacionesCercanas
 import com.example.trovare.Data.Places
 import com.example.trovare.Data.categorias
@@ -69,14 +72,17 @@ import com.example.trovare.ui.theme.Trv3
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.maps.android.PolyUtil
 import com.google.maps.android.compose.MapEffect
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerInfoWindow
+import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.CoroutineScope
@@ -85,7 +91,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-
+@SuppressLint("MutableCollectionMutableState")
 @OptIn(ExperimentalMaterial3Api::class, MapsComposeExperimentalApi::class)
 @Composable
 fun MapaPrincipal(
@@ -134,7 +140,7 @@ fun MapaPrincipal(
     val nombreLugar by viewModel.nombreLugar.collectAsState()
     val ratingLugar by viewModel.ratingLugar.collectAsState()
     val idLugar by viewModel.idLugar.collectAsState()
-    var zoom by remember { mutableStateOf(15f) }
+    var zoom by remember { mutableFloatStateOf(15f) }
 
 
     val ubicacion by viewModel.ubicacion.collectAsState()
@@ -151,6 +157,16 @@ fun MapaPrincipal(
     var filtroExtendido by rememberSaveable { mutableStateOf(false) }
 
     val marcadores by remember { mutableStateOf(mutableListOf<Marcador>()) }
+
+
+
+    //Ruta--------------------------------
+    val puntosRuta by remember { mutableStateOf(mutableListOf<LatLng>()) }
+    val polilineaInicializada by viewModel.polilineaInicializada.collectAsState()
+    //val rutaInfo by viewModel.rutaInfo.collectAsState()
+    //var polilineaCod: String?
+    //polilineaCod = ""
+    val polilineaCod by viewModel.polilineaCod.collectAsState()
 
 
 
@@ -190,6 +206,7 @@ fun MapaPrincipal(
                     Marker(
                         state = rememberMarkerState(position = marcador.ubicacion),
                         onClick ={
+                            viewModel.setUbicacion(marcador.ubicacion)
                             viewModel.setInformacionInicializada(false)
                             viewModel.obtenerMarcadorEntreMuchos(
                                 placesClient = placesClient,
@@ -202,7 +219,20 @@ fun MapaPrincipal(
                     )
                 }
             }
+            if(polilineaInicializada){
+                val encodedPolyline = polilineaCod // Reemplaza con tu encoded polyline
+                val decodedPolyline: List<LatLng> = PolyUtil.decode(encodedPolyline)
 
+                for (latLng in decodedPolyline) {
+                    Log.d("ListadeLats", "Latitud: ${latLng.latitude}, Longitud: ${latLng.longitude}")
+                }
+
+                Polyline(
+                    points = decodedPolyline,
+                    width = 5f,
+                    color = Color.Red
+                )
+            }
         }
 
         Column {
@@ -293,6 +323,7 @@ fun MapaPrincipal(
                                 .padding(end = 5.dp)
                                 .clickable {
                                     zoom = 13f
+                                    viewModel.setPolilineaInicializada(false)
                                     viewModel.setMarcadorInicializado(false)
                                     viewModel.setMarcadoresInicializado(false)
                                     viewModel.setInformacionInicializada(false)
@@ -349,6 +380,7 @@ fun MapaPrincipal(
                                 Box(
                                     modifier = modifier.clickable {
                                         zoom = 15f
+                                        viewModel.setPolilineaInicializada(false)
                                         viewModel.setMarcadoresInicializado(false)
                                         viewModel.setMarcadorInicializado(false)
                                         viewModel.setInformacionInicializada(false)
@@ -449,7 +481,22 @@ fun MapaPrincipal(
                                     modifier = modifier
                                         .fillMaxWidth()
                                         .padding(end = 5.dp, bottom = 5.dp),
-                                    onClick = { /*TODO*/ },
+                                    onClick = {
+
+                                        //Log.d("Algun punto",puntosRuta[0].latitude.toString())
+
+                                        val origen = LatLng(ubicacion.latitude, ubicacion.longitude)
+                                        val destino =
+                                            state.lastKnownLocation?.latitude?.let { state.lastKnownLocation?.longitude?.let { it1 -> LatLng(it, it1) } }
+                                        if (destino != null) {
+                                            rawJSONRutas(
+                                                origen = origen,
+                                                destino = destino,
+                                                viewModel = viewModel,
+                                                //recuperarResultados = rutaInfo
+                                            )
+                                        }
+                                    },
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = Trv3
                                     )

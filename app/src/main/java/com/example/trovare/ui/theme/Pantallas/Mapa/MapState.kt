@@ -11,3 +11,9 @@ data class Marcador(
     val ubicacion: LatLng,
     val id: String
 )
+
+data class RutaInfo(
+    val distancia: Float,
+    val duracion: String,
+    val polilinea: String
+)

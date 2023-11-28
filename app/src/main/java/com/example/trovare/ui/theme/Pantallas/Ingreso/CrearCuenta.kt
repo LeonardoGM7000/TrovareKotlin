@@ -61,6 +61,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.trovare.Data.Usuario
+import com.example.trovare.Data.itinerarioPrueba
 import com.example.trovare.R
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
@@ -474,7 +475,7 @@ private fun saveUserData(
     firestore: FirebaseFirestore
 ) {
     // Crear un objeto para representar la información del usuario
-    val userData = Usuario(textoNombre, R.drawable.perfil, "2023", "", "México", null)
+    val userData = Usuario(textoNombre, R.drawable.perfil, "2023", "", "México", null, mutableListOf(itinerarioPrueba))
     Log.i("cuenta", "Punto")
     firestore.collection("Usuario").document(textoCorreo).set(userData).addOnSuccessListener {
         Log.i("cuenta", "Datos guardados")
