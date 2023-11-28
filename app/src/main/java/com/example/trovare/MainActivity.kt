@@ -54,6 +54,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
+
         /*colocar aqui API de google places*/
         Places.initialize(this, /*colocar aqui llave de API de google places*/"AIzaSyBpmAJRF6PsRJVNm6oq1qmfXbdaBjNA5mQ")//Inicializar API de Places
         val placesClient: PlacesClient = Places.createClient(this)//Crear cliente
@@ -75,7 +77,6 @@ class MainActivity : ComponentActivity() {
         var ruta = "Bienvenida"
 
         try{
-
             Log.d("Main_Trovare", correo.toString())
 
             if(correo != null){
@@ -91,6 +92,8 @@ class MainActivity : ComponentActivity() {
             Log.d("Main_Trovare", "Error en la conexión de la base de datos")
         }
 
+        viewModel.obtenerDato()
+
         setContent {
             TrovareTheme {
                 Trovare(
@@ -105,6 +108,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 }
+
 
 
 
