@@ -130,7 +130,6 @@ fun Itinerarios(
                             Text(
                                 text = itinerario.nombre,
                                 color = Color.Black,
-                                fontWeight = FontWeight.Bold
                             )
                             Row(
                                 verticalAlignment = Alignment.CenterVertically
