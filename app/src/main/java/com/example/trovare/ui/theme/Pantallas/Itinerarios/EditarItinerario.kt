@@ -26,6 +26,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -37,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.trovare.Data.Itinerario
+import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
@@ -48,11 +50,14 @@ import com.example.trovare.ui.theme.Trv6
 @Composable
 fun EditarItinerario(
     modifier: Modifier = Modifier,
-    itinerario: Itinerario = Itinerario("", actividades = null),
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: TrovareViewModel
 ){
 
+    val itinerario by viewModel.itinerarioActual.collectAsState()
     var publico by rememberSaveable { mutableStateOf(false) }
+
+
 
     Scaffold(
         topBar = {BarraSuperior(navController = navController)}
@@ -202,17 +207,8 @@ fun EditarItinerario(
                             )
                         }
                     }
-
-
                 }
-
             }
-
         }
     }
-
-
-
-
-
 }

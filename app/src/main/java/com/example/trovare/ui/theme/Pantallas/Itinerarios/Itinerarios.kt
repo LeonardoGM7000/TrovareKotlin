@@ -1,6 +1,7 @@
 package com.example.trovare.ui.theme.Pantallas.Itinerarios
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -108,7 +109,11 @@ fun Itinerarios(
                     modifier = modifier
                         .fillMaxWidth()
                         .padding(horizontal = 25.dp, vertical = 5.dp)
-                        .size(100.dp),
+                        .size(100.dp)
+                        .clickable {
+                            navController.navigate(Pantalla.EditarItinerario.ruta)
+                            viewModel.setItinerarioActual(itinerario)
+                        },
                     colors = CardDefaults.cardColors(
                         containerColor = Trv3
                     )
@@ -161,9 +166,7 @@ fun Itinerarios(
                                 )
                             }
                         }
-
                     }
-
                 }
             }
             item {
