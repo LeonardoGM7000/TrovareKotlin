@@ -59,7 +59,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.trovare.Api.rawJSON
-import com.example.trovare.Api.rawJSONCrearRuta
 import com.example.trovare.Api.rawJSONRutas
 import com.example.trovare.Api.rawJSONUbicacionesCercanas
 import com.example.trovare.Data.Places
@@ -91,7 +90,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
 
 @SuppressLint("MutableCollectionMutableState")
 @OptIn(ExperimentalMaterial3Api::class, MapsComposeExperimentalApi::class)
@@ -157,14 +155,20 @@ fun MapaPrincipal(
 
     //Filtros----------------------------
     var filtroExtendido by rememberSaveable { mutableStateOf(false) }
+
     val marcadores by remember { mutableStateOf(mutableListOf<Marcador>()) }
-    var path by rememberSaveable{ mutableStateOf("") }
-    val interpolate1 by rememberSaveable { mutableStateOf(true) }
+
+
+
+    //Ruta--------------------------------
     val puntosRuta by remember { mutableStateOf(mutableListOf<LatLng>()) }
-    val rutaInfo by remember { mutableStateOf(mutableListOf<RutaInfo>()) }
     val polilineaInicializada by viewModel.polilineaInicializada.collectAsState()
-    var polilineaCod: String?
-    polilineaCod = ""
+    //val rutaInfo by viewModel.rutaInfo.collectAsState()
+    //var polilineaCod: String?
+    //polilineaCod = ""
+    val polilineaCod by viewModel.polilineaCod.collectAsState()
+
+
 
     //UI--------------------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------------------
@@ -185,34 +189,6 @@ fun MapaPrincipal(
                 val cameraPosition = CameraPosition.fromLatLngZoom(ubicacion, zoom)
                 cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
             }
-
-            Polyline(
-                points = listOf(
-                    LatLng(19.45802, -99.11380000000001),
-                    LatLng(19.459400000000002, -99.11347),
-                    LatLng(19.45876, -99.11056),
-                    LatLng(19.458730000000003, -99.11044000000001),
-                    LatLng(19.45812, -99.1088),
-                    LatLng(19.456210000000002, -99.10959000000001)
-                )
-                ,color = Color.Red
-            )
-            if(polilineaInicializada){
-                val encodedPolyline = polilineaCod // Reemplaza con tu encoded polyline
-                val decodedPolyline: List<LatLng> = PolyUtil.decode(encodedPolyline)
-
-                for (latLng in decodedPolyline) {
-                    Log.d("ListadeLats", "Latitud: ${latLng.latitude}, Longitud: ${latLng.longitude}")
-                }
-
-                Polyline(
-                    points = decodedPolyline,
-                    width = 5f,
-                    color = Color.Red
-                )
-                //viewModel.setPolilineaInicializada(false)
-            }
-
             if(marcadorInicializado){
                 MarkerInfoWindow(
                     state = rememberMarkerState(position = ubicacion),
@@ -230,6 +206,7 @@ fun MapaPrincipal(
                     Marker(
                         state = rememberMarkerState(position = marcador.ubicacion),
                         onClick ={
+                            viewModel.setUbicacion(marcador.ubicacion)
                             viewModel.setInformacionInicializada(false)
                             viewModel.obtenerMarcadorEntreMuchos(
                                 placesClient = placesClient,
@@ -242,7 +219,20 @@ fun MapaPrincipal(
                     )
                 }
             }
+            if(polilineaInicializada){
+                val encodedPolyline = polilineaCod // Reemplaza con tu encoded polyline
+                val decodedPolyline: List<LatLng> = PolyUtil.decode(encodedPolyline)
 
+                for (latLng in decodedPolyline) {
+                    Log.d("ListadeLats", "Latitud: ${latLng.latitude}, Longitud: ${latLng.longitude}")
+                }
+
+                Polyline(
+                    points = decodedPolyline,
+                    width = 5f,
+                    color = Color.Red
+                )
+            }
         }
 
         Column {
@@ -333,6 +323,7 @@ fun MapaPrincipal(
                                 .padding(end = 5.dp)
                                 .clickable {
                                     zoom = 13f
+                                    viewModel.setPolilineaInicializada(false)
                                     viewModel.setMarcadorInicializado(false)
                                     viewModel.setMarcadoresInicializado(false)
                                     viewModel.setInformacionInicializada(false)
@@ -389,6 +380,7 @@ fun MapaPrincipal(
                                 Box(
                                     modifier = modifier.clickable {
                                         zoom = 15f
+                                        viewModel.setPolilineaInicializada(false)
                                         viewModel.setMarcadoresInicializado(false)
                                         viewModel.setMarcadorInicializado(false)
                                         viewModel.setInformacionInicializada(false)
@@ -491,33 +483,18 @@ fun MapaPrincipal(
                                         .padding(end = 5.dp, bottom = 5.dp),
                                     onClick = {
 
+                                        //Log.d("Algun punto",puntosRuta[0].latitude.toString())
+
                                         val origen = LatLng(ubicacion.latitude, ubicacion.longitude)
                                         val destino =
-                                            state.lastKnownLocation?.latitude?.let { state.lastKnownLocation?.longitude?.let { it1 ->
-                                                LatLng(it,
-                                                    it1
-                                                )
-                                            } }
+                                            state.lastKnownLocation?.latitude?.let { state.lastKnownLocation?.longitude?.let { it1 -> LatLng(it, it1) } }
                                         if (destino != null) {
                                             rawJSONRutas(
                                                 origen = origen,
                                                 destino = destino,
                                                 viewModel = viewModel,
-                                                recuperarResultados = rutaInfo
+                                                //recuperarResultados = rutaInfo
                                             )
-                                            polilineaCod = rutaInfo.firstOrNull()?.polilinea
-
-                                            if (polilineaCod != null) {
-                                                Log.d("Polilinea codigo", polilineaCod!!)
-                                                viewModel.setPolilineaInicializada(true)
-                                            } else {
-                                                Log.d("ERROR_POLILINEA_COD", "La lista de puntos de ruta está vacía.")
-                                            }
-
-                                            /*val decodedPolyline: List<LatLng> = PolyUtil.decode(polilineaCod)
-
-                                            val prueba = decodedPolyline.firstOrNull()?.latitude
-                                            Log.d("ListadeLats",prueba.toString())*/
                                         }
                                     },
                                     colors = ButtonDefaults.buttonColors(

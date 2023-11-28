@@ -1,8 +1,6 @@
 package com.example.trovare.Api
 
 import android.util.Log
-import androidx.compose.runtime.MutableFloatState
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.trovare.Data.NearbyLocationsClass
 import com.example.trovare.Data.NearbyPlaces
 import com.example.trovare.Data.NearbyPlacesClass
@@ -92,7 +90,7 @@ fun rawJSON(
                 Log.d("Pretty Printed JSON :", prettyJson)
 
                 val gson1 = Gson()
-                val mUser = gson1.fromJson(prettyJson, PlacesClass::class.java)
+                var mUser = gson1.fromJson(prettyJson, PlacesClass::class.java)
                 mUser.places.forEach { lugar ->
                     if (lugar != null) {
                         recuperarResultados.add(Places(id = lugar.id, formattedAddress = lugar.formattedAddress, displayName = lugar.displayName))
@@ -199,7 +197,7 @@ fun rawJSONLugarCercano(
                 Log.d("Pretty Printed JSON :", prettyJson)
 
                 val gson1 = Gson()
-                val mUser = gson1.fromJson(prettyJson, NearbyPlacesClass::class.java)
+                var mUser = gson1.fromJson(prettyJson, NearbyPlacesClass::class.java)
                 mUser.placesNearby.forEach { lugar ->
                     if (lugar != null) {
                         recuperarResultados.add(NearbyPlaces(id = lugar.id, displayName = lugar.displayName, shortFormattedAddress = lugar.shortFormattedAddress))
@@ -303,7 +301,7 @@ fun rawJSONUbicacionesCercanas(
                 Log.d("Pretty Printed JSON :", prettyJson)
 
                 val gson1 = Gson()
-                val mUser = gson1.fromJson(prettyJson, NearbyLocationsClass::class.java)
+                var mUser = gson1.fromJson(prettyJson, NearbyLocationsClass::class.java)
 
                 recuperarResultados.clear()
 
@@ -322,73 +320,10 @@ fun rawJSONUbicacionesCercanas(
     }
 }
 
-interface ApiServiceCrearRuta{
-    @GET("/v1/snapToRoads")
-    suspend fun getPuntosParaRuta(@Query("interpolate") interpolate: Boolean?, @Query(value="path", encoded = true) path: String, @Query("key") key: String): Response<ResponseBody>
-}
-
-fun rawJSONCrearRuta(
-    path: String,
-    interpolate: Boolean?,
-    recuperarResultados: MutableList<LatLng>
-){
-    //Create Retrofit
-    val retrofit = Retrofit.Builder()
-        .baseUrl("https://roads.googleapis.com")
-        .build()
-
-   // Create Sevice
-    val service = retrofit.create(ApiServiceCrearRuta::class.java)
-    val key = "AIzaSyDiFpHGDFegDBzku5qKvnGniIN88T6vuQc"
-
-    CoroutineScope(Dispatchers.IO).launch {
-        // Do the GET request and get response
-        val response = service.getPuntosParaRuta(interpolate, path, key)
-
-        withContext(Dispatchers.Main) {
-            if (response.isSuccessful) {
-
-                // Convert raw JSON to pretty JSON using GSON library
-                val gson = GsonBuilder().setPrettyPrinting().create()
-                val prettyJson = gson.toJson(
-                    JsonParser.parseString(
-                        response.body()
-                            ?.string() // About this thread blocking annotation : https://github.com/square/retrofit/issues/3255
-                    )
-                )
-
-                Log.d("Pretty Printed JSON Rutas:", prettyJson)
-
-                val gson1 = Gson()
-                //val mUser = gson1.fromJson(prettyJson, SnappedPointsClass::class.java)
-
-                try {
-                    val mUser = gson1.fromJson(prettyJson, SnappedPointsClass::class.java)
-                    //Log.d("Deserialization Success", mUser.toString())
-                    mUser.snappedPoints.forEach { punto ->
-                        if (punto != null) {
-                            recuperarResultados.add(LatLng(punto.location.latitude, punto.location.longitude))
-                        } else {
-                            //manejar error no se eonctraron resultados
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.e("Deserialization Error", e.message ?: "Unknown error")
-                }
-
-
-            } else {
-                Log.e("RETROFIT_ERROR_RUTAS", response.code().toString())
-
-            }
-        }
-    }
-}
-
 interface APIServiceSolicitaPolyline {
     @Headers(
         "Content-Type: application/json",
-        "X-Goog-Api-Key: AIzaSyDiFpHGDFegDBzku5qKvnGniIN88T6vuQc",
+        "X-Goog-Api-Key: AIzaSyBpmAJRF6PsRJVNm6oq1qmfXbdaBjNA5mQ",
         "X-Goog-FieldMask: routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline"
     )
     @POST("/directions/v2:computeRoutes")
@@ -399,7 +334,7 @@ fun rawJSONRutas(
     origen: LatLng,
     destino: LatLng,
     viewModel: TrovareViewModel,
-    recuperarResultados: MutableList<RutaInfo>
+    //recuperarResultados: MutableList<RutaInfo>
 ) {
 
     // Crear Retrofit
@@ -452,7 +387,6 @@ fun rawJSONRutas(
     CoroutineScope(Dispatchers.IO).launch {
         // Hacer el request POST y obtener respuesta
         val response = service.getRuta(requestBody)
-        Log.d("TU mama", response.toString())
         withContext(Dispatchers.Main) {
             if (response.isSuccessful) {
 
@@ -469,15 +403,12 @@ fun rawJSONRutas(
 
                 val gson1 = Gson()
                 val mUser = gson1.fromJson(prettyJson, Routes::class.java)
-                mUser.routes.forEach { ruta ->
-                    if (ruta != null) {
-                        recuperarResultados.add(RutaInfo(distancia = ruta.distance, duracion = ruta.duration, polilinea = ruta.polyline.encodPolyline))
-                        Log.d("Polilineaaaa", ruta.polyline.encodPolyline)
-                    } else {
-                        //manejar error no se eonctraron resultados
-                    }
-                }
-                //viewModel.setPolilineaInicializada(true)
+                val rutaInfo = RutaInfo(distancia = mUser.routes.first().distance, duracion = mUser.routes.first().duration, polilinea = mUser.routes.first().polyline.encodPolyline)
+
+                viewModel.setPolilineaCod(rutaInfo.polilinea)
+                viewModel.setPolilineaInicializada(true)
+
+
             } else {
 
                 Log.e("RETROFIT_ERROR", response.code().toString())

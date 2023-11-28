@@ -59,7 +59,7 @@ data class SnappedPoints(
 )
 
 data class Routes(
-    @SerializedName("routes") var routes: List<InformationRoute?> = arrayListOf()
+    @SerializedName("routes") var routes: List<InformationRoute> = arrayListOf()
 )
 
 data class InformationRoute(
@@ -67,10 +67,8 @@ data class InformationRoute(
     @SerializedName("duration") var duration: String,
     @SerializedName("polyline") var polyline: EncodPoly
 )
-
 data class EncodPoly(
     @SerializedName("encodedPolyline") var encodPolyline: String
 )
-
 
 

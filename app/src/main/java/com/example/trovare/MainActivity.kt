@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import com.example.trovare.ViewModel.TrovareViewModel
+import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Navegacion.Trovare
 import com.example.trovare.ui.theme.TrovareTheme
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -17,8 +18,11 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
+
+    //Solicitar permisos de ubicación---------------------------------------------------------------
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -44,6 +48,9 @@ class MainActivity : ComponentActivity() {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private val viewModel: TrovareViewModel by viewModels()
 
+    //Shared preferences----------------------------------------------------------------------------
+    private val KEY_EMAIL = "correo"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -54,9 +61,45 @@ class MainActivity : ComponentActivity() {
         askPermissions()
         //getLastLocation()
         viewModel.getLastLocation(fusedLocationProviderClient = fusedLocationProviderClient)
+
+        // Verificamos si el usuario ya inicio sesión previamente
+        val sharedPreferecnes = getSharedPreferences("DB", MODE_PRIVATE)
+        val editor = sharedPreferecnes.edit()
+
+        // Creamos una instancia de firebase para verificar el usuario registrado
+        val auth = FirebaseAuth.getInstance()
+
+        val correo = sharedPreferecnes.getString(KEY_EMAIL, null)
+
+        // Variable que almacena la ruta de la pantalla
+        var ruta = "Bienvenida"
+
+        try{
+
+            Log.d("Main_Trovare", correo.toString())
+
+            if(correo != null){
+                ruta = Pantalla.NavegacionSecundaria.ruta
+            }else{
+                ruta = Pantalla.Bienvenida.ruta
+            }
+
+            editor.putString(KEY_EMAIL, auth.currentUser?.email.toString())
+            editor.apply()
+
+        }catch(e:Exception){
+            Log.d("Main_Trovare", "Error en la conexión de la base de datos")
+        }
+
         setContent {
             TrovareTheme {
-                Trovare(placesClient = placesClient, viewModel = viewModel, fusedLocationProviderClient = fusedLocationProviderClient)
+                Trovare(
+                    placesClient = placesClient,
+                    viewModel = viewModel,
+                    pantallaInicial = ruta,
+                    fusedLocationProviderClient = fusedLocationProviderClient,
+                    context = this
+                )
                 //MapScreen(state = viewModel.state.value, viewModel = viewModel, fusedLocationProviderClient = fusedLocationProviderClient)
         }
     }
