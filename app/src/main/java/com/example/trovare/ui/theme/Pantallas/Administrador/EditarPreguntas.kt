@@ -1,5 +1,6 @@
 package com.example.trovare.ui.theme.Pantallas
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,6 +36,11 @@ import com.example.trovare.ui.theme.Trv6
 import com.example.trovare.ui.theme.Trv8
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,6 +54,8 @@ fun EditarPreguntas(
     var textoRespuesta by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
+    var isErrorL: Int by rememberSaveable { mutableIntStateOf(0) }
+    val maximoLetras = 30
 
     // Estado para manejar la carga de la pregunta desde Firestore
     var preguntaActual by remember(preguntaId) { mutableStateOf("") }
@@ -56,6 +64,20 @@ fun EditarPreguntas(
 
     val keyboardOptionsTexto: KeyboardOptions =
         KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done)
+
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    fun validarLetras(text: String) {
+        if (!(text.matches("[a-zA-ZÀ-ÿ ]*".toRegex()))) {
+            Log.i("Error Caracter inválido", text)
+            isErrorL = 1
+        } else {
+            if (text.length > maximoLetras) {
+                isErrorL = 2
+            }
+        }
+    }
 
     // Utilizar LaunchedEffect para cargar la pregunta una vez al ingresar a la pantalla
     LaunchedEffect(preguntaId) {
@@ -74,6 +96,7 @@ fun EditarPreguntas(
 
     LaunchedEffect(guardadoExitoso) {
         if (guardadoExitoso) {
+            delay(1000)
             try {
                 // Lógica de guardado en Firestore
                 savePreguntaToFirestore(preguntaId!!, textoPregunta.text, textoRespuesta.text)
@@ -84,6 +107,7 @@ fun EditarPreguntas(
                 // Navegar de vuelta a la pantalla anterior
                 navController.popBackStack()
             } catch (e: Exception) {
+                Log.i("guardadoExitoso", e.toString())
             }
         }
     }
@@ -91,6 +115,9 @@ fun EditarPreguntas(
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
+        },snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState)
         },
         bottomBar = {
             Column(
@@ -100,11 +127,25 @@ fun EditarPreguntas(
             ) {
                 Button(
                     onClick = {
-                        // Guardar la pregunta editada en Firestore
-                        guardadoExitoso = true
-
-                        // Navegar de vuelta a la pantalla anterior
-                        navController.popBackStack()
+                        if(textoPregunta.text.isBlank() || textoRespuesta.text.isBlank()){
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "Campos obligatorios no completados",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                        }else{
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "Pregunta guardada exitosamente",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                            // Guardar la pregunta editada en Firestore
+                            guardadoExitoso = true
+                            // Navegar de vuelta a la pantalla anterior
+                            //navController.popBackStack()
+                        }
                     },
                     modifier = Modifier
                         .padding(start = 250.dp, bottom = 50.dp)
@@ -135,7 +176,11 @@ fun EditarPreguntas(
                             .fillMaxWidth()
                             .padding(bottom = 15.dp, start = 50.dp, end = 50.dp),
                         value = textoPregunta,
-                        onValueChange = { textoPregunta = it },
+                        onValueChange = {
+                            textoPregunta = it
+                            isErrorL = 0
+                            validarLetras(textoPregunta.text)
+                        },
                         label = {
                             Text(
                                 text = "Pregunta",
@@ -154,6 +199,22 @@ fun EditarPreguntas(
                         ),
                         singleLine = true,
                         keyboardOptions = keyboardOptionsTexto,
+                        supportingText = {
+                            isErrorL = isErrorL
+                            if (isErrorL == 1) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Ingresa solo letras",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            } else if (isErrorL == 2) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Máximo $maximoLetras carácteres",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
                     )
                     OutlinedTextField(
                         modifier = modifier
@@ -218,5 +279,6 @@ suspend fun savePreguntaToFirestore(
             )
         ).await()
     } catch (e: Exception) {
+        Log.i("savePregunta",e.toString())
     }
 }

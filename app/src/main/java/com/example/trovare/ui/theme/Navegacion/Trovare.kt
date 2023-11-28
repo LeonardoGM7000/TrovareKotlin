@@ -1,5 +1,6 @@
 package com.example.trovare.ui.theme.Navegacion
 
+import android.content.Context
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
@@ -27,7 +28,11 @@ import com.example.trovare.ui.theme.Pantallas.CrearCuenta
 import com.example.trovare.ui.theme.Pantallas.EditarPreguntas
 import com.example.trovare.ui.theme.Pantallas.EliminarComentarios
 import com.example.trovare.ui.theme.Pantallas.EliminarCuentas
+import com.example.trovare.ui.theme.Pantallas.Ingreso.ActualizarContrasena
+import com.example.trovare.ui.theme.Pantallas.Ingreso.RecuperarContrasena
+import com.example.trovare.ui.theme.Pantallas.Ingreso.TokenRecuperarContrasena
 import com.example.trovare.ui.theme.Pantallas.PreguntasAdmin
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.libraries.places.api.net.PlacesClient
 
 
@@ -54,6 +59,8 @@ sealed class Pantalla(val ruta: String) {
     object EliminarCuentas : Pantalla("EliminarCuentas")
     object EliminarComentarios : Pantalla("EliminarComentarios")
     object RecuperarContrasena : Pantalla("RecuperarContrasena")
+    object TokenRecuperarContrasena : Pantalla("TokenRecuperarContrasena")
+    object ActualizarContrasena : Pantalla("ActualizarContrasena")
     object CategoriaSeleccionada : Pantalla("CategoriaSeleccionada")
 
     fun conArgs(vararg args: String): String {
@@ -72,12 +79,15 @@ sealed class Pantalla(val ruta: String) {
 fun Trovare(
     viewModel: TrovareViewModel = viewModel(),
     navController: NavHostController = rememberNavController(),
-    placesClient: PlacesClient
+    pantallaInicial: String,
+    placesClient: PlacesClient,
+    fusedLocationProviderClient: FusedLocationProviderClient,
+    context: Context
 ){
 
     NavHost(
         navController = navController,
-        startDestination = Pantalla.Bienvenida.ruta,
+        startDestination = pantallaInicial,
         //enterTransition = {  slideInHorizontally(animationSpec = SpringSpec(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium,)) { 0 }  },
         //exitTransition = { slideOutHorizontally(animationSpec = SpringSpec(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium,)) { -300 }  }
         //enterTransition = { fadeIn() },
@@ -92,7 +102,8 @@ fun Trovare(
         }
         composable(route = Pantalla.InicioDeSesion.ruta) {
             InicioDeSesion(
-                navController = navController
+                navController = navController,
+                viewModel = viewModel
             )
         }
         composable(route = Pantalla.Registro.ruta) {
@@ -104,13 +115,15 @@ fun Trovare(
             NavegacionSecundaria(
                 viewModel = viewModel,
                 navController = navController,
-                placesClient = placesClient
+                placesClient = placesClient,
+                fusedLocationProviderClient = fusedLocationProviderClient
             )
         }
         composable(route = Pantalla.Configuracion.ruta) {
             Configuracion(
                 viewModel = viewModel,
-                navController = navController
+                navController = navController,
+                context = context
             )
         }
         composable(route = Pantalla.FAQS.ruta) {
@@ -126,12 +139,14 @@ fun Trovare(
         }
         composable(route = Pantalla.PerfilConfiguracion.ruta) {
             PerfilConfiguracion(
-                navController = navController
+                navController = navController,
+                viewModel = viewModel
             )
         }
         composable(route = Pantalla.EditarPerfil.ruta) {
             EditarPerfil(
-                navController = navController
+                navController = navController,
+                viewModel = viewModel
             )
         }
         composable(route = Pantalla.Buscar.ruta) {
@@ -188,14 +203,22 @@ fun Trovare(
                 navController = navController
             )
         }
-        /*
+
         composable(route = Pantalla.RecuperarContrasena.ruta) {
             RecuperarContrasena(
                 navController = navController
             )
         }
-
-         */
+        composable(route = Pantalla.TokenRecuperarContrasena.ruta) {
+            TokenRecuperarContrasena(
+                navController = navController
+            )
+        }
+        composable(route = Pantalla.ActualizarContrasena.ruta) {
+            ActualizarContrasena(
+                navController = navController
+            )
+        }
         composable(
             route = Pantalla.CategoriaSeleccionada.ruta + "/{categoria}",
             arguments = listOf(

@@ -32,8 +32,43 @@ data class NearbyPlaces (
     @SerializedName("id" ) var id : String,
     @SerializedName("displayName" ) var displayName : DisplayName?,
     @SerializedName("shortFormattedAddress" ) var shortFormattedAddress : String?,
-
 )
 
+data class NearbyLocationsClass (
+    @SerializedName("places" ) var nearbyLocations : List<NearbyLocations?> = arrayListOf()
+)
+
+data class NearbyLocations (
+    @SerializedName("location" ) var location : Location,
+    @SerializedName("id") var id: String
+)
+
+data class Location (
+    @SerializedName("latitude" ) var latitude : Double,
+    @SerializedName("longitude" ) var longitude : Double,
+)
+
+data class SnappedPointsClass(
+    @SerializedName("snappedPoints" ) var snappedPoints: List<SnappedPoints?> = arrayListOf()
+)
+
+data class SnappedPoints(
+    @SerializedName("location") var location: Location,
+    @SerializedName("originalIndex") var originalIndex: Int? = null,
+    @SerializedName("placeId") var id: String
+)
+
+data class Routes(
+    @SerializedName("routes") var routes: List<InformationRoute> = arrayListOf()
+)
+
+data class InformationRoute(
+    @SerializedName("distanceMeters") var distance: Float,
+    @SerializedName("duration") var duration: String,
+    @SerializedName("polyline") var polyline: EncodPoly
+)
+data class EncodPoly(
+    @SerializedName("encodedPolyline") var encodPolyline: String
+)
 
 

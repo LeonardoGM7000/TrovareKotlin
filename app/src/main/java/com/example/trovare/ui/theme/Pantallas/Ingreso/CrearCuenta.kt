@@ -1,5 +1,9 @@
 package com.example.trovare.ui.theme.Pantallas
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.util.Log
 import android.util.Patterns
 import androidx.compose.foundation.layout.Column
@@ -45,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -56,6 +61,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.trovare.Data.Usuario
+import com.example.trovare.Data.itinerarioPrueba
 import com.example.trovare.R
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
@@ -63,7 +69,6 @@ import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv6
 import com.example.trovare.ui.theme.Trv8
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -83,11 +88,12 @@ fun CrearCuenta(
     var isErrorLA: Int by rememberSaveable { mutableIntStateOf(0) }
     var isErrorC by rememberSaveable { mutableStateOf(false) }
     val minimoPassword = 8
-    val maximoLetras = 30
+    val maximoLetras = 20
     //Guardar estado de errores---------------------------------------------------------------------
 
     val auth = FirebaseAuth.getInstance()
     val firestore = Firebase.firestore
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     var textoNombre by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -362,7 +368,7 @@ fun CrearCuenta(
                                 Log.i("error", "campos imcompletos")
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
-                                        message = "Completa todos los campos",
+                                        message = "Campos obligatorios no completados",
                                         duration = SnackbarDuration.Short
                                     )
                                 }
@@ -385,8 +391,17 @@ fun CrearCuenta(
                             } else if(!Patterns.EMAIL_ADDRESS.matcher(textoCorreo.text).matches()){
                                 Log.i("error correo", textoCorreo.text)
                                 scope.launch {
+                                    isErrorC = true
                                     snackbarHostState.showSnackbar(
                                         message = "Correo inválido",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            } else if(!isNetworkAvailable(context)) {
+                                Log.i("error conexión", "No hay conexión a internet")
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Error de conexión",
                                         duration = SnackbarDuration.Short
                                     )
                                 }
@@ -460,11 +475,24 @@ private fun saveUserData(
     firestore: FirebaseFirestore
 ) {
     // Crear un objeto para representar la información del usuario
-    val userData = Usuario(textoNombre, R.drawable.perfil, "2023", "", "México", null)
+    val userData = Usuario(textoNombre, R.drawable.perfil, "2023", "", "México", null, mutableListOf(itinerarioPrueba))
     Log.i("cuenta", "Punto")
     firestore.collection("Usuario").document(textoCorreo).set(userData).addOnSuccessListener {
         Log.i("cuenta", "Datos guardados")
     }.addOnFailureListener {
         Log.i("cuenta", "Datos no guardados")
     }
+}
+
+@SuppressLint("ServiceCast")
+fun isNetworkAvailable(context: Context): Boolean {
+    val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    val network = connectivityManager.activeNetwork ?: return false
+    val capabilities =
+        connectivityManager.getNetworkCapabilities(network) ?: return false
+
+    return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
 }

@@ -28,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,21 +39,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.trovare.ui.theme.Navegacion.Pantalla
-import com.example.trovare.Data.Usuario
-import com.example.trovare.Data.usuarioPrueba
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
+import androidx.compose.runtime.getValue
+import com.example.trovare.ViewModel.TrovareViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PerfilConfiguracion(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    viewModel: TrovareViewModel
 ) {
-
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
@@ -65,7 +66,8 @@ fun PerfilConfiguracion(
             color = Trv1
         ) {
             PerfilPrincipal(
-                navController = navController
+                navController = navController,
+                viewModel = viewModel
             )
         }
     }
@@ -75,7 +77,8 @@ fun PerfilConfiguracion(
 @Composable
 fun PerfilInicio(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    viewModel: TrovareViewModel
 ) {
     Scaffold(
         topBar = {
@@ -89,7 +92,8 @@ fun PerfilInicio(
             color = Trv1
         ) {
             PerfilPrincipal(
-                navController = navController
+                navController = navController,
+                viewModel = viewModel
             )
         }
     }
@@ -99,9 +103,12 @@ fun PerfilInicio(
 @Composable
 fun PerfilPrincipal(
     modifier: Modifier = Modifier,
-    usuario: Usuario = usuarioPrueba,
-    navController: NavController
+    navController: NavController,
+    viewModel: TrovareViewModel,
 ){
+
+    val usuario by viewModel.usuario.collectAsState()
+
     Surface(
         modifier = modifier
             .fillMaxSize(),
@@ -188,7 +195,7 @@ fun PerfilPrincipal(
                         modifier = modifier
                             .padding(horizontal = 25.dp, vertical = 10.dp)
                             .fillMaxWidth(),
-                        text = usuario.descripcion,
+                        text = usuario.descripcion?: "",
                         textAlign = TextAlign.Justify,
                         color = Color.White,
                         style = MaterialTheme.typography.bodySmall
@@ -240,13 +247,13 @@ fun PerfilPrincipal(
                         modifier = modifier
                             .fillMaxSize()
                             .padding(horizontal = 25.dp),
-                        text = "${usuario.comentarios.size} reseñas",
+                        text = "${usuario.comentarios!!.size} reseñas",
                         style = MaterialTheme.typography.displaySmall,
                         textAlign = TextAlign.Left,
                         color = Color.White
                     )
                 }
-                items(usuario.comentarios){comentario ->
+                items(usuario.comentarios!!){comentario ->
                     Card(modifier = modifier
                         .padding(horizontal = 25.dp, vertical = 5.dp)
                         .fillMaxWidth(),
@@ -285,15 +292,10 @@ fun PerfilPrincipal(
                                     color = Color.White,
                                 )
                             }
-
                         }
                     }
                 }
             }
-
-
-
         }
-
     }
 }
