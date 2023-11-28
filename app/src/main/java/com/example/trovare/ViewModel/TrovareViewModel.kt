@@ -171,9 +171,6 @@ class TrovareViewModel : ViewModel() {
         _polilineaCod.value = newValue
     }
 
-
-
-
     //para mostrar el marcador de un solo lugar
     private val _marcadorInicializado = MutableStateFlow(false)
     val marcadorInicializado: StateFlow<Boolean> = _marcadorInicializado.asStateFlow()
