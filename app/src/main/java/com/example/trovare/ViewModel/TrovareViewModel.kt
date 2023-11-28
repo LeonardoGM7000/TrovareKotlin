@@ -224,6 +224,9 @@ class TrovareViewModel : ViewModel() {
     fun setItinerarioActual(nuevoItinerario: Itinerario) {
         _itinerarioActual.value = nuevoItinerario
     }
+    fun setNombreItinerario(nuevoNombre: String){
+        _itinerarioActual.value.nombre = nuevoNombre
+    }
 
     //--------------------------------------------------------------------------------------------//
     //-------------------------------------API----------------------------------------------------//
