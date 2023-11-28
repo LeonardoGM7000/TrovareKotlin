@@ -74,6 +74,10 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.GregorianCalendar
+import java.util.Locale
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CrearCuenta(
@@ -433,6 +437,10 @@ fun CrearCuenta(
                                                 textoCorreo.text,
                                                 firestore
                                             )
+
+                                            val user = FirebaseAuth.getInstance().currentUser
+                                            user?.sendEmailVerification()
+
                                         } else {
 
                                             scope.launch {
@@ -475,7 +483,7 @@ private fun saveUserData(
     firestore: FirebaseFirestore
 ) {
     // Crear un objeto para representar la información del usuario
-    val userData = Usuario(textoNombre, R.drawable.perfil, "2023", "", "México", null, mutableListOf(itinerarioPrueba))
+    val userData = Usuario(textoNombre, R.drawable.perfil, obtenerFecha(), "", "México", null, mutableListOf(itinerarioPrueba))
     Log.i("cuenta", "Punto")
     firestore.collection("Usuario").document(textoCorreo).set(userData).addOnSuccessListener {
         Log.i("cuenta", "Datos guardados")
@@ -495,4 +503,14 @@ fun isNetworkAvailable(context: Context): Boolean {
 
     return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
             capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+}
+
+// Función para fecha
+private fun obtenerFecha(): String{
+
+    val calendario = GregorianCalendar()
+    val fecha = calendario.time
+    val formato = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+
+    return formato.format(fecha)
 }
