@@ -76,11 +76,10 @@ class MainActivity : ComponentActivity() {
             Log.d("Main_Trovare", auth.currentUser?.email.toString())
 
             if(auth.currentUser != null){
-
                 ruta = Pantalla.NavegacionSecundaria.ruta
-                auth.signOut()
-            }else{
 
+            }else{
+                auth.signOut()
                 ruta = Pantalla.Bienvenida.ruta
             }
 
