@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.trovare.Data.Itinerario
 import com.example.trovare.Data.Usuario
 import com.example.trovare.Data.itinerarioPrueba
 import com.example.trovare.Data.usuarioPrueba
@@ -160,7 +161,7 @@ class TrovareViewModel : ViewModel() {
     }
     //mostrar la polilinea de la ruta
     private val _polilineaInicializada = MutableStateFlow(false)
-    val polilineaInicializada: StateFlow<Boolean> = _polilineaInicializada.asStateFlow()
+    val polilineaInicializada = _polilineaInicializada.asStateFlow()
     fun setPolilineaInicializada(newValue: Boolean) {
         _polilineaInicializada.value = newValue
     }
@@ -213,6 +214,20 @@ class TrovareViewModel : ViewModel() {
     fun setIdLugar(nuevoId: String) {
         _idLugar.value = nuevoId
     }
+    //--------------------------------------------------------------------------------------------//
+    //-------------------------------------ITINERARIOS--------------------------------------------//
+    //--------------------------------------------------------------------------------------------//
+    //itinerario Actual
+    private val _itinerarioActual = MutableStateFlow(itinerarioPrueba)
+    val itinerarioActual = _itinerarioActual.asStateFlow()
+
+    fun setItinerarioActual(nuevoItinerario: Itinerario) {
+        _itinerarioActual.value = nuevoItinerario
+    }
+    fun setNombreItinerario(nuevoNombre: String){
+        _itinerarioActual.value.nombre = nuevoNombre
+    }
+
     //--------------------------------------------------------------------------------------------//
     //-------------------------------------API----------------------------------------------------//
     //--------------------------------------------------------------------------------------------//

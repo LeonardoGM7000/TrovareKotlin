@@ -1,6 +1,7 @@
 package com.example.trovare.ui.theme.Pantallas.Itinerarios
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -11,13 +12,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -30,7 +29,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -89,8 +87,15 @@ fun Itinerarios(
                         modifier = modifier
                             .size(20.dp),
                         onClick = {
-                            navController.navigate(Pantalla.EditarItinerario.ruta)
-                            usuario.itinerarios.add(Itinerario(nombre = "nuevo Itinerario", actividades = null))
+                            //Crear nuevo itinerario
+                            val nuevoItinerario = Itinerario(
+                                nombre = "nuevo Itinerario",
+                                autor = usuario.nombre,
+                                actividades = null,
+                            )
+                            navController.navigate(Pantalla.EditarItinerario.ruta)//
+                            usuario.itinerarios.add(nuevoItinerario)//
+                            viewModel.setItinerarioActual(nuevoItinerario)//
                         },
                         containerColor = Color.White,
                         shape = CircleShape
@@ -108,7 +113,11 @@ fun Itinerarios(
                     modifier = modifier
                         .fillMaxWidth()
                         .padding(horizontal = 25.dp, vertical = 5.dp)
-                        .size(100.dp),
+                        .size(100.dp)
+                        .clickable {
+                            navController.navigate(Pantalla.EditarItinerario.ruta)
+                            viewModel.setItinerarioActual(itinerario)
+                        },
                     colors = CardDefaults.cardColors(
                         containerColor = Trv3
                     )
@@ -130,7 +139,8 @@ fun Itinerarios(
                             Text(
                                 text = itinerario.nombre,
                                 color = Color.Black,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1
                             )
                             Row(
                                 verticalAlignment = Alignment.CenterVertically
@@ -155,15 +165,13 @@ fun Itinerarios(
                                     tint = Color.Black
                                 )
                                 Text(
-                                    text = "lugar",
+                                    text = itinerario.autor,
                                     color = Color.Black,
                                     fontSize = 20.sp
                                 )
                             }
                         }
-
                     }
-
                 }
             }
             item {

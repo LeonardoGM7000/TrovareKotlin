@@ -25,18 +25,26 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.trovare.Data.Itinerario
+import com.example.trovare.ViewModel.TrovareViewModel
+import com.example.trovare.ui.theme.JosefinSans
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
@@ -48,11 +56,15 @@ import com.example.trovare.ui.theme.Trv6
 @Composable
 fun EditarItinerario(
     modifier: Modifier = Modifier,
-    itinerario: Itinerario = Itinerario("", actividades = null),
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: TrovareViewModel
 ){
 
+    val itinerario by viewModel.itinerarioActual.collectAsState()
+    var nombreItinerario by remember { mutableStateOf(itinerario.nombre) }
     var publico by rememberSaveable { mutableStateOf(false) }
+
+
 
     Scaffold(
         topBar = {BarraSuperior(navController = navController)}
@@ -80,13 +92,28 @@ fun EditarItinerario(
                     Divisor()
                 }
                 item {
-                    Text(
+                    TextField(
                         modifier = modifier
-                            .fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        color = Color.White,
-                        text = "Nombre itinerario",
-                        style = MaterialTheme.typography.displaySmall
+                            .padding(horizontal = 25.dp),
+                        value = nombreItinerario,
+                        onValueChange = {nuevoNombre->
+                            nombreItinerario = nuevoNombre
+                            viewModel.setNombreItinerario(nuevoNombre)
+                        },
+                        textStyle = TextStyle(
+                            textAlign = TextAlign.Center,
+                            fontFamily = JosefinSans,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 26.sp
+                        ),
+                        singleLine = true,
+                        colors = TextFieldDefaults.textFieldColors(
+                            textColor = Color.White,
+                            containerColor = Trv1,
+                            focusedIndicatorColor = Trv1,
+                            unfocusedIndicatorColor = Trv1,
+                            cursorColor = Color.White,
+                        )
                     )
                 }
                 item{
@@ -202,17 +229,8 @@ fun EditarItinerario(
                             )
                         }
                     }
-
-
                 }
-
             }
-
         }
     }
-
-
-
-
-
 }
