@@ -54,6 +54,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
+
         /*colocar aqui API de google places*/
         Places.initialize(this, /*colocar aqui llave de API de google places*/"AIzaSyBpmAJRF6PsRJVNm6oq1qmfXbdaBjNA5mQ")//Inicializar API de Places
         val placesClient: PlacesClient = Places.createClient(this)//Crear cliente
@@ -63,33 +65,31 @@ class MainActivity : ComponentActivity() {
         viewModel.getLastLocation(fusedLocationProviderClient = fusedLocationProviderClient)
 
         // Verificamos si el usuario ya inicio sesión previamente
-        val sharedPreferecnes = getSharedPreferences("DB", MODE_PRIVATE)
-        val editor = sharedPreferecnes.edit()
 
         // Creamos una instancia de firebase para verificar el usuario registrado
         val auth = FirebaseAuth.getInstance()
-
-        val correo = sharedPreferecnes.getString(KEY_EMAIL, null)
 
         // Variable que almacena la ruta de la pantalla
         var ruta = "Bienvenida"
 
         try{
+            Log.d("Main_Trovare", auth.currentUser?.email.toString())
 
-            Log.d("Main_Trovare", correo.toString())
+            if(auth.currentUser != null){
 
-            if(correo != null){
                 ruta = Pantalla.NavegacionSecundaria.ruta
+                auth.signOut()
             }else{
+
                 ruta = Pantalla.Bienvenida.ruta
             }
 
-            editor.putString(KEY_EMAIL, auth.currentUser?.email.toString())
-            editor.apply()
 
         }catch(e:Exception){
             Log.d("Main_Trovare", "Error en la conexión de la base de datos")
         }
+
+        viewModel.obtenerDato()
 
         setContent {
             TrovareTheme {
@@ -101,10 +101,11 @@ class MainActivity : ComponentActivity() {
                     context = this
                 )
                 //MapScreen(state = viewModel.state.value, viewModel = viewModel, fusedLocationProviderClient = fusedLocationProviderClient)
+            }
         }
     }
 }
-}
+
 
 
 
