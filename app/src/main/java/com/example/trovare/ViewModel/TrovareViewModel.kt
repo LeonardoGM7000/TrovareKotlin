@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.trovare.Data.Usuario
+import com.example.trovare.Data.itinerarioPrueba
 import com.example.trovare.Data.usuarioPrueba
 import com.example.trovare.R
 import com.example.trovare.ui.theme.Pantallas.Mapa.MapState
@@ -474,6 +475,7 @@ class TrovareViewModel : ViewModel() {
         _usuario.value = nuevoUsuario
     }
 
+
     // Funciones auxiliares
     fun obtenerDato() {
         viewModelScope.launch{
@@ -492,7 +494,8 @@ class TrovareViewModel : ViewModel() {
                         fechaDeRegistro = documento.getString("fechaDeRegistro").toString(),
                         descripcion = documento.getString("descripcion").toString(),
                         lugarDeOrigen = documento.getString("lugarDeOrigen").toString(),
-                        comentarios = null
+                        comentarios = null,
+                        itinerarios = mutableListOf(itinerarioPrueba)
                 )
 
                 setUsuario(usuario)

@@ -48,7 +48,7 @@ import com.example.trovare.ui.theme.Trv6
 @Composable
 fun EditarItinerario(
     modifier: Modifier = Modifier,
-    itinerario: Itinerario = Itinerario("", imagen = null, actividades = null),
+    itinerario: Itinerario = Itinerario("", actividades = null),
     navController: NavHostController
 ){
 
