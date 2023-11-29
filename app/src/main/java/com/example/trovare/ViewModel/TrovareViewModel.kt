@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.time.LocalDate
 
 /**
  * [TrovareViewModel] guarda información de la aplicación dentro del ciclo de vida.
@@ -172,9 +173,6 @@ class TrovareViewModel : ViewModel() {
         _polilineaCod.value = newValue
     }
 
-
-
-
     //para mostrar el marcador de un solo lugar
     private val _marcadorInicializado = MutableStateFlow(false)
     val marcadorInicializado: StateFlow<Boolean> = _marcadorInicializado.asStateFlow()
@@ -226,6 +224,9 @@ class TrovareViewModel : ViewModel() {
     }
     fun setNombreItinerario(nuevoNombre: String){
         _itinerarioActual.value.nombre = nuevoNombre
+    }
+    fun setFechasItinerario(nuevasFechas: List<LocalDate>){
+        _itinerarioActual.value.fechas = nuevasFechas
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -510,7 +511,7 @@ class TrovareViewModel : ViewModel() {
                         descripcion = documento.getString("descripcion").toString(),
                         lugarDeOrigen = documento.getString("lugarDeOrigen").toString(),
                         comentarios = null,
-                        itinerarios = mutableListOf(itinerarioPrueba)
+                        itinerarios = mutableListOf()
                 )
 
                 setUsuario(usuario)

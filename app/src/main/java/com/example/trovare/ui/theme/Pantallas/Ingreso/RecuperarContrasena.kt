@@ -54,7 +54,6 @@ import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv6
 import com.example.trovare.ui.theme.Trv8
-import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -65,7 +64,6 @@ fun RecuperarContrasena(
     modifier: Modifier = Modifier,
     navController: NavController
 ){
-
     // Definimos las variables
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -73,8 +71,6 @@ fun RecuperarContrasena(
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     var guardadoExitoso by remember { mutableStateOf(false) }
-
-
     var textoCorreo by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
@@ -131,7 +127,6 @@ fun RecuperarContrasena(
                         color = Color.White,
                         style = MaterialTheme.typography.bodySmall
                     )
-
                     // Correo ----------------------------------------------------------------------
                     OutlinedTextField(
                         modifier = modifier
@@ -173,7 +168,6 @@ fun RecuperarContrasena(
                             .fillMaxWidth()
                             .padding(start = 25.dp, end = 25.dp, bottom = 10.dp),
                         onClick = {
-
                             // Realizamos las validadciones
                             if(textoCorreo.text.isBlank()){
 
@@ -232,10 +226,7 @@ fun RecuperarContrasena(
                                         }
                                     }
                             }
-
-
-
-                                  },
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Trv6,
                             contentColor = Color.White
@@ -247,10 +238,7 @@ fun RecuperarContrasena(
             }
         }
     }
-}
-
-
-//Funciones auxiliares
+}//Funciones auxiliares
 @SuppressLint("ServiceCast")
 private fun isNetworkAvailable(context: Context): Boolean {
     val connectivityManager =
