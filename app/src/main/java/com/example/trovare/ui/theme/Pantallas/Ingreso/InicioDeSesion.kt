@@ -1,10 +1,5 @@
 package com.example.trovare.ui.theme.Pantallas.Ingreso
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.os.Build
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -50,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.R
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Trv1
@@ -59,22 +55,25 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import android.util.Log
-import android.util.Patterns
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
-import com.example.trovare.Pantalla
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import android.util.Patterns
+import com.google.firebase.firestore.FirebaseFirestore
+import android.annotation.SuppressLint
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import androidx.compose.ui.platform.LocalContext
+import com.example.trovare.ViewModel.TrovareViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InicioDeSesion(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    viewModel: TrovareViewModel
 ){
     // Declaramos variables
     val db = FirebaseFirestore.getInstance()
@@ -94,8 +93,8 @@ fun InicioDeSesion(
 
     val keyboardOptionsCorreo: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email, imeAction = ImeAction.Done)
     val keyboardOptionsPassword: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done)
+
     val context = LocalContext.current
-    var inicio by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -211,8 +210,7 @@ fun InicioDeSesion(
                             .padding(horizontal = 25.dp)
                             .fillMaxWidth()
                             .clickable {
-                                //Recuperar contrasena+++++++++++++++++++++++
-                                navController.navigate(Pantalla.RecuperarPassword.ruta)
+                                navController.navigate(Pantalla.RecuperarContrasena.ruta)
                             },
                         text = "Recuperar contraseña",
                         textAlign = TextAlign.Right,
@@ -257,21 +255,19 @@ fun InicioDeSesion(
                                     )
                                 }
                             }else if (!isNetworkAvailable(context)) {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = "Error de conexión",
-                                    duration = SnackbarDuration.Short
-                                )
-                            }
-                            }else{
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Error de conexión",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            } else {
                                 try{
-
                                     // Verificamos si la cuenta es de administrador
                                     db.collection("Administrador").whereEqualTo("correo", textoCorreo.text)
                                         .whereEqualTo("password", textoPasswrod.text)
                                         .get()
                                         .addOnSuccessListener { querySnapshot ->
-
                                             if(!querySnapshot.isEmpty){
 
                                                 Log.d("Trovare","Ingreso usuario administrador")
@@ -280,9 +276,7 @@ fun InicioDeSesion(
                                                         inclusive = true
                                                     }
                                                 }
-
                                             }else{
-
                                                 // Verificamos si la cuenta es de usuario
                                                 val user = FirebaseAuth.getInstance().currentUser
 
@@ -303,8 +297,13 @@ fun InicioDeSesion(
                                                                         message = "Bienvenido...",
                                                                         duration = SnackbarDuration.Short
                                                                     )
-                                                                    inicio=true
+                                                                    }
+                                                                    navController.navigate(Pantalla.NavegacionSecundaria.ruta){
+                                                                        popUpTo(navController.graph.id){
+                                                                            inclusive = true
+                                                                        }
                                                                 }
+                                                                viewModel.obtenerDato()
                                                             }
                                                         }else{
                                                             scope.launch {
@@ -320,7 +319,6 @@ fun InicioDeSesion(
                                         .addOnFailureListener{
                                             Log.d("Trovare","Error al conectar con la base")
                                         }
-
                                 }catch(ex:Exception){
                                     Log.d("Login", "Error en la conexión de la base de datos")
                                 }
@@ -332,16 +330,6 @@ fun InicioDeSesion(
                         )
                     ) {
                         Text(text = "Ingresar")
-                    }
-                    LaunchedEffect(inicio) {
-                        if (inicio) {
-                            delay(100)
-                            navController.navigate(Pantalla.Inicio.ruta){
-                                popUpTo(navController.graph.id){
-                                    inclusive = true
-                                }
-                            }
-                        }
                     }
                 }
             }

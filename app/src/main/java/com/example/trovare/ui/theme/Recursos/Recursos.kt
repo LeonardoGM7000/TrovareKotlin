@@ -2,27 +2,20 @@ package com.example.trovare.ui.theme.Recursos
 
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Surface
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -33,11 +26,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.trovare.Pantalla
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import com.example.trovare.ui.theme.Navegacion.DestinosNavegacionSecundaria
+import com.example.trovare.ui.theme.Navegacion.Pantalla
+import com.example.trovare.ui.theme.Navegacion.rutaActual
 import com.example.trovare.ui.theme.Trv1
+import com.example.trovare.ui.theme.Trv10
 import com.example.trovare.ui.theme.Trv2
-import com.example.trovare.ui.theme.Trv4
-import com.example.trovare.ui.theme.Trv5
 import kotlinx.coroutines.flow.emptyFlow
 
 
@@ -47,6 +43,15 @@ fun Divisor(modifier: Modifier = Modifier){
     Divider(
         modifier = modifier
             .padding(horizontal = 25.dp, vertical = 15.dp),
+        color = Color.White
+    )
+}
+
+@Composable
+fun Divisor2(modifier: Modifier = Modifier){
+    Divider(
+        modifier = modifier
+            .padding(horizontal = 5.dp, vertical = 5.dp),
         color = Color.White
     )
 }
@@ -160,76 +165,34 @@ fun VentanaDeAlerta(
             }
         )
     }
-
 }
-//Menu de navegacion inferior-----------------------------------------------------------------------
-
+//Barra de navegación ingerior----------------------------------------------------------------------
 @Composable
-fun MenuInferior(
+fun BarraInferior(
     modifier: Modifier = Modifier,
-    presionarHome: () -> Unit,
-    presionarPerfil: () -> Unit,
-    presionarNavegacion: () -> Unit,
-    presionarItinerario: () -> Unit,
-    colorHome: Color = Color.White,
-    colorPerfil: Color = Color.White,
-    colorNavegacion: Color = Color.White,
-    colorItinerario: Color = Color.White,
-
-) {
-    Surface(
+    navControllerSecundaario: NavHostController,
+){
+    NavigationBar(
         modifier = modifier.fillMaxWidth(),
-        color = Trv1
+        containerColor = Trv1,
     ) {
-        Card(
-            modifier = modifier.padding(horizontal = 30.dp, vertical = 15.dp),
-            colors = CardDefaults.cardColors(Trv4)
-
-        ) {
-            Row(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 10.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-
-                IconButton(onClick = { presionarHome() }) {
-                    Icon(
-                        modifier = modifier
-                            .size(40.dp),
-                        imageVector = Icons.Filled.Home,
-                        contentDescription =  "",
-                        tint = colorHome
-                    )
-                }
-                IconButton(onClick = { presionarPerfil() }) {
-                    Icon(
-                        modifier = modifier
-                            .size(40.dp),
-                        imageVector = Icons.Filled.AccountCircle,
-                        contentDescription =  "",
-                        tint = colorPerfil
-                    )
-                }
-                IconButton(onClick = { presionarNavegacion() }) {
-                    Icon(
-                        modifier = modifier
-                            .size(40.dp),
-                        imageVector = Icons.Filled.Explore,
-                        contentDescription =  "",
-                        tint = colorNavegacion
-                    )
-                }
-                IconButton(onClick = { presionarItinerario() }) {
-                    Icon(
-                        modifier = modifier
-                            .size(40.dp),
-                        imageVector = Icons.Filled.CalendarToday,
-                        contentDescription =  "",
-                        tint = colorItinerario
-                    )
-                }
-            }
+        DestinosNavegacionSecundaria.forEach{ destino ->
+            val rutaActual = rutaActual(navController = navControllerSecundaario) == destino.ruta
+            NavigationBarItem(
+                selected = rutaActual,
+                onClick = { navControllerSecundaario.navigate(destino.ruta){
+                    popUpTo(navControllerSecundaario.graph.findStartDestination().id){
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                } },
+                icon = {
+                    Icon(imageVector = destino.iconoSeleccionado, contentDescription = "")
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = Trv10
+                )
+            )
         }
 
     }

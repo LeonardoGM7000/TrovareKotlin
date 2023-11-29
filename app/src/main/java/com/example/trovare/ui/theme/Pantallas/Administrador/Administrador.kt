@@ -30,9 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.trovare.Pantalla
-import com.example.trovare.ui.theme.Data.Usuario
-import com.example.trovare.ui.theme.Data.usuarioPrueba
+import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Recursos.VentanaDeAlerta
 import com.example.trovare.ui.theme.Trv1
@@ -49,6 +47,7 @@ fun Administrador(
 ){
 
     var mostrarCerrarSesion by rememberSaveable { mutableStateOf(false) }
+    Buscar = ""
 
     Surface(
         modifier = modifier

@@ -1,9 +1,6 @@
 package com.example.trovare.ui.theme.Pantallas
 
-<<<<<<< HEAD
-=======
 import android.util.Log
->>>>>>> bf972f322efdd1ef70f150421b2f2df11170b264
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,77 +8,44 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-<<<<<<< HEAD
-=======
 import androidx.compose.foundation.text.KeyboardOptions
->>>>>>> bf972f322efdd1ef70f150421b2f2df11170b264
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-<<<<<<< HEAD
-import androidx.compose.material3.Scaffold
-=======
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
->>>>>>> bf972f322efdd1ef70f150421b2f2df11170b264
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-<<<<<<< HEAD
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-=======
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
->>>>>>> bf972f322efdd1ef70f150421b2f2df11170b264
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextRange
-<<<<<<< HEAD
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.example.trovare.ui.theme.Navegacion.TrovareViewModel
-=======
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
->>>>>>> bf972f322efdd1ef70f150421b2f2df11170b264
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv6
-import com.example.trovare.ui.theme.Trv7
-<<<<<<< HEAD
-=======
 import com.example.trovare.ui.theme.Trv8
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
->>>>>>> bf972f322efdd1ef70f150421b2f2df11170b264
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditarPreguntas(
     modifier: Modifier = Modifier,
-<<<<<<< HEAD
-    navController: NavController
-){
-
-    var textoPregunta by rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue("", TextRange(0, 7))) }
-=======
     navController: NavController, preguntaId: String?
 ) {
     var textoPregunta by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -147,17 +111,13 @@ fun EditarPreguntas(
             }
         }
     }
->>>>>>> bf972f322efdd1ef70f150421b2f2df11170b264
 
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
-<<<<<<< HEAD
-=======
         },snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState)
->>>>>>> bf972f322efdd1ef70f150421b2f2df11170b264
         },
         bottomBar = {
             Column(
@@ -166,14 +126,6 @@ fun EditarPreguntas(
                     .fillMaxWidth()
             ) {
                 Button(
-<<<<<<< HEAD
-                    onClick = {/*TODO*/},
-                    modifier = Modifier
-                        .padding(20.dp)
-                        .clip(RoundedCornerShape(20.dp)),
-                    colors = ButtonDefaults.buttonColors(Trv6,Color.White)
-                    ){
-=======
                     onClick = {
                         if(textoPregunta.text.isBlank() || textoRespuesta.text.isBlank()){
                             scope.launch {
@@ -200,7 +152,6 @@ fun EditarPreguntas(
                         .clip(RoundedCornerShape(20.dp)),
                     colors = ButtonDefaults.buttonColors(Trv6, Color.White)
                 ) {
->>>>>>> bf972f322efdd1ef70f150421b2f2df11170b264
                     Text(text = "Guardar")
                 }
             }
@@ -212,52 +163,24 @@ fun EditarPreguntas(
                 .padding(it),
             color = Trv1
         ) {
-<<<<<<< HEAD
-            LazyColumn(){
-                item {
-                    TituloAdmin(titulo = "EDITAR PREGUNTAS")
-=======
             LazyColumn() {
                 item {
                     TituloAdmin(titulo = "EDITAR PREGUNTA")
->>>>>>> bf972f322efdd1ef70f150421b2f2df11170b264
                 }
                 item {
                     Divisor(modifier = Modifier.padding(top = 13.dp))
                 }
                 item {
-<<<<<<< HEAD
-                    TextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp)
-                            .clip(RoundedCornerShape(20.dp)),
-                        value = textoPregunta,
-                        onValueChange = {textoPregunta = it},
-                        label = {
-                            Text(
-                                text = "Pregunta",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = Color.White
-                            )
-                        },
-                        textStyle = MaterialTheme.typography.labelMedium,
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = Color.White,
-                            containerColor = Trv7,
-                            cursorColor = Color.White
-                        )
-=======
                     OutlinedTextField(
                         modifier = modifier
                             .fillMaxWidth()
                             .padding(bottom = 15.dp, start = 50.dp, end = 50.dp),
                         value = textoPregunta,
                         onValueChange = {
-                                            textoPregunta = it
-                                            isErrorL = 0
-                                            validarLetras(textoPregunta.text)
-                                        },
+                            textoPregunta = it
+                            isErrorL = 0
+                            validarLetras(textoPregunta.text)
+                        },
                         label = {
                             Text(
                                 text = "Pregunta",
@@ -317,14 +240,11 @@ fun EditarPreguntas(
                         ),
                         singleLine = true,
                         keyboardOptions = keyboardOptionsTexto,
->>>>>>> bf972f322efdd1ef70f150421b2f2df11170b264
                     )
                 }
             }
         }
     }
-<<<<<<< HEAD
-=======
 }
 
 data class PreguntaRespuesta(val pregunta: String?, val respuesta: String?)
@@ -361,5 +281,4 @@ suspend fun savePreguntaToFirestore(
     } catch (e: Exception) {
         Log.i("savePregunta",e.toString())
     }
->>>>>>> bf972f322efdd1ef70f150421b2f2df11170b264
 }

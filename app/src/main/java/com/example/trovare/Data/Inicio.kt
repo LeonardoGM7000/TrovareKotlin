@@ -1,7 +1,4 @@
-package com.example.trovare.ui.theme.Data
-
-import androidx.compose.ui.graphics.vector.ImageVector
-import com.example.trovare.R
+package com.example.trovare.Data
 
 //Categorías
 
