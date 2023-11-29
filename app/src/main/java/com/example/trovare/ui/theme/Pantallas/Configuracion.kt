@@ -52,10 +52,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.trovare.Data.Configuracion
 import com.example.trovare.Data.Usuario
 import com.example.trovare.Data.listaDeConfiguracion
 import com.example.trovare.Data.usuarioPrueba
+import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
@@ -225,7 +227,7 @@ fun TarjetaPerfil(
             ) {
                 Image(
                     modifier = modifier.fillMaxSize(),
-                    painter = painterResource(id = usuario.foto_perfil),
+                    painter = rememberAsyncImagePainter(model = usuario.foto_perfil),
                     contentDescription = "",
                     contentScale = ContentScale.FillBounds
                 )

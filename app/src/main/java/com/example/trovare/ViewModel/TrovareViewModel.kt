@@ -505,7 +505,7 @@ class TrovareViewModel : ViewModel() {
                 val documento =  firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().await()
                 val usuario = Usuario(
                         nombre = documento.getString("nombre").toString(),
-                        foto_perfil = R.drawable.perfil,
+                        foto_perfil = documento.getString("foto_perfil").toString(),
                         fechaDeRegistro = documento.getString("fechaDeRegistro").toString(),
                         descripcion = documento.getString("descripcion").toString(),
                         lugarDeOrigen = documento.getString("lugarDeOrigen").toString(),

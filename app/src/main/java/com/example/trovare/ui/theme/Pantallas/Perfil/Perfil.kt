@@ -45,6 +45,8 @@ import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import androidx.compose.runtime.getValue
+import coil.compose.rememberAsyncImagePainter
+import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -150,7 +152,7 @@ fun PerfilPrincipal(
                         ) {
                             Image(
                                 modifier = modifier.fillMaxSize(),
-                                painter = painterResource(id = usuario.foto_perfil),
+                                painter = rememberAsyncImagePainter(model = usuario.foto_perfil),
                                 contentDescription = "",
                                 contentScale = ContentScale.FillBounds
                             )
@@ -270,7 +272,7 @@ fun PerfilPrincipal(
                             ) {
                                 Image(
                                     modifier = modifier.fillMaxSize(),
-                                    painter = painterResource(id = usuario.foto_perfil),
+                                    painter = rememberAsyncImagePainter(model = usuario.foto_perfil),
                                     contentDescription = "",
                                     contentScale = ContentScale.FillBounds
                                 )
