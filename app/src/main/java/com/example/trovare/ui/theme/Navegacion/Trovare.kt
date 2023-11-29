@@ -175,6 +175,7 @@ fun Trovare(
         composable(route = Pantalla.EditarItinerario.ruta) {
             EditarItinerario(
                 navController = navController,
+                viewModel = viewModel
             )
         }
 

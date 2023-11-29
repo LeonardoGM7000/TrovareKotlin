@@ -65,6 +65,8 @@ import com.example.trovare.ui.theme.Recursos.VentanaDeAlerta
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv6
+import com.google.firebase.auth.FirebaseAuth
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Configuracion(
@@ -165,11 +167,9 @@ fun Configuracion(
                                 }
                             }
 
-                            // Borramos los datos de sharedPreferences
-                            val sharedPreferences = context.getSharedPreferences("DB", Context.MODE_PRIVATE)
-                            val editor = sharedPreferences.edit()
-                            editor.clear()
-                            editor.apply()
+                            // Borramos los datos de firebase
+                            val auth = FirebaseAuth.getInstance()
+                            auth.signOut()
                         },
                         textoConfirmar = "Cerrar Sesión",
                         titulo = "Cerrar Sesión",

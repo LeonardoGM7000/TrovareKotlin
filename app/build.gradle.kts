@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.trovare"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         //targetSdk = 34 (para navegacion)
         versionCode = 1
@@ -108,6 +108,11 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.5.0"))
     implementation("com.google.firebase:firebase-firestore:24.9.1")
     implementation("com.google.firebase:firebase-analytics")
+
+    //Calendario
+    implementation("com.maxkeppeler.sheets-compose-dialogs:core:1.0.2")
+    implementation("com.maxkeppeler.sheets-compose-dialogs:calendar:1.0.2")
+
 
 
     //Compilación

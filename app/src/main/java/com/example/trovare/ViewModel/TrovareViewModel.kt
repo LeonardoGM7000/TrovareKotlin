@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.trovare.Data.Itinerario
 import com.example.trovare.Data.Usuario
 import com.example.trovare.Data.itinerarioPrueba
 import com.example.trovare.Data.usuarioPrueba
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.time.LocalDate
 
 /**
  * [TrovareViewModel] guarda información de la aplicación dentro del ciclo de vida.
@@ -160,7 +162,7 @@ class TrovareViewModel : ViewModel() {
     }
     //mostrar la polilinea de la ruta
     private val _polilineaInicializada = MutableStateFlow(false)
-    val polilineaInicializada: StateFlow<Boolean> = _polilineaInicializada.asStateFlow()
+    val polilineaInicializada = _polilineaInicializada.asStateFlow()
     fun setPolilineaInicializada(newValue: Boolean) {
         _polilineaInicializada.value = newValue
     }
@@ -210,6 +212,23 @@ class TrovareViewModel : ViewModel() {
     fun setIdLugar(nuevoId: String) {
         _idLugar.value = nuevoId
     }
+    //--------------------------------------------------------------------------------------------//
+    //-------------------------------------ITINERARIOS--------------------------------------------//
+    //--------------------------------------------------------------------------------------------//
+    //itinerario Actual
+    private val _itinerarioActual = MutableStateFlow(itinerarioPrueba)
+    val itinerarioActual = _itinerarioActual.asStateFlow()
+
+    fun setItinerarioActual(nuevoItinerario: Itinerario) {
+        _itinerarioActual.value = nuevoItinerario
+    }
+    fun setNombreItinerario(nuevoNombre: String){
+        _itinerarioActual.value.nombre = nuevoNombre
+    }
+    fun setFechasItinerario(nuevasFechas: List<LocalDate>){
+        _itinerarioActual.value.fechas = nuevasFechas
+    }
+
     //--------------------------------------------------------------------------------------------//
     //-------------------------------------API----------------------------------------------------//
     //--------------------------------------------------------------------------------------------//
@@ -492,7 +511,7 @@ class TrovareViewModel : ViewModel() {
                         descripcion = documento.getString("descripcion").toString(),
                         lugarDeOrigen = documento.getString("lugarDeOrigen").toString(),
                         comentarios = null,
-                        itinerarios = mutableListOf(itinerarioPrueba)
+                        itinerarios = mutableListOf()
                 )
 
                 setUsuario(usuario)
