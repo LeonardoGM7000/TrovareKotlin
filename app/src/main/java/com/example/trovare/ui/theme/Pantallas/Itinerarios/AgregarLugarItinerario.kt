@@ -112,7 +112,6 @@ fun AgregarLugarItinerario(
     fusedLocationProviderClient: FusedLocationProviderClient,
     placesClient: PlacesClient
 ){
-
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 

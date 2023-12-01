@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarToday
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Place
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -78,9 +79,12 @@ fun EditarItinerario(
     val itinerario by viewModel.itinerarioActual.collectAsState()
     var nombreItinerario by remember { mutableStateOf(itinerario.nombre) }
     var publico by rememberSaveable { mutableStateOf(false) }
-    var fechas by remember { mutableStateOf(itinerario.fechas) }
+    var lugares by remember { mutableStateOf(itinerario.lugares) }
     val calendarState = rememberSheetState()
 
+
+
+    /*
     CalendarTheme {
         CalendarDialog(
             state = calendarState,
@@ -97,6 +101,8 @@ fun EditarItinerario(
             )
         )
     }
+
+     */
 
     Scaffold(
         topBar = {BarraSuperior(navController = navController)}
@@ -224,7 +230,8 @@ fun EditarItinerario(
                             .fillMaxWidth()
                             .padding(horizontal = 25.dp)
                             .clickable {
-                                calendarState.show()
+                                //calendar State.show()
+                                navController.navigate(Pantalla.AgregarLugarItinerario.ruta)
                             },
                         colors = CardDefaults.cardColors(
                             containerColor = Trv3
@@ -237,14 +244,14 @@ fun EditarItinerario(
                         ){
                             Text(
                                 modifier = modifier.padding(5.dp),
-                                text = "Agregar fecha",
+                                text = "Agregar lugar",
                                 textAlign = TextAlign.Left,
                                 color = Color.Black,
                                 style = MaterialTheme.typography.bodyLarge
                             )
                             Icon(
                                 modifier = modifier.padding(5.dp),
-                                imageVector = Icons.Rounded.CalendarToday,
+                                imageVector = Icons.Rounded.Place,
                                 contentDescription = "",
                                 tint = Color.Black
                             )
@@ -254,7 +261,7 @@ fun EditarItinerario(
                 item {
                     Divisor()
                 }
-                if(fechas == null){
+                if(lugares == null){
                     item {
                         Box(modifier = modifier
                             .fillMaxSize()
@@ -270,7 +277,7 @@ fun EditarItinerario(
                         }
                     }
                 } else {
-                    items(fechas!!){fecha ->
+                    items(lugares!!){fecha ->
                         Row (
                             modifier = modifier
                                 .fillMaxWidth()

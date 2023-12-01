@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.trovare.Data.Itinerario
+import com.example.trovare.Data.Lugar
 import com.example.trovare.Data.Usuario
 import com.example.trovare.Data.itinerarioPrueba
 import com.example.trovare.Data.usuarioPrueba
@@ -225,8 +226,8 @@ class TrovareViewModel : ViewModel() {
     fun setNombreItinerario(nuevoNombre: String){
         _itinerarioActual.value.nombre = nuevoNombre
     }
-    fun setFechasItinerario(nuevasFechas: List<LocalDate>){
-        _itinerarioActual.value.fechas = nuevasFechas
+    fun setNuevosLugares(nuevosLugares: MutableList<Lugar>){
+        _itinerarioActual.value.lugares = nuevosLugares
     }
 
     //--------------------------------------------------------------------------------------------//
