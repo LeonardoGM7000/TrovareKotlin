@@ -21,7 +21,6 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -37,7 +36,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -56,6 +54,7 @@ import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.CalendarTheme
 import com.example.trovare.ui.theme.JosefinSans
+import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
@@ -66,7 +65,6 @@ import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
-import java.time.LocalDate
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -282,7 +280,9 @@ fun EditarItinerario(
                             Text(text = fecha.toString())
                             TextButton(
                                 modifier = modifier.padding(horizontal = 15.dp),
-                                onClick = { /*TODO*/ },
+                                onClick = {
+                                          navController.navigate(Pantalla.AgregarLugarItinerario.ruta)
+                                },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = Trv3,
                                     contentColor = Color.Black
