@@ -1,6 +1,7 @@
 package com.example.trovare.ui.theme.Pantallas
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -67,7 +68,9 @@ import com.example.trovare.ui.theme.Recursos.VentanaDeAlerta
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv6
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,7 +87,14 @@ fun Configuracion(
     ) { it ->
         var mostrarCerrarSesion by rememberSaveable { mutableStateOf(false) }
         var mostrarBorrarCuenta by rememberSaveable { mutableStateOf(false) }
+        val auth = FirebaseAuth.getInstance()
+        val firebase = FirebaseFirestore.getInstance()
         val uiState by viewModel.uiState.collectAsState()
+
+
+
+        
+        
         //CUERPO DE LA PANTALLA CONFIGURACION ------------------------------------------------------
         Surface(
             modifier = modifier
@@ -170,7 +180,6 @@ fun Configuracion(
                             }
 
                             // Borramos los datos de firebase
-                            val auth = FirebaseAuth.getInstance()
                             auth.signOut()
                         },
                         textoConfirmar = "Cerrar Sesión",
@@ -182,11 +191,31 @@ fun Configuracion(
                         mostrar = mostrarBorrarCuenta,
                         alRechazar = {mostrarBorrarCuenta = false},
                         alConfirmar = {
-                            navController.navigate(Pantalla.Bienvenida.ruta){
-                                popUpTo(navController.graph.id){
-                                    inclusive = true
+                            
+                            // Borramos la cuenta de firebase
+                            firebase.collection("Usuario").document(auth.currentUser?.email.toString()).delete()
+                                .addOnSuccessListener {
+
+                                    navController.navigate(Pantalla.Bienvenida.ruta){
+                                        popUpTo(navController.graph.id){
+                                            inclusive = true
+                                        }
+                                    }
+
+                                    // Borramos de firebase Auth
+                                    auth.currentUser?.delete()?.addOnSuccessListener {
+
+                                        Log.d("Borrar_cuenta", "Usuario eliminado exitosamente")
+
+
+                                    }
+                                        ?.addOnFailureListener{
+                                        }
                                 }
-                            }
+                                .addOnFailureListener {
+                                    Log.d("Borrar_cuenta", "Error al intentar eliminar Usuario")
+                                }
+
                         },
                         textoConfirmar = "Borrar Cuenta",
                         titulo = "Borrar Cuenta",
