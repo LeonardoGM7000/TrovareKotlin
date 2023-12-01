@@ -47,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -72,13 +73,18 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
+// Creamos las llaves para sharedPreferences
+private val KEY_PREFERENCES = "Configuracion"
+private val KEY_IDIOMA = "idioma"
+private val KEY_UNIDADES = "unidades"
+private val KEY_MONEDA = "moneda"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Configuracion(
     modifier: Modifier = Modifier,
     viewModel: TrovareViewModel,
     navController: NavController,
-    context: Context,
 ) {
     Scaffold(
         topBar = {
@@ -91,8 +97,12 @@ fun Configuracion(
         val firebase = FirebaseFirestore.getInstance()
         val uiState by viewModel.uiState.collectAsState()
 
+        // Creamos el contexto de la aplicación
+        val context = LocalContext.current
 
-
+        // Utilizamos sharedPreferences
+        val sharedPreferences = context.getSharedPreferences(KEY_PREFERENCES, Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
         
         
         //CUERPO DE LA PANTALLA CONFIGURACION ------------------------------------------------------
@@ -129,7 +139,12 @@ fun Configuracion(
                         configuracion = listaDeConfiguracion[0],
                         configuracionActual = uiState.idioma
                     ) {
+
                         viewModel.setIdioma(it)
+
+                        // Modificamos Shared Preferences
+                        editor.putString(KEY_IDIOMA, it).apply()
+
                     }
                     //Configuración-Unidad----------------------------------------------------------
                     TarjetaConfiguracion(
@@ -137,6 +152,9 @@ fun Configuracion(
                         configuracionActual = uiState.unidad
                     ) {
                         viewModel.setUnidades(it)
+
+                        // Modificamos Shared Preferences
+                        editor.putString(KEY_UNIDADES, it).apply()
                     }
                     //Configuración-Moneda----------------------------------------------------------
                     TarjetaConfiguracion(
@@ -144,6 +162,9 @@ fun Configuracion(
                         configuracionActual = uiState.moneda
                     ) {
                         viewModel.setMonedas(it)
+
+                        // Modificamos Shared Preferences
+                        editor.putString(KEY_MONEDA, it).apply()
                     }
                 }
                 item {

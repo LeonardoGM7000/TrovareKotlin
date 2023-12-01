@@ -8,6 +8,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Navegacion.Pantalla
@@ -21,6 +23,12 @@ import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
+
+    // Creamos las llaves para sharedPreferences
+    private val KEY_PREFERENCES = "Configuracion"
+    private val KEY_IDIOMA = "idioma"
+    private val KEY_UNIDADES = "unidades"
+    private val KEY_MONEDA = "moneda"
 
     //Solicitar permisos de ubicación---------------------------------------------------------------
 
@@ -89,6 +97,13 @@ class MainActivity : ComponentActivity() {
         }
 
         viewModel.obtenerDato()
+
+        // SharedPreferences -> Configuración
+        val sharedPreferences = getSharedPreferences(KEY_PREFERENCES, MODE_PRIVATE)
+
+        viewModel.setIdioma(sharedPreferences.getString(KEY_IDIOMA,"Español").toString())
+        viewModel.setUnidades(sharedPreferences.getString(KEY_UNIDADES, "Km/m").toString())
+        viewModel.setMonedas(sharedPreferences.getString(KEY_MONEDA, "MXN").toString())
 
         setContent {
             TrovareTheme {
