@@ -1,6 +1,7 @@
 package com.example.trovare.ui.theme.Pantallas
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -46,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -67,7 +69,15 @@ import com.example.trovare.ui.theme.Recursos.VentanaDeAlerta
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv6
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+
+// Creamos las llaves para sharedPreferences
+private val KEY_PREFERENCES = "Configuracion"
+private val KEY_IDIOMA = "idioma"
+private val KEY_UNIDADES = "unidades"
+private val KEY_MONEDA = "moneda"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,7 +85,6 @@ fun Configuracion(
     modifier: Modifier = Modifier,
     viewModel: TrovareViewModel,
     navController: NavController,
-    context: Context,
 ) {
     Scaffold(
         topBar = {
@@ -84,7 +93,18 @@ fun Configuracion(
     ) { it ->
         var mostrarCerrarSesion by rememberSaveable { mutableStateOf(false) }
         var mostrarBorrarCuenta by rememberSaveable { mutableStateOf(false) }
+        val auth = FirebaseAuth.getInstance()
+        val firebase = FirebaseFirestore.getInstance()
         val uiState by viewModel.uiState.collectAsState()
+
+        // Creamos el contexto de la aplicación
+        val context = LocalContext.current
+
+        // Utilizamos sharedPreferences
+        val sharedPreferences = context.getSharedPreferences(KEY_PREFERENCES, Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        
+        
         //CUERPO DE LA PANTALLA CONFIGURACION ------------------------------------------------------
         Surface(
             modifier = modifier
@@ -119,7 +139,12 @@ fun Configuracion(
                         configuracion = listaDeConfiguracion[0],
                         configuracionActual = uiState.idioma
                     ) {
+
                         viewModel.setIdioma(it)
+
+                        // Modificamos Shared Preferences
+                        editor.putString(KEY_IDIOMA, it).apply()
+
                     }
                     //Configuración-Unidad----------------------------------------------------------
                     TarjetaConfiguracion(
@@ -127,6 +152,9 @@ fun Configuracion(
                         configuracionActual = uiState.unidad
                     ) {
                         viewModel.setUnidades(it)
+
+                        // Modificamos Shared Preferences
+                        editor.putString(KEY_UNIDADES, it).apply()
                     }
                     //Configuración-Moneda----------------------------------------------------------
                     TarjetaConfiguracion(
@@ -134,6 +162,9 @@ fun Configuracion(
                         configuracionActual = uiState.moneda
                     ) {
                         viewModel.setMonedas(it)
+
+                        // Modificamos Shared Preferences
+                        editor.putString(KEY_MONEDA, it).apply()
                     }
                 }
                 item {
@@ -170,7 +201,6 @@ fun Configuracion(
                             }
 
                             // Borramos los datos de firebase
-                            val auth = FirebaseAuth.getInstance()
                             auth.signOut()
                         },
                         textoConfirmar = "Cerrar Sesión",
@@ -182,11 +212,31 @@ fun Configuracion(
                         mostrar = mostrarBorrarCuenta,
                         alRechazar = {mostrarBorrarCuenta = false},
                         alConfirmar = {
-                            navController.navigate(Pantalla.Bienvenida.ruta){
-                                popUpTo(navController.graph.id){
-                                    inclusive = true
+                            
+                            // Borramos la cuenta de firebase
+                            firebase.collection("Usuario").document(auth.currentUser?.email.toString()).delete()
+                                .addOnSuccessListener {
+
+                                    navController.navigate(Pantalla.Bienvenida.ruta){
+                                        popUpTo(navController.graph.id){
+                                            inclusive = true
+                                        }
+                                    }
+
+                                    // Borramos de firebase Auth
+                                    auth.currentUser?.delete()?.addOnSuccessListener {
+
+                                        Log.d("Borrar_cuenta", "Usuario eliminado exitosamente")
+
+
+                                    }
+                                        ?.addOnFailureListener{
+                                        }
                                 }
-                            }
+                                .addOnFailureListener {
+                                    Log.d("Borrar_cuenta", "Error al intentar eliminar Usuario")
+                                }
+
                         },
                         textoConfirmar = "Borrar Cuenta",
                         titulo = "Borrar Cuenta",

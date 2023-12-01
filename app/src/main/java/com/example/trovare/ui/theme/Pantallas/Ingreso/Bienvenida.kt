@@ -110,6 +110,7 @@ fun Bienvenida(
                     textDecoration = TextDecoration.Underline,
                 )
                 //Boton temporal para saltar el inicio de sesión (eliminar para la versión final)---
+                /*
                 TextButton(
                     modifier = modifier
                         .padding(bottom = 10.dp),
@@ -123,6 +124,8 @@ fun Bienvenida(
                 ) {
                     Text(text = "SALTAR")
                 }
+
+                */
             }
         }
     }

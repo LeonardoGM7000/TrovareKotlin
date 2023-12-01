@@ -125,7 +125,6 @@ fun Trovare(
             Configuracion(
                 viewModel = viewModel,
                 navController = navController,
-                context = context
             )
         }
         composable(route = Pantalla.FAQS.ruta) {
