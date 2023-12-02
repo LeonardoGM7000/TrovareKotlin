@@ -12,6 +12,13 @@ data class Itinerario(
 data class Lugar(
     val id: String,
     val nombreLugar: String,
+    var fechaDeVisita: LocalDate?,
+    var horaDeVisita: Hora?
+)
+
+data class Hora(
+    val hora: Int,
+    val minuto: Int,
 )
 
 val itinerarioPrueba: Itinerario = Itinerario(

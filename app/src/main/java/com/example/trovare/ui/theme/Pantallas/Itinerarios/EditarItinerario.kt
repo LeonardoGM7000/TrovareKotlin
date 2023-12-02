@@ -17,20 +17,26 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CalendarToday
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Place
 import androidx.compose.material.icons.rounded.Public
+import androidx.compose.material.icons.rounded.Route
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -58,13 +64,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.trovare.Data.Hora
+import com.example.trovare.Data.Lugar
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.CalendarTheme
+import com.example.trovare.ui.theme.ClockTheme
 import com.example.trovare.ui.theme.JosefinSans
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
+import com.example.trovare.ui.theme.Recursos.VentanaDeAlerta
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv11
 import com.example.trovare.ui.theme.Trv3
@@ -74,7 +84,16 @@ import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.clock.ClockDialog
+import com.maxkeppeler.sheets.clock.models.ClockConfig
 import com.maxkeppeler.sheets.clock.models.ClockSelection
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Delay
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import okhttp3.internal.wait
+import java.time.LocalDate
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -91,12 +110,22 @@ fun EditarItinerario(
     var lugares by remember { mutableStateOf(itinerario.lugares) }
     val calendarState = rememberSheetState()
     val clockState = rememberSheetState()
+    var indiceActual by remember{ mutableStateOf(0) }
+    var listaVisible by remember{ mutableStateOf(true) }
+
+    var mostrarBorrarDeItinerario by rememberSaveable { mutableStateOf(false) }
 
     CalendarTheme {
         CalendarDialog(
             state = calendarState,
             selection = CalendarSelection.Date{ fecha->
-                //viewModel.setFechaLugar(fecha)
+                CoroutineScope(Dispatchers.Default).launch {
+                    listaVisible = false
+                    viewModel.modificarFechaDeVisita(indiceActual = indiceActual, fechaNueva = fecha)
+                    itinerario.lugares = lugares?.sortedBy { it.fechaDeVisita }?.toMutableList()
+                    lugares = itinerario.lugares
+                    listaVisible = true
+                }
             },
             config = CalendarConfig(
                 monthSelection = true,
@@ -105,15 +134,25 @@ fun EditarItinerario(
         )
     }
 
-    //CalendarTheme {
+    ClockTheme {
         ClockDialog(
             state = clockState,
             selection = ClockSelection.HoursMinutes{hours, minutes ->
-                //TODO
-            }
+                CoroutineScope(Dispatchers.Default).launch {
+                    listaVisible = false
+                    viewModel.modificarHoraDeVisita(indiceActual = indiceActual, horaNueva = Hora(hora = hours, minuto = minutes))
+                    //itinerario.lugares = lugares?.sortedBy { it.fechaDeVisita }?.toMutableList()
+                    lugares = itinerario.lugares
+                    listaVisible = true
+                }
+                //Log.d("testReloj", "${hours}:${minutes}")
+            },
+            config = ClockConfig(
+                //is24HourFormat = true
+            )
         )
-    //}
-
+    }
+    
     Scaffold(
         topBar = {BarraSuperior(navController = navController)}
     ) {
@@ -287,82 +326,122 @@ fun EditarItinerario(
                         }
                     }
                 } else {
-                    items(lugares!!){lugar ->
-
-                        Card(
-                            modifier = modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 25.dp, vertical = 5.dp)
-                                .size(100.dp)
-                                .clickable {
-                                    //TODO
-                                },
-                            colors = CardDefaults.cardColors(
-                                containerColor = Trv3
-                            )
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
+                    if(listaVisible){
+                        lugares!!.forEachIndexed { index, lugar ->
+                            item {
                                 Card(
                                     modifier = modifier
-                                        .padding(5.dp)
-                                        .aspectRatio(1f),
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 25.dp, vertical = 5.dp)
+                                        .size(100.dp)
+                                        .clickable {
+                                            navController.navigate(Pantalla.Detalles.conArgs(lugar.id))
+                                        },
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = Trv3
+                                    )
                                 ) {
-                                    Image(
-                                        modifier = modifier
-                                            .fillMaxSize(),
-                                        painter = painterResource(id = R.drawable.image_placeholder),
-                                        contentDescription = ""
-                                    )
-                                }
-                                Column {
-                                    Text(
-                                        text = lugar.nombreLugar,
-                                        color = Color.Black,
-                                        maxLines = 2
-                                    )
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically
-                                    ){
-                                        Row(
+                                    ) {
+                                        Card(
                                             modifier = modifier
-                                                .clickable {
-                                                    calendarState.show()
-                                                },
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ){
-                                            Icon(
-                                                imageVector = Icons.Rounded.CalendarToday,
-                                                contentDescription = "",
-                                                tint = Color.Black
-                                            )
-                                            Text(
-                                                text = "Editar",
-                                                color = Color.Black,
-                                                fontSize = 20.sp
+                                                .padding(5.dp)
+                                                .aspectRatio(1f),
+                                        ) {
+                                            Image(
+                                                modifier = modifier
+                                                    .fillMaxSize(),
+                                                painter = painterResource(id = R.drawable.image_placeholder),
+                                                contentDescription = ""
                                             )
                                         }
-                                        Spacer(
-                                            modifier = modifier.padding(horizontal = 10.dp)
-                                        )
-                                        Row(
-                                            modifier = modifier
-                                                .clickable {
-                                                    clockState.show()
-                                                },
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ){
-                                            Icon(
-                                                imageVector = Icons.Rounded.AccessTime,
-                                                contentDescription = "",
-                                                tint = Color.Black
-                                            )
+                                        Column(
+                                            modifier = modifier.fillMaxWidth(0.8f)
+                                        ) {
                                             Text(
-                                                text = "Editar",
+                                                text = lugar.nombreLugar,
                                                 color = Color.Black,
-                                                fontSize = 20.sp
+                                                maxLines = 2
                                             )
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ){
+                                                Row(
+                                                    modifier = modifier
+                                                        .clickable {
+                                                            indiceActual = index
+                                                            calendarState.show()
+                                                        },
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ){
+                                                    Icon(
+                                                        imageVector = Icons.Rounded.CalendarToday,
+                                                        contentDescription = "",
+                                                        tint = Color.Black
+                                                    )
+                                                    Text(
+                                                        text = if(lugar.fechaDeVisita == null) "" else lugar.fechaDeVisita.toString(),
+                                                        color = Color.Black,
+                                                        fontSize = 20.sp
+                                                    )
+                                                }
+                                                Spacer(
+                                                    modifier = modifier.padding(horizontal = 5.dp)
+                                                )
+                                                Row(
+                                                    modifier = modifier
+                                                        .clickable {
+                                                            indiceActual = index
+                                                            clockState.show()
+                                                        },
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ){
+                                                    Icon(
+                                                        imageVector = Icons.Rounded.AccessTime,
+                                                        contentDescription = "",
+                                                        tint = Color.Black
+                                                    )
+                                                    Text(
+                                                        text = if(lugar.horaDeVisita == null) "" else "${lugar.horaDeVisita!!.hora}:${lugar.horaDeVisita!!.minuto}",
+                                                        color = Color.Black,
+                                                        fontSize = 20.sp
+                                                    )
+                                                }
+                                            }
+                                        }
+                                        Column(
+                                            modifier = modifier.fillMaxWidth(),
+                                            verticalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            IconButton(
+                                                onClick = {
+                                                    indiceActual = index
+                                                    mostrarBorrarDeItinerario = true
+                                                    listaVisible = false
+                                                    viewModel.borrarLugarActual(lugar)
+                                                    lugares = itinerario.lugares
+                                                    listaVisible = true
+                                                }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Rounded.DeleteForever,
+                                                    contentDescription = "",
+                                                    tint = Color.Black,
+                                                )
+
+                                            }
+                                            IconButton(
+                                                onClick = {
+                                                    //TODO NAVEGAR A PANTALLA DE RUTAS
+                                                }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Rounded.Route,
+                                                    contentDescription = "",
+                                                    tint = Color.Black,
+                                                )
+                                            }
                                         }
                                     }
                                 }

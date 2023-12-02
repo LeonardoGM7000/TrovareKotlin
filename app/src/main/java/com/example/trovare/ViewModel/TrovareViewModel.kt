@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.trovare.Data.Hora
 import com.example.trovare.Data.Itinerario
 import com.example.trovare.Data.Lugar
 import com.example.trovare.Data.Usuario
@@ -227,17 +228,8 @@ class TrovareViewModel : ViewModel() {
         _itinerarioActual.value.nombre = nuevoNombre
     }
 
-    /*
-    fun setFechaLugar(nuevaFecha: LocalDate){
-        _itinerarioActual.value.lugares. = nuevoNombre
-    }
-
-     */
-
-
-
     fun agregarLugarALItinerario(id: String, nombreLugar: String) {
-        val lugarNuevo = Lugar(id, nombreLugar)
+        val lugarNuevo = Lugar(id, nombreLugar, fechaDeVisita = null, horaDeVisita = null)
         val itinerarioActualValor = _itinerarioActual.value
 
         // Verificar si la lista de lugares existe, si no, crearla
@@ -250,6 +242,20 @@ class TrovareViewModel : ViewModel() {
 
         // Actualizar el valor del itinerario actual en MutableStateFlow
         _itinerarioActual.value = itinerarioActualValor
+    }
+    fun modificarFechaDeVisita(indiceActual: Int, fechaNueva: LocalDate) {
+            val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
+            lugarActual?.fechaDeVisita = fechaNueva
+    }
+
+    fun modificarHoraDeVisita(indiceActual: Int, horaNueva: Hora) {
+        val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
+        lugarActual?.horaDeVisita = horaNueva
+    }
+
+    fun borrarLugarActual(lugar: Lugar) {
+        _itinerarioActual.value.lugares?.remove(lugar)
+
     }
 
     //--------------------------------------------------------------------------------------------//
