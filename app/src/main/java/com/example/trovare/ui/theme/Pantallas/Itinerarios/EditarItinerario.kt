@@ -5,7 +5,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,10 +17,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CalendarToday
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Place
+import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,6 +41,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,6 +73,8 @@ import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
+import com.maxkeppeler.sheets.clock.ClockDialog
+import com.maxkeppeler.sheets.clock.models.ClockSelection
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,19 +90,13 @@ fun EditarItinerario(
     var publico by rememberSaveable { mutableStateOf(false) }
     var lugares by remember { mutableStateOf(itinerario.lugares) }
     val calendarState = rememberSheetState()
+    val clockState = rememberSheetState()
 
-
-
-    /*
     CalendarTheme {
         CalendarDialog(
             state = calendarState,
-            selection = CalendarSelection.Dates{ fecha->
-                viewModel.setFechasItinerario(fecha)
-                fechas = fecha
-                fecha.forEach(){
-                    Log.d("testFecha" ,"$it")
-                }
+            selection = CalendarSelection.Date{ fecha->
+                //viewModel.setFechaLugar(fecha)
             },
             config = CalendarConfig(
                 monthSelection = true,
@@ -102,7 +105,14 @@ fun EditarItinerario(
         )
     }
 
-     */
+    //CalendarTheme {
+        ClockDialog(
+            state = clockState,
+            selection = ClockSelection.HoursMinutes{hours, minutes ->
+                //TODO
+            }
+        )
+    //}
 
     Scaffold(
         topBar = {BarraSuperior(navController = navController)}
@@ -277,28 +287,87 @@ fun EditarItinerario(
                         }
                     }
                 } else {
-                    items(lugares!!){fecha ->
-                        Row (
+                    items(lugares!!){lugar ->
+
+                        Card(
                             modifier = modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 25.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ){
-                            Text(text = fecha.toString())
-                            TextButton(
-                                modifier = modifier.padding(horizontal = 15.dp),
-                                onClick = {
-                                          navController.navigate(Pantalla.AgregarLugarItinerario.ruta)
+                                .padding(horizontal = 25.dp, vertical = 5.dp)
+                                .size(100.dp)
+                                .clickable {
+                                    //TODO
                                 },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Trv3,
-                                    contentColor = Color.Black
-                                )
+                            colors = CardDefaults.cardColors(
+                                containerColor = Trv3
+                            )
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(text = "Agregar Lugar")
+                                Card(
+                                    modifier = modifier
+                                        .padding(5.dp)
+                                        .aspectRatio(1f),
+                                ) {
+                                    Image(
+                                        modifier = modifier
+                                            .fillMaxSize(),
+                                        painter = painterResource(id = R.drawable.image_placeholder),
+                                        contentDescription = ""
+                                    )
+                                }
+                                Column {
+                                    Text(
+                                        text = lugar.nombreLugar,
+                                        color = Color.Black,
+                                        maxLines = 2
+                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ){
+                                        Row(
+                                            modifier = modifier
+                                                .clickable {
+                                                    calendarState.show()
+                                                },
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ){
+                                            Icon(
+                                                imageVector = Icons.Rounded.CalendarToday,
+                                                contentDescription = "",
+                                                tint = Color.Black
+                                            )
+                                            Text(
+                                                text = "Editar",
+                                                color = Color.Black,
+                                                fontSize = 20.sp
+                                            )
+                                        }
+                                        Spacer(
+                                            modifier = modifier.padding(horizontal = 10.dp)
+                                        )
+                                        Row(
+                                            modifier = modifier
+                                                .clickable {
+                                                    clockState.show()
+                                                },
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ){
+                                            Icon(
+                                                imageVector = Icons.Rounded.AccessTime,
+                                                contentDescription = "",
+                                                tint = Color.Black
+                                            )
+                                            Text(
+                                                text = "Editar",
+                                                color = Color.Black,
+                                                fontSize = 20.sp
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
-                        Divisor()
                     }
                 }
             }

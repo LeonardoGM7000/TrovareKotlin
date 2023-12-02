@@ -42,6 +42,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -67,6 +68,7 @@ import androidx.navigation.NavController
 import com.example.trovare.Api.rawJSON
 import com.example.trovare.Api.rawJSONRutas
 import com.example.trovare.Api.rawJSONUbicacionesCercanas
+import com.example.trovare.Data.Lugar
 import com.example.trovare.Data.Places
 import com.example.trovare.Data.categorias
 import com.example.trovare.R
@@ -114,6 +116,7 @@ fun AgregarLugarItinerario(
 ){
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
 
     Scaffold(
         snackbarHost = {
@@ -482,6 +485,7 @@ fun AgregarLugarItinerario(
                                             .fillMaxWidth()
                                             .padding(end = 5.dp, bottom = 5.dp),
                                         onClick = {
+                                            viewModel.agregarLugarALItinerario(id = idLugar, nombreLugar = nombreLugar)
                                             scope.launch {
                                                 snackbarHostState.showSnackbar(
                                                     message = "Guardado en el itinerario",

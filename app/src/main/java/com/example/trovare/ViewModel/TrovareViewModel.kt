@@ -226,8 +226,30 @@ class TrovareViewModel : ViewModel() {
     fun setNombreItinerario(nuevoNombre: String){
         _itinerarioActual.value.nombre = nuevoNombre
     }
-    fun setNuevosLugares(nuevosLugares: MutableList<Lugar>){
-        _itinerarioActual.value.lugares = nuevosLugares
+
+    /*
+    fun setFechaLugar(nuevaFecha: LocalDate){
+        _itinerarioActual.value.lugares. = nuevoNombre
+    }
+
+     */
+
+
+
+    fun agregarLugarALItinerario(id: String, nombreLugar: String) {
+        val lugarNuevo = Lugar(id, nombreLugar)
+        val itinerarioActualValor = _itinerarioActual.value
+
+        // Verificar si la lista de lugares existe, si no, crearla
+        if (itinerarioActualValor.lugares == null) {
+            itinerarioActualValor.lugares = mutableListOf()
+        }
+
+        // Agregar el nuevo lugar a la lista de lugares del itinerario actual
+        itinerarioActualValor.lugares?.add(lugarNuevo)
+
+        // Actualizar el valor del itinerario actual en MutableStateFlow
+        _itinerarioActual.value = itinerarioActualValor
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -363,9 +385,6 @@ class TrovareViewModel : ViewModel() {
                 }
         }
     }
-
-
-
 
     //funci[on para obtener informacion para el mapa------------------------------------------------
     fun obtenerMarcador(
@@ -518,9 +537,7 @@ class TrovareViewModel : ViewModel() {
                 setUsuario(usuario)
 
             }catch(e: Exception){
-
                 setUsuario(usuarioPrueba)
-
             }
         }
     }

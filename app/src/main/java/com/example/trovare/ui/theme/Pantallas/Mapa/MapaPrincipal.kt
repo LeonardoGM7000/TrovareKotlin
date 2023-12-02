@@ -68,6 +68,7 @@ import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.Divisor2
 import com.example.trovare.ui.theme.Trv1
+import com.example.trovare.ui.theme.Trv10
 import com.example.trovare.ui.theme.Trv3
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -161,11 +162,8 @@ fun MapaPrincipal(
 
 
     //Ruta--------------------------------
-    val puntosRuta by remember { mutableStateOf(mutableListOf<LatLng>()) }
+
     val polilineaInicializada by viewModel.polilineaInicializada.collectAsState()
-    //val rutaInfo by viewModel.rutaInfo.collectAsState()
-    //var polilineaCod: String?
-    //polilineaCod = ""
     val polilineaCod by viewModel.polilineaCod.collectAsState()
 
 
@@ -230,7 +228,7 @@ fun MapaPrincipal(
                 Polyline(
                     points = decodedPolyline,
                     width = 5f,
-                    color = Color.Red
+                    color = Trv10
                 )
             }
         }
