@@ -57,6 +57,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -349,12 +350,22 @@ fun EditarItinerario(
                                                 .padding(5.dp)
                                                 .aspectRatio(1f),
                                         ) {
-                                            Image(
-                                                modifier = modifier
-                                                    .fillMaxSize(),
-                                                painter = painterResource(id = R.drawable.image_placeholder),
-                                                contentDescription = ""
-                                            )
+                                            if(lugar.imagen != null){
+                                                Image(
+                                                    bitmap= lugar.imagen!!,
+                                                    modifier = modifier
+                                                        .fillMaxSize(),
+                                                    contentScale = ContentScale.FillBounds,
+                                                    contentDescription = ""
+                                                )
+                                            } else{
+                                                Image(
+                                                    modifier = modifier
+                                                        .fillMaxSize(),
+                                                    painter = painterResource(id = R.drawable.image_placeholder),
+                                                    contentDescription = ""
+                                                )
+                                            }
                                         }
                                         Column(
                                             modifier = modifier.fillMaxWidth(0.8f)

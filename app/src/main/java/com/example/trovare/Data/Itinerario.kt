@@ -1,6 +1,7 @@
 package com.example.trovare.Data
 
 import androidx.annotation.DrawableRes
+import androidx.compose.ui.graphics.ImageBitmap
 import java.time.LocalDate
 
 data class Itinerario(
@@ -13,7 +14,8 @@ data class Lugar(
     val id: String,
     val nombreLugar: String,
     var fechaDeVisita: LocalDate?,
-    var horaDeVisita: Hora?
+    var horaDeVisita: Hora?,
+    var imagen: ImageBitmap?
 )
 
 data class Hora(

@@ -229,7 +229,7 @@ class TrovareViewModel : ViewModel() {
     }
 
     fun agregarLugarALItinerario(id: String, nombreLugar: String) {
-        val lugarNuevo = Lugar(id, nombreLugar, fechaDeVisita = null, horaDeVisita = null)
+        val lugarNuevo = Lugar(id, nombreLugar, fechaDeVisita = null, horaDeVisita = null, imagen=_imagen.value)
         val itinerarioActualValor = _itinerarioActual.value
 
         // Verificar si la lista de lugares existe, si no, crearla
