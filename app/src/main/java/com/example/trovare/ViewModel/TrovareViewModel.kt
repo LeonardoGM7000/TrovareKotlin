@@ -163,11 +163,6 @@ class TrovareViewModel : ViewModel() {
         _ubicacion.value = nuevaUbicacion
     }
     //mostrar la polilinea de la ruta
-    private val _polilineaInicializada = MutableStateFlow(false)
-    val polilineaInicializada = _polilineaInicializada.asStateFlow()
-    fun setPolilineaInicializada(newValue: Boolean) {
-        _polilineaInicializada.value = newValue
-    }
     //Guardar la polilinea codificada
     private val _polilineaCod = MutableStateFlow("")
     val polilineaCod = _polilineaCod.asStateFlow()
