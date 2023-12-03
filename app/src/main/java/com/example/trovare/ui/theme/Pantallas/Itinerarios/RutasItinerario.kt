@@ -1,4 +1,10 @@
-package com.example.trovare.ui.theme.Pantallas.Mapa
+package com.example.trovare.ui.theme.Pantallas.Itinerarios
+
+import com.example.trovare.ui.theme.Pantallas.Mapa.MapState
+import com.example.trovare.ui.theme.Pantallas.Mapa.MapStyle
+import com.example.trovare.ui.theme.Pantallas.Mapa.Marcador
+
+
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -95,7 +101,7 @@ import kotlinx.coroutines.launch
 @SuppressLint("MutableCollectionMutableState")
 @OptIn(ExperimentalMaterial3Api::class, MapsComposeExperimentalApi::class)
 @Composable
-fun MapaPrincipal(
+fun RutasItinerario(
     modifier: Modifier = Modifier,
     state: MapState,
     navController: NavController,
@@ -212,6 +218,7 @@ fun MapaPrincipal(
                             )
                             //viewModel.set
                             false
+
                         }
                     )
                 }
@@ -320,7 +327,6 @@ fun MapaPrincipal(
                                 .padding(end = 5.dp)
                                 .clickable {
                                     zoom = 13f
-                                    viewModel.reiniciarImagen()
                                     viewModel.setPolilineaInicializada(false)
                                     viewModel.setMarcadorInicializado(false)
                                     viewModel.setMarcadoresInicializado(false)
@@ -378,7 +384,6 @@ fun MapaPrincipal(
                                 Box(
                                     modifier = modifier.clickable {
                                         zoom = 15f
-                                        viewModel.reiniciarImagen()
                                         viewModel.setPolilineaInicializada(false)
                                         viewModel.setMarcadoresInicializado(false)
                                         viewModel.setMarcadorInicializado(false)

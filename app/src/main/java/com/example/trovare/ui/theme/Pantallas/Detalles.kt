@@ -21,13 +21,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.KeyboardArrowLeft
@@ -36,7 +31,6 @@ import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.Web
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -57,18 +51,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.trovare.Api.obtenerResenas
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
-import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.Divisor
-import com.example.trovare.ui.theme.Recursos.VentanaDeAlerta
+import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
-import com.example.trovare.ui.theme.Trv3
 import com.example.trovare.ui.theme.Trv7
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -88,6 +80,7 @@ import okhttp3.Request
 import org.json.JSONObject
 
 data class Resena(val usuario: String, val puntuacion: Int, val texto: String)
+
 @Composable
 fun Detalles(
     modifier: Modifier = Modifier,
@@ -96,6 +89,7 @@ fun Detalles(
     viewModel: TrovareViewModel,
     navController: NavController
 ){
+
     var favorito by rememberSaveable { mutableStateOf(false) }
     var nombre by rememberSaveable { mutableStateOf("") }
     var direccion by rememberSaveable { mutableStateOf("") }
@@ -103,46 +97,7 @@ fun Detalles(
     var paginaWeb by rememberSaveable { mutableStateOf("") }
     var calificacion by rememberSaveable { mutableStateOf(-1.0) }
     var latLng by rememberSaveable { mutableStateOf(LatLng(0.0,0.0)) }
-    var reseñasList by remember { mutableStateOf(mutableListOf<Resena>()) }
-
-
-    fun obtenerResenas(apiKey: String, placeId: String) {
-        val url = "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey&language=es"
-
-        val cliente = OkHttpClient()
-        val solicitud = Request.Builder().url(url).build()
-
-        cliente.newCall(solicitud).execute().use { respuesta ->
-            if (respuesta.isSuccessful) {
-                val cuerpoRespuesta = respuesta.body?.string()
-                val datos = JSONObject(cuerpoRespuesta)
-
-                if (datos.has("result")) {
-                    val reseñas = datos.getJSONObject("result").optJSONArray("reviews")
-
-                    if (reseñas != null) {
-
-                        for (i in 0 until reseñas.length()) {
-                            val reseña = reseñas.getJSONObject(i)
-                            val usuario = reseña.optString("author_name", "Desconocido")
-                            val puntuacion = reseña.optInt("rating", -1)
-                            val texto = reseña.optString("text", "N/A")
-
-                            reseñasList.add(Resena(usuario, puntuacion, texto))
-                        }
-
-                    } else {
-                        Log.i("resena", "No se encontraron reseñas para este lugar.")
-                    }
-                } else {
-                    Log.i("resena","No se encontraron detalles para el lugar.")
-                }
-            } else {
-                Log.i("resena","Error en la solicitud: ${respuesta.message}")
-            }
-        }
-        Log.i("resena",reseñasList.toString())
-    }
+    var resenasList by remember { mutableStateOf(mutableListOf<Resena>()) }
 
     LaunchedEffect(key1 = Unit){
         viewModel.reiniciarImagen()
@@ -156,12 +111,7 @@ fun Detalles(
             paginaWeb = {paginaWeb = it?: ""},
             latLng = {latLng = it?: LatLng(0.0,0.0) },
         )
-        GlobalScope.launch(Dispatchers.IO) {
-            if (placeId != null) {
-                obtenerResenas("AIzaSyDJBAeLUu6KewjD9hhDGNP8gCnshpG5y7c", placeId)
-            }
-        }
-
+        obtenerResenas(placeId!! ,resenasList)
     }
 
     Surface(
@@ -406,11 +356,11 @@ fun Detalles(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
-            Log.i("resena",reseñasList.size.toString())
+            Log.i("resena",resenasList.size.toString())
             item {
-                if (reseñasList.isNotEmpty()) {
-                    reseñasList.forEach { reseña ->
-                        TarjetaReseña(reseña = reseña)
+                if (resenasList.isNotEmpty()) {
+                    resenasList.forEach { resena ->
+                        TarjetaReseña(resena = resena)
                         Spacer(modifier = Modifier.height(15.dp))
                     }
                 } else {
@@ -422,23 +372,18 @@ fun Detalles(
                     )
                 }
             }
-
         }
     }
-    /*
-    DisposableEffect(Unit) {
-        onDispose {
-            viewModel.reiniciarImagen()
-        }
-    }
-
-     */
 }
 
 @Composable
-fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier) {
+fun TarjetaReseña(
+    resena: Resena,
+    modifier: Modifier = Modifier
+) {
 
     var expanded by remember { mutableStateOf(false) }
+
     val cardSizeModifier = Modifier
         .animateContentSize(
             animationSpec = spring(
@@ -451,19 +396,26 @@ fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .then(cardSizeModifier) // Aplicar el modificador de tamaño aquí
-            .padding(horizontal = 25.dp),
+            .padding(horizontal = 25.dp)
+            .clickable(
+                indication = null,
+                interactionSource = NoRippleInteractionSource()
+            ) { expanded = !expanded },
     ) {
         Column(
-            /*modifier = Modifier
+            modifier = Modifier
                 .background(
                     color = if (expanded) Trv2
                     else Trv1
-                )*/
+                )
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { expanded = !expanded },
+                    .clickable (
+                        indication = null,
+                        interactionSource = NoRippleInteractionSource()
+                    ){ expanded = !expanded },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -479,14 +431,14 @@ fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier) {
                         .fillMaxWidth(0.64f)
                 ) {
                     Text(
-                        text = reseña.usuario,
+                        text = resena.usuario,
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White
                     )
                 }
                 Text(
                     modifier = modifier.fillMaxWidth(0.75f),
-                    text = "${reseña.puntuacion}/5",
+                    text = "${resena.puntuacion}/5",
                     textAlign = TextAlign.Right,
                     color = Color.White,
                     style = MaterialTheme.typography.bodyMedium
@@ -497,17 +449,16 @@ fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier) {
                     tint = Color.Yellow
                 )
             }
-            AnimatedVisibility(visible = expanded) {
-                if(expanded){
-                    Text(
-                        modifier = modifier.padding(start = 20.dp, end = 20.dp, bottom = 15.dp),
-                        text = reseña.texto,
-                        textAlign = TextAlign.Justify,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White
-                    )
-                }
+            if(expanded){
+                Text(
+                    modifier = modifier.padding(start = 20.dp, end = 20.dp, bottom = 15.dp),
+                    text = resena.texto,
+                    textAlign = TextAlign.Justify,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White
+                )
             }
+
         }
     }
 }

@@ -2,10 +2,8 @@ package com.example.trovare.ui.theme.Pantallas
 
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,8 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
@@ -23,13 +19,10 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -51,11 +44,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
@@ -64,7 +54,6 @@ import com.example.trovare.ui.theme.Recursos.VentanaDeAlerta
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv3
 import com.example.trovare.ui.theme.Trv6
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -74,7 +63,16 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 
 data class Cuenta(val nombre: String = "", val id: String="")
 
@@ -92,36 +90,22 @@ fun EliminarCuentas(
     navController: NavController,
     buscar: String = ""
 ){
-    //snackbarFlag = 0
     val firestore: FirebaseFirestore by lazy { Firebase.firestore }
     var cuentas by remember { mutableStateOf(emptyList<Cuenta>()) }
     var expandedCuentaIndex by remember { mutableIntStateOf(-1) }
     var isLoading by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    //var snackbarVisible by remember { mutableStateOf(false) }
-    //var snackbarMessage by remember { mutableStateOf("") }
-
-    //var flagstate by remember {
-      //  mutableIntStateOf(0)
-    //}
-    Log.i("entro","entro")
-
 
     LaunchedEffect(effectKey) {
-        //snackbarFlag =0;
-        Log.i("entro","entro")
-        Log.i("EliminarCuentas", "LaunchedEffect: Obtaining accounts from Firestore")
+
         try {
             val cuentasSnapshot = firestore.collection("Usuario").get().await()
             cuentas = cuentasSnapshot.documents.map { document ->
                 val cuenta = document.toObject(Cuenta::class.java)
                 cuenta?.copy(id = document.id) ?: Cuenta() // Asigna el ID al objeto Cuenta
             }
-
-            Log.i("EliminarCuenta", "Cuentas obtenidas exitosamente: $cuentas")
         } catch (e: Exception) {
-            Log.e("EliminarCuenta", "Error al obtener cuentas de Firestore", e)
         }finally {
             isLoading = false
         }
@@ -130,38 +114,27 @@ fun EliminarCuentas(
     LaunchedEffect(snackbarFlag){
         //flagstate = 1
         if (snackbarFlag.value == 1) {
-            Log.i("Mensaje Entro verificacion", "Entro busqueda Cuenta")
-            // Muestra el Snackbar con el mensaje de éxito
             delay(500)
             scope.launch {
-                Log.i("Mensaje ENtro snackbar", "SnackBar si se va a mostrar")
                 snackbarHostState
                     .showSnackbar(
                         message = "Cuentas borradas con exito",
                         duration = SnackbarDuration.Short
                     )
                 snackbarFlag.value = 0;
-
             }
-
-            Log.i("Actualizacion snackbarflag", "Snackbarfalg: $snackbarFlag")
-
         }
         snackbarFlag.value = 0;
     }
-
-    Log.i("EliminarCuenta","SnackBar afuera: $snackbarFlag");
-
 
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
         },
-            snackbarHost = {
-                SnackbarHost(hostState = snackbarHostState)
-            }
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        }
     ) { it ->
-
         Surface(
             modifier = modifier
                 .fillMaxSize()
@@ -180,8 +153,6 @@ fun EliminarCuentas(
                     )
                 }
             } else {
-
-
                 LazyColumn() {
                     item {
                         TituloAdmin(titulo = "ELIMINAR CUENTAS")
@@ -190,8 +161,6 @@ fun EliminarCuentas(
                         Divisor(modifier = modifier.padding(15.dp))
                     }
 
-
-                    //snackbarFlag = 0;
                     Log.i("mensaje entro siguiente", "entro al effectkey")
                     try {
                         if(cuentas.isEmpty()){
@@ -248,7 +217,6 @@ fun EliminarCuentas(
         }
     }
 }
-
 @Composable
 fun TarjetaUsuario(
     cuenta: Cuenta,
@@ -333,7 +301,6 @@ fun BusquedaCuenta(
         hostState = snackbarHostState
         //modifier = Modifier.align(Alignment.BottomCenter)
     )
-
     var busquedaEnProgreso by rememberSaveable { mutableStateOf(false) }//saber si se esta llevando a cabo una busqueda en el momento(permite mostrar el indicador de progreso circular)
     var tiempoRestante by rememberSaveable { mutableIntStateOf(1) }
     var job: Job? by remember { mutableStateOf(null) }
@@ -429,7 +396,6 @@ fun BusquedaCuenta(
             alConfirmar = {
 
                 eliminarCuentasSeleccionadas(cuentasSeleccionadas)
-
                 navController.navigate(Pantalla.EliminarCuentas.ruta) {
                     popUpTo(Pantalla.EliminarCuentas.ruta) {
                         inclusive = true
@@ -437,29 +403,23 @@ fun BusquedaCuenta(
                 }
                 Log.i("cuentas", cuentasSeleccionadas.toString())
             },
-
             textoConfirmar = "Eliminar Cuentas",
             titulo = "Eliminar Cuentas",
             texto = "¿Estás seguro de eliminar todas las cuentas seleccionadas?",
             icono = Icons.Filled.DeleteForever,
             colorConfirmar = Color.Red
         )
-
-
     }
 }
 fun eliminarCuentasSeleccionadas(cuentasSeleccionadas: List<Cuenta>) {
-
     val firestore: FirebaseFirestore by lazy { Firebase.firestore }
-     try {
+    try {
         for (cuenta in cuentasSeleccionadas) {
             firestore.collection("Usuario").document(cuenta.id).delete()
-
         }
-         snackbarFlag.value =1;
+        snackbarFlag.value = 1;
     } catch (e: Exception) {
         // Manejar el error, por ejemplo, mostrar un mensaje al usuario
-         snackbarFlag.value = 2
+        snackbarFlag.value = 2
     }
 }
-

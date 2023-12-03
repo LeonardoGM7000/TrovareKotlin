@@ -142,7 +142,8 @@ fun PerfilPrincipal(
                     border = CardDefaults.outlinedCardBorder(),
                 ) {
                     Row(modifier = modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
                     ){
                         Card(
                             modifier = modifier
@@ -184,18 +185,16 @@ fun PerfilPrincipal(
                                 contentDescription = "",
                                 tint = Color.White
                             )
-                                
-
                         }
                     }
                 }
             }
             //Descripcion del usuario---------------------------------------------------------------
-            item {
-                if(usuario.descripcion != null){
+            if(usuario.descripcion != ""){
+                item {
                     Text(
                         modifier = modifier
-                            .padding(horizontal = 25.dp, vertical = 10.dp)
+                            .padding(horizontal = 25.dp, vertical = 15.dp)
                             .fillMaxWidth(),
                         text = usuario.descripcion?: "",
                         textAlign = TextAlign.Justify,
@@ -203,7 +202,10 @@ fun PerfilPrincipal(
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
+            } else {
+
             }
+
             item {
                 if (usuario.lugarDeOrigen != null){
                     Row (

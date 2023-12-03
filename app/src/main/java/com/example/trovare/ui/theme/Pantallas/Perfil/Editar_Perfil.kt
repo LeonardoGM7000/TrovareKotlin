@@ -43,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -52,7 +51,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Trv1
@@ -65,8 +63,6 @@ import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,21 +98,11 @@ fun EditarPerfil(
         mutableStateOf(TextFieldValue(usuario.descripcion?:"", TextRange(0, 7)))
     }
 
-    var guardadoExitoso by remember { mutableStateOf(false) }
-
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
     val keyboardOptions: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done)
 
-    LaunchedEffect(guardadoExitoso){
-
-        if(guardadoExitoso) {
-            delay(1000)
-            guardadoExitoso = false
-            navController.popBackStack()
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -177,8 +163,6 @@ fun EditarPerfil(
                                         modifier = modifier
                                             .fillMaxSize()
                                             .clickable {
-
-                                                Log.d("Editar_foto", "click")
                                                 getContent.launch("image/*")
                                             },
                                         painter = rememberAsyncImagePainter(model = usuario.foto_perfil),
@@ -309,9 +293,6 @@ fun EditarPerfil(
                                             duration = SnackbarDuration.Short
                                         )
                                     }
-
-                                    guardadoExitoso = true
-
                                 },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = Trv6,

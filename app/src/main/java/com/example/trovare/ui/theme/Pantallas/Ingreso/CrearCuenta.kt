@@ -53,7 +53,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -61,7 +60,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.trovare.Data.Usuario
@@ -160,7 +158,7 @@ fun CrearCuenta(
     fun validarCorreo(textoCorreo: String){
         isErrorC = !Patterns.EMAIL_ADDRESS.matcher(textoCorreo).matches()
     }
-    fun validarPassword(text: String) {
+    fun validarPassword(text: String){
         Log.i("Error tamaño",text.length.toString())
         isErrorP = !(text.matches("^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%^&*(),.?\":{}|<>])(?=.*[a-z]).{8,}\$".toRegex()))
     }
@@ -233,16 +231,8 @@ fun CrearCuenta(
                             }
                         },
                         label = {
-                            val texto = buildAnnotatedString {
-                                withStyle(style = MaterialTheme.typography.labelSmall.toSpanStyle()) {
-                                    append("Nombre(s) ")
-                                }
-                                withStyle(style = MaterialTheme.typography.labelSmall.toSpanStyle().copy(color = Color.Red)) {
-                                    append("*")
-                                }
-                            }
                             Text(
-                                text = texto,
+                                text = "Nombre(s) *",
                                 style = MaterialTheme.typography.labelSmall
                             )
                         },
@@ -279,16 +269,8 @@ fun CrearCuenta(
                             }
                         },
                         label = {
-                            val texto = buildAnnotatedString {
-                                withStyle(style = MaterialTheme.typography.labelSmall.toSpanStyle()) {
-                                    append("Apellido(s) ")
-                                }
-                                withStyle(style = MaterialTheme.typography.labelSmall.toSpanStyle().copy(color = Color.Red)) {
-                                    append("*")
-                                }
-                            }
                             Text(
-                                text = texto,
+                                text = "Apellido(s) *",
                                 style = MaterialTheme.typography.labelSmall
                             )
                         },
@@ -317,16 +299,8 @@ fun CrearCuenta(
                             }
                         },
                         label = {
-                            val texto = buildAnnotatedString {
-                                withStyle(style = MaterialTheme.typography.labelSmall.toSpanStyle()) {
-                                    append("Correo ")
-                                }
-                                withStyle(style = MaterialTheme.typography.labelSmall.toSpanStyle().copy(color = Color.Red)) {
-                                    append("*")
-                                }
-                            }
                             Text(
-                                text = texto,
+                                text = "Correo *",
                                 style = MaterialTheme.typography.labelSmall
                             )
                         },
@@ -356,8 +330,9 @@ fun CrearCuenta(
                             if (isErrorP) {
                                 Text(
                                     modifier = Modifier.fillMaxWidth(),
-                                    text = "Ingresa min $minimoPassword caracteres, una mayúscula, un número y caracter especial.",
-                                    color = MaterialTheme.colorScheme.error
+                                    text = "Ingresar al menos $minimoPassword caracteres, una mayúscula, una minúscula, un número y un caracter especial.",
+                                    color = MaterialTheme.colorScheme.error,
+                                    textAlign = TextAlign.Justify
                                 )
                             }
                         },
@@ -376,16 +351,8 @@ fun CrearCuenta(
                         },
                         visualTransformation = if (passwordOculta) PasswordVisualTransformation() else VisualTransformation.None,
                         label = {
-                            val tName = buildAnnotatedString {
-                                withStyle(style = MaterialTheme.typography.labelSmall.toSpanStyle()) {
-                                    append("Contraseña ")
-                                }
-                                withStyle(style = MaterialTheme.typography.labelSmall.toSpanStyle().copy(color = Color.Red)) {
-                                    append("*")
-                                }
-                            }
                             Text(
-                                text = tName,
+                                text = "Contraseña *",
                                 style = MaterialTheme.typography.labelSmall
                             )
                         },
@@ -425,7 +392,7 @@ fun CrearCuenta(
                                 Log.i("error", "campos incompletos")
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
-                                        message = "Completa todos los campos obligatorios",
+                                        message = "Completar todos los campos",
                                         duration = SnackbarDuration.Short
                                     )
                                 }
@@ -450,7 +417,7 @@ fun CrearCuenta(
                                 scope.launch {
                                     isErrorC = true
                                     snackbarHostState.showSnackbar(
-                                        message = "El correo no tiene una estructura válida",
+                                        message = "Correo inválido",
                                         duration = SnackbarDuration.Short
                                     )
                                 }

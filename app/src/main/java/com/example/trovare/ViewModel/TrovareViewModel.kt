@@ -11,7 +11,9 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.trovare.Data.Hora
 import com.example.trovare.Data.Itinerario
+import com.example.trovare.Data.Lugar
 import com.example.trovare.Data.Usuario
 import com.example.trovare.Data.itinerarioPrueba
 import com.example.trovare.Data.usuarioPrueba
@@ -161,11 +163,6 @@ class TrovareViewModel : ViewModel() {
         _ubicacion.value = nuevaUbicacion
     }
     //mostrar la polilinea de la ruta
-    private val _polilineaInicializada = MutableStateFlow(false)
-    val polilineaInicializada = _polilineaInicializada.asStateFlow()
-    fun setPolilineaInicializada(newValue: Boolean) {
-        _polilineaInicializada.value = newValue
-    }
     //Guardar la polilinea codificada
     private val _polilineaCod = MutableStateFlow("")
     val polilineaCod = _polilineaCod.asStateFlow()
@@ -191,6 +188,14 @@ class TrovareViewModel : ViewModel() {
     fun setInformacionInicializada(newValue: Boolean) {
         _informacionInicializada.value = newValue
     }
+
+    //mostrar la polilinea de la ruta
+    private val _polilineaInicializada = MutableStateFlow(false)
+    val polilineaInicializada: StateFlow<Boolean> = _polilineaInicializada.asStateFlow()
+    fun setPolilineaInicializada(newValue: Boolean) {
+        _polilineaInicializada.value = newValue
+    }
+
     //nombre del lugar seleccionando
     private val _nombreLugar = MutableStateFlow("")
     val nombreLugar = _nombreLugar.asStateFlow()
@@ -225,8 +230,35 @@ class TrovareViewModel : ViewModel() {
     fun setNombreItinerario(nuevoNombre: String){
         _itinerarioActual.value.nombre = nuevoNombre
     }
-    fun setFechasItinerario(nuevasFechas: List<LocalDate>){
-        _itinerarioActual.value.fechas = nuevasFechas
+
+    fun agregarLugarALItinerario(id: String, nombreLugar: String) {
+        val lugarNuevo = Lugar(id, nombreLugar, fechaDeVisita = null, horaDeVisita = null, imagen=_imagen.value)
+        val itinerarioActualValor = _itinerarioActual.value
+
+        // Verificar si la lista de lugares existe, si no, crearla
+        if (itinerarioActualValor.lugares == null) {
+            itinerarioActualValor.lugares = mutableListOf()
+        }
+
+        // Agregar el nuevo lugar a la lista de lugares del itinerario actual
+        itinerarioActualValor.lugares?.add(lugarNuevo)
+
+        // Actualizar el valor del itinerario actual en MutableStateFlow
+        _itinerarioActual.value = itinerarioActualValor
+    }
+    fun modificarFechaDeVisita(indiceActual: Int, fechaNueva: LocalDate) {
+            val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
+            lugarActual?.fechaDeVisita = fechaNueva
+    }
+
+    fun modificarHoraDeVisita(indiceActual: Int, horaNueva: Hora) {
+        val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
+        lugarActual?.horaDeVisita = horaNueva
+    }
+
+    fun borrarLugarActual(lugar: Lugar) {
+        _itinerarioActual.value.lugares?.remove(lugar)
+
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -362,9 +394,6 @@ class TrovareViewModel : ViewModel() {
                 }
         }
     }
-
-
-
 
     //funci[on para obtener informacion para el mapa------------------------------------------------
     fun obtenerMarcador(
@@ -517,9 +546,7 @@ class TrovareViewModel : ViewModel() {
                 setUsuario(usuario)
 
             }catch(e: Exception){
-
                 setUsuario(usuarioPrueba)
-
             }
         }
     }

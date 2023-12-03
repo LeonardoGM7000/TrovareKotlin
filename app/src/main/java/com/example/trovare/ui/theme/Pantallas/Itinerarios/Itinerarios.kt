@@ -102,7 +102,7 @@ fun Itinerarios(
                             val nuevoItinerario = Itinerario(
                                 nombre = "nuevo Itinerario",
                                 autor = usuario.nombre,
-                                fechas = null,
+                                lugares = null,
                             )
                             navController.navigate(Pantalla.EditarItinerario.ruta)//
                             usuario.itinerarios.add(nuevoItinerario)//
