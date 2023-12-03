@@ -212,7 +212,6 @@ fun MapaPrincipal(
                             )
                             //viewModel.set
                             false
-
                         }
                     )
                 }

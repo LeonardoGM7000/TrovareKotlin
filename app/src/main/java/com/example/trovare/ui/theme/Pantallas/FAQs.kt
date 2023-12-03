@@ -147,8 +147,6 @@ fun FAQS(
                 }
             }
         }
-
-
     }
 }
 
@@ -177,7 +175,6 @@ fun BarrInferior(modifier: Modifier = Modifier) {
                 color = Color.Black
             )
         }
-
     }
 }
 
@@ -279,14 +276,3 @@ fun BotonPregunta(
         )
     }
 }
-
-/*
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun GreetingPreview() {
-    TrovareTheme {
-        FAQS()
-    }
-}
-
- */

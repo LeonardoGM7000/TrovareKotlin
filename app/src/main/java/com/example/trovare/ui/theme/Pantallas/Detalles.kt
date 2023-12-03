@@ -1,7 +1,15 @@
 package com.example.trovare.ui.theme.Pantallas
 
+import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -14,6 +22,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.KeyboardArrowLeft
@@ -34,6 +43,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -44,9 +54,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.trovare.Api.obtenerResenas
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.Divisor
+import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
+import com.example.trovare.ui.theme.Trv1
+import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv7
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -58,6 +72,14 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
+
+data class Resena(val usuario: String, val puntuacion: Int, val texto: String)
 
 @Composable
 fun Detalles(
@@ -75,7 +97,7 @@ fun Detalles(
     var paginaWeb by rememberSaveable { mutableStateOf("") }
     var calificacion by rememberSaveable { mutableStateOf(-1.0) }
     var latLng by rememberSaveable { mutableStateOf(LatLng(0.0,0.0)) }
-
+    var resenasList by remember { mutableStateOf(mutableListOf<Resena>()) }
 
     LaunchedEffect(key1 = Unit){
         viewModel.reiniciarImagen()
@@ -89,6 +111,7 @@ fun Detalles(
             paginaWeb = {paginaWeb = it?: ""},
             latLng = {latLng = it?: LatLng(0.0,0.0) },
         )
+        obtenerResenas(placeId!! ,resenasList)
     }
 
     Surface(
@@ -331,15 +354,111 @@ fun Detalles(
                     color = Color.White,
                     style = MaterialTheme.typography.displaySmall
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            Log.i("resena",resenasList.size.toString())
+            item {
+                if (resenasList.isNotEmpty()) {
+                    resenasList.forEach { resena ->
+                        TarjetaReseña(resena = resena)
+                        Spacer(modifier = Modifier.height(15.dp))
+                    }
+                } else {
+                    Text(
+                        text = "No hay reseñas para este lugar.",
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
             }
         }
     }
-    /*
-    DisposableEffect(Unit) {
-        onDispose {
-            viewModel.reiniciarImagen()
+}
+
+@Composable
+fun TarjetaReseña(
+    resena: Resena,
+    modifier: Modifier = Modifier
+) {
+
+    var expanded by remember { mutableStateOf(false) }
+
+    val cardSizeModifier = Modifier
+        .animateContentSize(
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessMediumLow,
+            )
+        )
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .then(cardSizeModifier) // Aplicar el modificador de tamaño aquí
+            .padding(horizontal = 25.dp)
+            .clickable(
+                indication = null,
+                interactionSource = NoRippleInteractionSource()
+            ) { expanded = !expanded },
+    ) {
+        Column(
+            modifier = Modifier
+                .background(
+                    color = if (expanded) Trv2
+                    else Trv1
+                )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable (
+                        indication = null,
+                        interactionSource = NoRippleInteractionSource()
+                    ){ expanded = !expanded },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .padding(13.dp),
+                    imageVector = Icons.Filled.AccountCircle,
+                    contentDescription = "",
+                    tint = Color.White,
+                )
+                Box(
+                    contentAlignment = Alignment.CenterStart,
+                    modifier = Modifier
+                        .fillMaxWidth(0.64f)
+                ) {
+                    Text(
+                        text = resena.usuario,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White
+                    )
+                }
+                Text(
+                    modifier = modifier.fillMaxWidth(0.75f),
+                    text = "${resena.puntuacion}/5",
+                    textAlign = TextAlign.Right,
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Icon(
+                    imageVector = Icons.Rounded.Star,
+                    contentDescription = "",
+                    tint = Color.Yellow
+                )
+            }
+            if(expanded){
+                Text(
+                    modifier = modifier.padding(start = 20.dp, end = 20.dp, bottom = 15.dp),
+                    text = resena.texto,
+                    textAlign = TextAlign.Justify,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White
+                )
+            }
+
         }
     }
-
-     */
 }

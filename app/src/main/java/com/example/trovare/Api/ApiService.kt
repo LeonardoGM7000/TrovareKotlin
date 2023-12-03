@@ -11,6 +11,7 @@ import com.example.trovare.Data.SnappedPointsClass
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Pantallas.Mapa.Marcador
 import com.example.trovare.ui.theme.Pantallas.Mapa.RutaInfo
+import com.example.trovare.ui.theme.Pantallas.Resena
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -20,6 +21,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
@@ -413,6 +416,49 @@ fun rawJSONRutas(
 
                 Log.e("RETROFIT_ERROR", response.code().toString())
 
+            }
+        }
+    }
+}
+
+
+fun obtenerResenas(
+    placeId: String,
+    recuperarResultados: MutableList<Resena>
+) {
+    val url = "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=AIzaSyDJBAeLUu6KewjD9hhDGNP8gCnshpG5y7c&language=es"
+
+    val cliente = OkHttpClient()
+    val solicitud = Request.Builder().url(url).build()
+
+    CoroutineScope(Dispatchers.IO).launch {
+        cliente.newCall(solicitud).execute().use { respuesta ->
+            if (respuesta.isSuccessful) {
+                val cuerpoRespuesta = respuesta.body?.string()
+                val datos = JSONObject(cuerpoRespuesta)
+
+                if (datos.has("result")) {
+                    val resenas = datos.getJSONObject("result").optJSONArray("reviews")
+
+                    if (resenas != null) {
+
+                        for (i in 0 until resenas.length()) {
+                            val resena = resenas.getJSONObject(i)
+                            val usuario = resena.optString("author_name", "Desconocido")
+                            val puntuacion = resena.optInt("rating", -1)
+                            val texto = resena.optString("text", "N/A")
+
+                            recuperarResultados.add(Resena(usuario, puntuacion, texto))
+                        }
+
+                    } else {
+                        Log.i("resena", "No se encontraron reseñas para este lugar.")
+                    }
+                } else {
+                    Log.i("resena","No se encontraron detalles para el lugar.")
+                }
+            } else {
+                Log.i("resena","Error en la solicitud: ${respuesta.message}")
             }
         }
     }

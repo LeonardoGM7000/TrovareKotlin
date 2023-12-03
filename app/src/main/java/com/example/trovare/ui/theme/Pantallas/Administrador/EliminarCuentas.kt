@@ -68,12 +68,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 
 data class Cuenta(val nombre: String = "", val id: String="")
 
 var effectKey = 0
 val cuentasSeleccionadas = mutableListOf<Cuenta>()
+var snackbarFlag = mutableStateOf(0)
+
 
 
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -91,29 +97,43 @@ fun EliminarCuentas(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-
-    Log.i("entro","entro")
     LaunchedEffect(effectKey) {
-        Log.i("entro","entro")
-        Log.i("EliminarCuentas", "LaunchedEffect: Obtaining accounts from Firestore")
+
         try {
             val cuentasSnapshot = firestore.collection("Usuario").get().await()
             cuentas = cuentasSnapshot.documents.map { document ->
                 val cuenta = document.toObject(Cuenta::class.java)
                 cuenta?.copy(id = document.id) ?: Cuenta() // Asigna el ID al objeto Cuenta
             }
-
-            Log.i("EliminarCuenta", "Cuentas obtenidas exitosamente: $cuentas")
         } catch (e: Exception) {
-            Log.e("EliminarCuenta", "Error al obtener cuentas de Firestore", e)
         }finally {
             isLoading = false
         }
     }
+
+    LaunchedEffect(snackbarFlag){
+        //flagstate = 1
+        if (snackbarFlag.value == 1) {
+            delay(500)
+            scope.launch {
+                snackbarHostState
+                    .showSnackbar(
+                        message = "Cuentas borradas con exito",
+                        duration = SnackbarDuration.Short
+                    )
+                snackbarFlag.value = 0;
+            }
+        }
+        snackbarFlag.value = 0;
+    }
+
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
         },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        }
     ) { it ->
         Surface(
             modifier = modifier
@@ -140,56 +160,53 @@ fun EliminarCuentas(
                     item {
                         Divisor(modifier = modifier.padding(15.dp))
                     }
-                    item {
-                        BusquedaCuenta(navController = navController)
-                    }
-                    Log.i("Mensaje Eliminar cuenta", buscar)
-                    Log.i("Total cuentas", cuentas.size.toString())
-                    if (buscar.isNotBlank()) {
-                        Log.i("mensaje entro", "entro al effectkey")
-                        effectKey++
-                    }
+
                     Log.i("mensaje entro siguiente", "entro al effectkey")
                     try {
-                        items(cuentas.size) { index ->
-                            val cuenta = cuentas[index]
-                            if ((Buscar == cuenta.nombre) || Buscar.isBlank()) {
-                                Log.i("Si hay cuentas", Buscar)
-                                TarjetaUsuario(
-                                    cuenta = cuenta,
-                                    expanded = index == expandedCuentaIndex,
-                                    onDeleteClick = {
-                                        if(cuentasSeleccionadas.contains(cuenta)){
-                                            Log.i("Entro a eliminar","entro a eliminar")
-                                            firestore.collection("Usuario").document(cuenta.nombre)
-                                                .delete()
-                                                .addOnSuccessListener {
-                                                    // Éxito al eliminar
-                                                    Log.d("EliminarCuenta", "Cuenta eliminada")
-                                                }
-                                                .addOnFailureListener { e ->
-                                                    // Error al eliminar
-                                                    Log.w("EliminarCuenta", "Error al eliminar cuenta", e)
-                                                }
-                                            cuentas = cuentas.filterNot { it.nombre == cuenta.nombre}
-                                            cuentasSeleccionadas.clear();
-                                        }
-                                        // Eliminar la pregunta de Firestore
+                        if(cuentas.isEmpty()){
+                            item {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center,
+                                    modifier = modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 15.dp)
+                                ) {
+                                    Text(
+                                        modifier = modifier.padding(start = 5.dp),
+                                        text = "No hay cuentas",
+                                        color = Color.White,
+                                        fontSize = 25.sp,
+                                        textAlign = TextAlign.Center,
+                                        style = MaterialTheme.typography.displayMedium
+                                    )
+                                }
+                            }
+                        }else{
+                            item {
+                                Log.i("Mensaje Entro Busqueda", "Entro busqueda Cuenta")
+                                BusquedaCuenta(navController = navController);
+                            }
 
-                                        //  .delete()
-                                        //accounts = accounts.filterNot { it.nombre == account.nombre }
-                                    },
-                                    modifier = modifier.padding(top = 20.dp),
-                                    navController = navController
-                                 )
-                            } else {
-                                Log.i("No hay cuentas", Buscar)
-                                /* scope.launch {
-                                     snackbarHostState.showSnackbar(
-                                         message = "El correo ingresado ya está asociado a otra cuenta",
-                                         duration = SnackbarDuration.Short
-                                     )
-                                 }*/
+                            Log.i("Mensaje Eliminar cuenta", buscar)
+                            Log.i("Total cuentas", cuentas.size.toString())
+                            if (buscar.isNotBlank()) {
+                                Log.i("mensaje entro", "entro al effectkey")
+                                effectKey++
+                            }
+
+                            items(cuentas.size) { index ->
+                                val cuenta = cuentas[index]
+                                if ((Buscar == cuenta.nombre) || Buscar.isBlank()) {
+                                    Log.i("Si hay cuentas", Buscar)
+                                    TarjetaUsuario(
+                                        cuenta = cuenta,
+                                        modifier = modifier.padding(top = 20.dp),
+                                        navController = navController
+                                    )
+                                } else {
+                                    Log.i("No hay cuentas", Buscar)
+                                }
                             }
                         }
                     } catch (e: Exception) {
@@ -203,8 +220,6 @@ fun EliminarCuentas(
 @Composable
 fun TarjetaUsuario(
     cuenta: Cuenta,
-    expanded: Boolean,
-    onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
@@ -280,6 +295,12 @@ fun BusquedaCuenta(
     var textoBuscar by rememberSaveable(stateSaver = TextFieldValue.Saver) {//texto a buscar
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    SnackbarHost(
+        hostState = snackbarHostState
+        //modifier = Modifier.align(Alignment.BottomCenter)
+    )
     var busquedaEnProgreso by rememberSaveable { mutableStateOf(false) }//saber si se esta llevando a cabo una busqueda en el momento(permite mostrar el indicador de progreso circular)
     var tiempoRestante by rememberSaveable { mutableIntStateOf(1) }
     var job: Job? by remember { mutableStateOf(null) }
@@ -376,7 +397,7 @@ fun BusquedaCuenta(
 
                 eliminarCuentasSeleccionadas(cuentasSeleccionadas)
                 navController.navigate(Pantalla.EliminarCuentas.ruta) {
-                    popUpTo(navController.graph.id) {
+                    popUpTo(Pantalla.EliminarCuentas.ruta) {
                         inclusive = true
                     }
                 }
@@ -396,10 +417,9 @@ fun eliminarCuentasSeleccionadas(cuentasSeleccionadas: List<Cuenta>) {
         for (cuenta in cuentasSeleccionadas) {
             firestore.collection("Usuario").document(cuenta.id).delete()
         }
-        Log.i("cuentas","se borro")
+        snackbarFlag.value = 1;
     } catch (e: Exception) {
         // Manejar el error, por ejemplo, mostrar un mensaje al usuario
-        Log.i("cuentas","no se borro")
-
+        snackbarFlag.value = 2
     }
 }

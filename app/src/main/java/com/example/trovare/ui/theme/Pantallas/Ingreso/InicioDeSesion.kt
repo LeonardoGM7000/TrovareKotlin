@@ -287,7 +287,7 @@ fun InicioDeSesion(
                                                             if (user?.isEmailVerified == false){
                                                                 scope.launch {
                                                                     snackbarHostState.showSnackbar(
-                                                                        message = "Correo no verificado. Verifica tu correo electrónico.",
+                                                                        message = "Tu cuenta aún no está verificada, abre el link que enviamos a tu correo electrónico.",
                                                                         duration = SnackbarDuration.Short
                                                                     )
                                                                 }
