@@ -321,6 +321,7 @@ fun MapaPrincipal(
                                 .padding(end = 5.dp)
                                 .clickable {
                                     zoom = 13f
+                                    viewModel.reiniciarImagen()
                                     viewModel.setPolilineaInicializada(false)
                                     viewModel.setMarcadorInicializado(false)
                                     viewModel.setMarcadoresInicializado(false)
@@ -378,6 +379,7 @@ fun MapaPrincipal(
                                 Box(
                                     modifier = modifier.clickable {
                                         zoom = 15f
+                                        viewModel.reiniciarImagen()
                                         viewModel.setPolilineaInicializada(false)
                                         viewModel.setMarcadoresInicializado(false)
                                         viewModel.setMarcadorInicializado(false)
