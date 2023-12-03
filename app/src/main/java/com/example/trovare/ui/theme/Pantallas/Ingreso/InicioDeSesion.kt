@@ -66,6 +66,8 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import com.example.trovare.ViewModel.TrovareViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,6 +87,7 @@ fun InicioDeSesion(
     var textoPasswrod by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
+    var isErrorC by rememberSaveable { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -95,6 +98,21 @@ fun InicioDeSesion(
     val keyboardOptionsPassword: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done)
 
     val context = LocalContext.current
+    val colores = TextFieldDefaults.textFieldColors(
+        containerColor = Trv8,
+        focusedLabelColor = Color.White,
+        unfocusedLabelColor = Color.White,
+        cursorColor = Color.White,
+        focusedIndicatorColor = Color.White,
+        unfocusedIndicatorColor = Color.White,
+        errorCursorColor = MaterialTheme.colorScheme.error,
+        errorIndicatorColor = MaterialTheme.colorScheme.error,
+        errorLabelColor = MaterialTheme.colorScheme.error,
+        errorSupportingTextColor = MaterialTheme.colorScheme.error,
+    )
+    fun validarCorreo(textoCorreo: String){
+        isErrorC = !Patterns.EMAIL_ADDRESS.matcher(textoCorreo).matches()
+    }
 
     Scaffold(
         topBar = {
@@ -141,31 +159,42 @@ fun InicioDeSesion(
                         modifier = modifier
                             .fillMaxWidth()
                             .padding(start = 25.dp, end = 25.dp, bottom = 15.dp),
+                        isError = isErrorC,
                         value = textoCorreo,
-                        onValueChange = { textoCorreo = it },
-                        leadingIcon = {Icon(imageVector = Icons.Rounded.Mail, contentDescription = "")},
+                        onValueChange = { textoCorreo = it
+                            validarCorreo(textoCorreo.text)},
+                        supportingText = {
+                            isErrorC = isErrorC
+                            if (isErrorC) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Ingresa un correo válido.",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
                         label = {
+                            val texto = buildAnnotatedString {
+                                withStyle(style = MaterialTheme.typography.labelSmall.toSpanStyle()) {
+                                    append("Correo ")
+                                }
+                                withStyle(style = MaterialTheme.typography.labelSmall.toSpanStyle().copy(color = Color.Red)) {
+                                    append("*")
+                                }
+                            }
                             Text(
-                                text = "Correo",
+                                text = texto,
                                 style = MaterialTheme.typography.labelSmall
                             )
                         },
-                        textStyle = MaterialTheme.typography.labelSmall,
                         placeholder = {
                             Text(
                                 text = "Ejemplo@mail.com",
                                 style = MaterialTheme.typography.labelSmall
                             )
                         },
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = Color.White,
-                            focusedLabelColor = Color.White,
-                            unfocusedLabelColor = Color.White,
-                            containerColor = Trv8,
-                            cursorColor = Color.White,
-                            focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White
-                        ),
+                        textStyle = MaterialTheme.typography.labelSmall,
+                        colors = colores,
                         singleLine = true,
                         keyboardOptions = keyboardOptionsCorreo,
                     )
@@ -186,8 +215,16 @@ fun InicioDeSesion(
                         },
                         visualTransformation = if (passwordOculta) PasswordVisualTransformation() else VisualTransformation.None,
                         label = {
+                            val tName = buildAnnotatedString {
+                                withStyle(style = MaterialTheme.typography.labelSmall.toSpanStyle()) {
+                                    append("Contraseña ")
+                                }
+                                withStyle(style = MaterialTheme.typography.labelSmall.toSpanStyle().copy(color = Color.Red)) {
+                                    append("*")
+                                }
+                            }
                             Text(
-                                text = "Contraseña",
+                                text = tName,
                                 style = MaterialTheme.typography.labelSmall
                             )
                         },
@@ -287,7 +324,7 @@ fun InicioDeSesion(
                                                             if (user?.isEmailVerified == false){
                                                                 scope.launch {
                                                                     snackbarHostState.showSnackbar(
-                                                                        message = "Correo no verificado. Verifica tu correo electrónico.",
+                                                                        message = "Tu cuenta aun no está verificada, abre el link que enviamos a tu correo electrónico.",
                                                                         duration = SnackbarDuration.Short
                                                                     )
                                                                 }

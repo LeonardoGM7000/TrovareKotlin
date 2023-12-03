@@ -450,7 +450,7 @@ fun CrearCuenta(
                                 scope.launch {
                                     isErrorC = true
                                     snackbarHostState.showSnackbar(
-                                        message = "Correo inválido",
+                                        message = "El correo no tiene una estructura válida",
                                         duration = SnackbarDuration.Short
                                     )
                                 }

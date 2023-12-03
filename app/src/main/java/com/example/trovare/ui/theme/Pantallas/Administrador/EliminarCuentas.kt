@@ -53,7 +53,9 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
@@ -145,6 +147,7 @@ fun EliminarCuentas(
             Log.i("Actualizacion snackbarflag", "Snackbarfalg: $snackbarFlag")
 
         }
+        snackbarFlag.value = 0;
     }
 
     Log.i("EliminarCuenta","SnackBar afuera: $snackbarFlag");
@@ -187,32 +190,54 @@ fun EliminarCuentas(
                         Divisor(modifier = modifier.padding(15.dp))
                     }
 
-                    item {
-                        Log.i("Mensaje Entro Busqueda", "Entro busqueda Cuenta")
-                        BusquedaCuenta(navController = navController);
-                    }
-
-                    Log.i("Mensaje Eliminar cuenta", buscar)
-                    Log.i("Total cuentas", cuentas.size.toString())
-                    if (buscar.isNotBlank()) {
-                        Log.i("mensaje entro", "entro al effectkey")
-                        effectKey++
-                    }
 
                     //snackbarFlag = 0;
                     Log.i("mensaje entro siguiente", "entro al effectkey")
                     try {
-                        items(cuentas.size) { index ->
-                            val cuenta = cuentas[index]
-                            if ((Buscar == cuenta.nombre) || Buscar.isBlank()) {
-                                Log.i("Si hay cuentas", Buscar)
-                                TarjetaUsuario(
-                                    cuenta = cuenta,
-                                    modifier = modifier.padding(top = 20.dp),
-                                    navController = navController
-                                 )
-                            } else {
-                                Log.i("No hay cuentas", Buscar)
+                        if(cuentas.isEmpty()){
+                            item {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center,
+                                    modifier = modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 15.dp)
+                                ) {
+                                    Text(
+                                        modifier = modifier.padding(start = 5.dp),
+                                        text = "No hay cuentas",
+                                        color = Color.White,
+                                        fontSize = 25.sp,
+                                        textAlign = TextAlign.Center,
+                                        style = MaterialTheme.typography.displayMedium
+                                    )
+                                }
+                            }
+                        }else{
+                            item {
+                                Log.i("Mensaje Entro Busqueda", "Entro busqueda Cuenta")
+                                BusquedaCuenta(navController = navController);
+                            }
+
+                            Log.i("Mensaje Eliminar cuenta", buscar)
+                            Log.i("Total cuentas", cuentas.size.toString())
+                            if (buscar.isNotBlank()) {
+                                Log.i("mensaje entro", "entro al effectkey")
+                                effectKey++
+                            }
+
+                            items(cuentas.size) { index ->
+                                val cuenta = cuentas[index]
+                                if ((Buscar == cuenta.nombre) || Buscar.isBlank()) {
+                                    Log.i("Si hay cuentas", Buscar)
+                                    TarjetaUsuario(
+                                        cuenta = cuenta,
+                                        modifier = modifier.padding(top = 20.dp),
+                                        navController = navController
+                                    )
+                                } else {
+                                    Log.i("No hay cuentas", Buscar)
+                                }
                             }
                         }
                     } catch (e: Exception) {
@@ -406,7 +431,7 @@ fun BusquedaCuenta(
                 eliminarCuentasSeleccionadas(cuentasSeleccionadas)
 
                 navController.navigate(Pantalla.EliminarCuentas.ruta) {
-                    popUpTo(navController.graph.id) {
+                    popUpTo(Pantalla.EliminarCuentas.ruta) {
                         inclusive = true
                     }
                 }
