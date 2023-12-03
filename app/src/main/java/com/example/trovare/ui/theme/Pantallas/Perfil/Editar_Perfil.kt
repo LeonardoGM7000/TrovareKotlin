@@ -1,7 +1,11 @@
 package com.example.trovare.ui.theme.Pantallas.Perfil
 
+import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -28,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -46,6 +50,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Trv1
@@ -53,6 +58,9 @@ import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv6
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -65,6 +73,20 @@ fun EditarPerfil(
 ){
 
     val usuario by viewModel.usuario.collectAsState()
+
+    val storage = FirebaseStorage.getInstance()
+
+    val getContent = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            uri?.let {
+                // Seleccionar imagen exitosa, ahora puedes subirla a Firebase Storage
+                //uploadImageAndSaveReference(firestore, storage, userId ?: "", it, navController)
+                cargarImagenPerfil(storage, it, viewModel)
+            }
+        }
+    )
+
 
     var textoNombre by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(usuario.nombre, TextRange(0, 7)))
@@ -80,6 +102,7 @@ fun EditarPerfil(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val keyboardOptions: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done)
+
 
     Scaffold(
         topBar = {
@@ -135,9 +158,14 @@ fun EditarPerfil(
                                         .size(100.dp),
                                     shape = RoundedCornerShape(100.dp)
                                 ) {
+
                                     Image(
-                                        modifier = modifier.fillMaxSize(),
-                                        painter = painterResource(id = usuario.foto_perfil),
+                                        modifier = modifier
+                                            .fillMaxSize()
+                                            .clickable {
+                                                getContent.launch("image/*")
+                                            },
+                                        painter = rememberAsyncImagePainter(model = usuario.foto_perfil),
                                         contentDescription = "",
                                         contentScale = ContentScale.FillBounds
                                     )
@@ -265,7 +293,6 @@ fun EditarPerfil(
                                             duration = SnackbarDuration.Short
                                         )
                                     }
-
                                 },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = Trv6,
@@ -307,4 +334,45 @@ suspend fun editarPerfil(
         Log.i("Editar_usuario",e.toString())
     }
 }
+
+
+private fun cargarImagenPerfil(
+
+    storage: FirebaseStorage,
+    imageUri: Uri,
+    viewModel: TrovareViewModel,
+) {
+
+    val auth = FirebaseAuth.getInstance()
+    val firestore = FirebaseFirestore.getInstance()
+    val storageRef: StorageReference = storage.reference.child("images/user${auth.currentUser?.email.toString()}")
+
+
+    // Subir la imagen a Firebase Storage
+    storageRef.putFile(imageUri)
+        .addOnSuccessListener {
+            // Obtener la URL de descarga de la imagen
+            storageRef.downloadUrl.addOnSuccessListener { uri ->
+                // Guardar la referencia de la imagen en Firestore
+                val usuario = firestore.collection("Usuario").document(auth.currentUser?.email.toString())
+                usuario.update("foto_perfil", uri.toString())
+                    .addOnSuccessListener {
+                        // Éxito al guardar la referencia en Firestore
+                        Log.i("Imagen_Perfil", "Imagen cargada con éxito")
+                    }
+                    .addOnFailureListener { e ->
+                        // Error al guardar la referencia en Firestore
+                        Log.i("Imagen_Perfil", "Error al guardar la imagen", e)
+                    }
+            }
+
+            viewModel.obtenerDato()
+        }
+        .addOnFailureListener { e ->
+            // Error al subir la imagen a Firebase Storage
+            Log.i("firebase", "Error uploading image to Storage", e)
+        }
+}
+
+
 

@@ -8,6 +8,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Navegacion.Pantalla
@@ -21,6 +23,12 @@ import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
+
+    // Creamos las llaves para sharedPreferences
+    private val KEY_PREFERENCES = "Configuracion"
+    private val KEY_IDIOMA = "idioma"
+    private val KEY_UNIDADES = "unidades"
+    private val KEY_MONEDA = "moneda"
 
     //Solicitar permisos de ubicación---------------------------------------------------------------
 
@@ -54,6 +62,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
+
         /*colocar aqui API de google places*/
         Places.initialize(this, /*colocar aqui llave de API de google places*/"AIzaSyBpmAJRF6PsRJVNm6oq1qmfXbdaBjNA5mQ")//Inicializar API de Places
         val placesClient: PlacesClient = Places.createClient(this)//Crear cliente
@@ -63,33 +73,37 @@ class MainActivity : ComponentActivity() {
         viewModel.getLastLocation(fusedLocationProviderClient = fusedLocationProviderClient)
 
         // Verificamos si el usuario ya inicio sesión previamente
-        val sharedPreferecnes = getSharedPreferences("DB", MODE_PRIVATE)
-        val editor = sharedPreferecnes.edit()
 
         // Creamos una instancia de firebase para verificar el usuario registrado
         val auth = FirebaseAuth.getInstance()
-
-        val correo = sharedPreferecnes.getString(KEY_EMAIL, null)
 
         // Variable que almacena la ruta de la pantalla
         var ruta = "Bienvenida"
 
         try{
+            Log.d("Main_Trovare", auth.currentUser?.email.toString())
 
-            Log.d("Main_Trovare", correo.toString())
-
-            if(correo != null){
+            if(auth.currentUser != null){
                 ruta = Pantalla.NavegacionSecundaria.ruta
+
             }else{
+                auth.signOut()
                 ruta = Pantalla.Bienvenida.ruta
             }
 
-            editor.putString(KEY_EMAIL, auth.currentUser?.email.toString())
-            editor.apply()
 
         }catch(e:Exception){
             Log.d("Main_Trovare", "Error en la conexión de la base de datos")
         }
+
+        viewModel.obtenerDato()
+
+        // SharedPreferences -> Configuración
+        val sharedPreferences = getSharedPreferences(KEY_PREFERENCES, MODE_PRIVATE)
+
+        viewModel.setIdioma(sharedPreferences.getString(KEY_IDIOMA,"Español").toString())
+        viewModel.setUnidades(sharedPreferences.getString(KEY_UNIDADES, "Km/m").toString())
+        viewModel.setMonedas(sharedPreferences.getString(KEY_MONEDA, "MXN").toString())
 
         setContent {
             TrovareTheme {
@@ -101,10 +115,11 @@ class MainActivity : ComponentActivity() {
                     context = this
                 )
                 //MapScreen(state = viewModel.state.value, viewModel = viewModel, fusedLocationProviderClient = fusedLocationProviderClient)
+            }
         }
     }
 }
-}
+
 
 
 

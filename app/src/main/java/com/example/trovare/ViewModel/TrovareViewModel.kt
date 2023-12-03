@@ -11,6 +11,9 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.trovare.Data.Hora
+import com.example.trovare.Data.Itinerario
+import com.example.trovare.Data.Lugar
 import com.example.trovare.Data.Usuario
 import com.example.trovare.Data.itinerarioPrueba
 import com.example.trovare.Data.usuarioPrueba
@@ -34,6 +37,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.time.LocalDate
 
 /**
  * [TrovareViewModel] guarda información de la aplicación dentro del ciclo de vida.
@@ -160,7 +164,7 @@ class TrovareViewModel : ViewModel() {
     }
     //mostrar la polilinea de la ruta
     private val _polilineaInicializada = MutableStateFlow(false)
-    val polilineaInicializada: StateFlow<Boolean> = _polilineaInicializada.asStateFlow()
+    val polilineaInicializada = _polilineaInicializada.asStateFlow()
     fun setPolilineaInicializada(newValue: Boolean) {
         _polilineaInicializada.value = newValue
     }
@@ -170,9 +174,6 @@ class TrovareViewModel : ViewModel() {
     fun setPolilineaCod(newValue: String) {
         _polilineaCod.value = newValue
     }
-
-
-
 
     //para mostrar el marcador de un solo lugar
     private val _marcadorInicializado = MutableStateFlow(false)
@@ -221,6 +222,50 @@ class TrovareViewModel : ViewModel() {
     fun setIdLugar(nuevoId: String) {
         _idLugar.value = nuevoId
     }
+    //--------------------------------------------------------------------------------------------//
+    //-------------------------------------ITINERARIOS--------------------------------------------//
+    //--------------------------------------------------------------------------------------------//
+    //itinerario Actual
+    private val _itinerarioActual = MutableStateFlow(itinerarioPrueba)
+    val itinerarioActual = _itinerarioActual.asStateFlow()
+
+    fun setItinerarioActual(nuevoItinerario: Itinerario) {
+        _itinerarioActual.value = nuevoItinerario
+    }
+    fun setNombreItinerario(nuevoNombre: String){
+        _itinerarioActual.value.nombre = nuevoNombre
+    }
+
+    fun agregarLugarALItinerario(id: String, nombreLugar: String) {
+        val lugarNuevo = Lugar(id, nombreLugar, fechaDeVisita = null, horaDeVisita = null, imagen=_imagen.value)
+        val itinerarioActualValor = _itinerarioActual.value
+
+        // Verificar si la lista de lugares existe, si no, crearla
+        if (itinerarioActualValor.lugares == null) {
+            itinerarioActualValor.lugares = mutableListOf()
+        }
+
+        // Agregar el nuevo lugar a la lista de lugares del itinerario actual
+        itinerarioActualValor.lugares?.add(lugarNuevo)
+
+        // Actualizar el valor del itinerario actual en MutableStateFlow
+        _itinerarioActual.value = itinerarioActualValor
+    }
+    fun modificarFechaDeVisita(indiceActual: Int, fechaNueva: LocalDate) {
+            val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
+            lugarActual?.fechaDeVisita = fechaNueva
+    }
+
+    fun modificarHoraDeVisita(indiceActual: Int, horaNueva: Hora) {
+        val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
+        lugarActual?.horaDeVisita = horaNueva
+    }
+
+    fun borrarLugarActual(lugar: Lugar) {
+        _itinerarioActual.value.lugares?.remove(lugar)
+
+    }
+
     //--------------------------------------------------------------------------------------------//
     //-------------------------------------API----------------------------------------------------//
     //--------------------------------------------------------------------------------------------//
@@ -354,9 +399,6 @@ class TrovareViewModel : ViewModel() {
                 }
         }
     }
-
-
-
 
     //funci[on para obtener informacion para el mapa------------------------------------------------
     fun obtenerMarcador(
@@ -498,20 +540,18 @@ class TrovareViewModel : ViewModel() {
                 val documento =  firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().await()
                 val usuario = Usuario(
                         nombre = documento.getString("nombre").toString(),
-                        foto_perfil = R.drawable.perfil,
+                        foto_perfil = documento.getString("foto_perfil").toString(),
                         fechaDeRegistro = documento.getString("fechaDeRegistro").toString(),
                         descripcion = documento.getString("descripcion").toString(),
                         lugarDeOrigen = documento.getString("lugarDeOrigen").toString(),
                         comentarios = null,
-                        itinerarios = mutableListOf(itinerarioPrueba)
+                        itinerarios = mutableListOf()
                 )
 
                 setUsuario(usuario)
 
             }catch(e: Exception){
-
                 setUsuario(usuarioPrueba)
-
             }
         }
     }

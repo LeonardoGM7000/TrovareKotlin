@@ -2,11 +2,6 @@ package com.example.trovare.Data
 
 import com.google.gson.annotations.SerializedName
 
-data class LugarAutocompletar(
-    val id: String,
-    val textoPrimario: String,
-    val textoSecundario: String
-)
 
 data class PlacesClass (
     @SerializedName("places" ) var places : List<Places?> = arrayListOf()

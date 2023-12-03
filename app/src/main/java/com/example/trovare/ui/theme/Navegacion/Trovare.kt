@@ -31,6 +31,7 @@ import com.example.trovare.ui.theme.Pantallas.EliminarCuentas
 import com.example.trovare.ui.theme.Pantallas.Ingreso.ActualizarContrasena
 import com.example.trovare.ui.theme.Pantallas.Ingreso.RecuperarContrasena
 import com.example.trovare.ui.theme.Pantallas.Ingreso.TokenRecuperarContrasena
+import com.example.trovare.ui.theme.Pantallas.Itinerarios.AgregarLugarItinerario
 import com.example.trovare.ui.theme.Pantallas.PreguntasAdmin
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.libraries.places.api.net.PlacesClient
@@ -53,6 +54,7 @@ sealed class Pantalla(val ruta: String) {
     object Mapa : Pantalla("Mapa")
     object Itinerarios : Pantalla("Itinerarios")
     object EditarItinerario : Pantalla("EditarItinerario")
+    object AgregarLugarItinerario : Pantalla("AgregarLugarItinerario")
     object Administrador : Pantalla("Administrador")
     object PreguntasAdmin : Pantalla("PreguntasAdmin")
     object EditarPreguntas : Pantalla("EditarPreguntas")
@@ -123,7 +125,6 @@ fun Trovare(
             Configuracion(
                 viewModel = viewModel,
                 navController = navController,
-                context = context
             )
         }
         composable(route = Pantalla.FAQS.ruta) {
@@ -171,11 +172,24 @@ fun Trovare(
                 navController = navController,
             )
         }
+
         composable(route = Pantalla.EditarItinerario.ruta) {
             EditarItinerario(
                 navController = navController,
+                viewModel = viewModel
             )
         }
+
+        composable(route = Pantalla.AgregarLugarItinerario.ruta) {
+            AgregarLugarItinerario(
+                navController = navController,
+                state = viewModel.state.value,
+                viewModel = viewModel,
+                fusedLocationProviderClient = fusedLocationProviderClient,
+                placesClient = placesClient
+            )
+        }
+
         composable(route = Pantalla.Administrador.ruta) {
             Administrador(
                 navController = navController

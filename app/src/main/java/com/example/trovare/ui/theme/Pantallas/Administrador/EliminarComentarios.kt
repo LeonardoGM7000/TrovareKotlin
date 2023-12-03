@@ -49,8 +49,10 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.trovare.Data.Usuario
 import com.example.trovare.Data.usuarioPrueba
+import com.example.trovare.R
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
@@ -218,7 +220,7 @@ fun TarjetaComentarios(
                     shape = RoundedCornerShape(100.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = usuario.foto_perfil),
+                        painter = rememberAsyncImagePainter(model = usuario.foto_perfil),
                         contentDescription = "",
                         contentScale = ContentScale.FillBounds
                     )

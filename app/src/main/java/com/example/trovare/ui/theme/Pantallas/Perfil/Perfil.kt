@@ -45,6 +45,8 @@ import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import androidx.compose.runtime.getValue
+import coil.compose.rememberAsyncImagePainter
+import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -140,7 +142,8 @@ fun PerfilPrincipal(
                     border = CardDefaults.outlinedCardBorder(),
                 ) {
                     Row(modifier = modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
                     ){
                         Card(
                             modifier = modifier
@@ -150,7 +153,7 @@ fun PerfilPrincipal(
                         ) {
                             Image(
                                 modifier = modifier.fillMaxSize(),
-                                painter = painterResource(id = usuario.foto_perfil),
+                                painter = rememberAsyncImagePainter(model = usuario.foto_perfil),
                                 contentDescription = "",
                                 contentScale = ContentScale.FillBounds
                             )
@@ -182,18 +185,16 @@ fun PerfilPrincipal(
                                 contentDescription = "",
                                 tint = Color.White
                             )
-                                
-
                         }
                     }
                 }
             }
             //Descripcion del usuario---------------------------------------------------------------
-            item {
-                if(usuario.descripcion != null){
+            if(usuario.descripcion != ""){
+                item {
                     Text(
                         modifier = modifier
-                            .padding(horizontal = 25.dp, vertical = 10.dp)
+                            .padding(horizontal = 25.dp, vertical = 15.dp)
                             .fillMaxWidth(),
                         text = usuario.descripcion?: "",
                         textAlign = TextAlign.Justify,
@@ -201,7 +202,10 @@ fun PerfilPrincipal(
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
+            } else {
+
             }
+
             item {
                 if (usuario.lugarDeOrigen != null){
                     Row (
@@ -270,7 +274,7 @@ fun PerfilPrincipal(
                             ) {
                                 Image(
                                     modifier = modifier.fillMaxSize(),
-                                    painter = painterResource(id = usuario.foto_perfil),
+                                    painter = rememberAsyncImagePainter(model = usuario.foto_perfil),
                                     contentDescription = "",
                                     contentScale = ContentScale.FillBounds
                                 )
