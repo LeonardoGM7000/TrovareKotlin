@@ -8,7 +8,6 @@ import androidx.compose.material.icons.rounded.Museum
 import androidx.compose.material.icons.rounded.Park
 import androidx.compose.material.icons.rounded.Restaurant
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.example.trovare.R
 
 data class Categoria(
     val nombre: String,

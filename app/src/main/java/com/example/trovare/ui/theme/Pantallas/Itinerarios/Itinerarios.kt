@@ -62,7 +62,6 @@ fun Itinerarios(
 
     val usuario by viewModel.usuario.collectAsState()
 
-
     Surface(
         modifier = modifier
             .fillMaxSize(),

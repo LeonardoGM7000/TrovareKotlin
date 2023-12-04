@@ -218,11 +218,13 @@ fun Trovare(
                 navController = navController
             )
         }
+        //PreguntasAdmin----------------------------------------------------------------------------
         composable(route = Pantalla.PreguntasAdmin.ruta) {
             PreguntasAdmin(
                 navController = navController
             )
         }
+        //EditarPreguntas---------------------------------------------------------------------------
         composable(route = Pantalla.EditarPreguntas.ruta + "/{preguntaId}") { navBackStackEntry ->
             val preguntaId = navBackStackEntry.arguments?.getString("preguntaId") ?: ""
             EditarPreguntas(
@@ -230,32 +232,37 @@ fun Trovare(
                 preguntaId = preguntaId
             )
         }
+        //EliminarCuentas---------------------------------------------------------------------------
         composable(route = Pantalla.EliminarCuentas.ruta) {
             EliminarCuentas(
                 navController = navController
             )
         }
+        //EliminarComentarios-----------------------------------------------------------------------
         composable(route = Pantalla.EliminarComentarios.ruta) {
             EliminarComentarios(
                 navController = navController
             )
         }
-
+        //RecuperarContrasena-----------------------------------------------------------------------
         composable(route = Pantalla.RecuperarContrasena.ruta) {
             RecuperarContrasena(
                 navController = navController
             )
         }
+        //TokenParaRecuperarContrasen---------------------------------------------------------------
         composable(route = Pantalla.TokenRecuperarContrasena.ruta) {
             TokenRecuperarContrasena(
                 navController = navController
             )
         }
+        //ActualizarContrasena----------------------------------------------------------------------
         composable(route = Pantalla.ActualizarContrasena.ruta) {
             ActualizarContrasena(
                 navController = navController
             )
         }
+        //CategoriaSeleccionada---------------------------------------------------------------------
         composable(
             route = Pantalla.CategoriaSeleccionada.ruta + "/{categoria}",
             arguments = listOf(

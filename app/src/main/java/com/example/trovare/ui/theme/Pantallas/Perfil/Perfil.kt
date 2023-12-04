@@ -33,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -46,7 +45,6 @@ import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv2
 import androidx.compose.runtime.getValue
 import coil.compose.rememberAsyncImagePainter
-import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

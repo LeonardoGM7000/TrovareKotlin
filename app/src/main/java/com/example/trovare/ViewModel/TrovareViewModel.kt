@@ -4,9 +4,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
@@ -17,9 +15,7 @@ import com.example.trovare.Data.Lugar
 import com.example.trovare.Data.Usuario
 import com.example.trovare.Data.itinerarioPrueba
 import com.example.trovare.Data.usuarioPrueba
-import com.example.trovare.R
 import com.example.trovare.ui.theme.Pantallas.Mapa.MapState
-import com.example.trovare.ui.theme.Pantallas.Mapa.RutaInfo
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng

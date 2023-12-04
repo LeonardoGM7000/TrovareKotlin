@@ -7,7 +7,6 @@ import com.example.trovare.Data.NearbyPlacesClass
 import com.example.trovare.Data.Places
 import com.example.trovare.Data.PlacesClass
 import com.example.trovare.Data.Routes
-import com.example.trovare.Data.SnappedPointsClass
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Pantallas.Mapa.Marcador
 import com.example.trovare.ui.theme.Pantallas.Mapa.RutaInfo
@@ -31,10 +30,8 @@ import org.json.JSONObject
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.http.Body
-import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
-import retrofit2.http.Query
 
 
 interface APIServiceBuscarTexto {

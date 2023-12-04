@@ -1,8 +1,5 @@
 package com.example.trovare.Data
 
-import androidx.annotation.DrawableRes
-import com.example.trovare.R
-
 data class Usuario(
     val nombre: String,
     //@DrawableRes val foto_perfil: Int = R.drawable.perfil,

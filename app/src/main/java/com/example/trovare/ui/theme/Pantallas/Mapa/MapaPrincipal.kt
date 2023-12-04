@@ -141,8 +141,6 @@ fun MapaPrincipal(
         }
     }
 
-
-
     //Mapa-------------------------------
     val marcadorInicializado by viewModel.marcadorInicializado.collectAsState()
     val marcadoresInicializado by viewModel.marcadoresInicializado.collectAsState()
@@ -174,7 +172,7 @@ fun MapaPrincipal(
     val polilineaInicializada by viewModel.polilineaInicializada.collectAsState()
     val polilineaCod by viewModel.polilineaCod.collectAsState()
 
-    fun calcularZoom(punto1: LatLng, punto2: LatLng): Double {
+    fun calcularZoom(punto1: LatLng, punto2: LatLng) {
         val latDiff = punto2.latitude - punto1.latitude
         val lonDiff = punto2.longitude - punto1.longitude
 
@@ -216,14 +214,7 @@ fun MapaPrincipal(
             distancia > 0.0 -> {
                 zoom = 14f
             }
-
-
-
-
         }
-
-        return distancia
-
     }
 
 
