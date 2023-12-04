@@ -1,5 +1,6 @@
 package com.example.trovare.ui.theme.Pantallas
 
+import android.text.format.DateUtils
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -91,6 +92,7 @@ import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
+import java.util.concurrent.TimeUnit
 
 data class Resena(val usuario: String, val puntuacion: Int, val texto: String, val tiempo: Int, val fotoPerfil: String)
 @Composable
@@ -454,6 +456,12 @@ fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier) {
             )
         )
 
+    val tiempoActual = System.currentTimeMillis() // Tiempo actual en milisegundos
+    val tiempoResena = TimeUnit.SECONDS.toMillis(reseña.tiempo.toLong()) // Convertir a milisegundos
+
+    val tiempoTranscurrido = DateUtils.getRelativeTimeSpanString(tiempoResena, tiempoActual, DateUtils.MINUTE_IN_MILLIS)
+
+
 
 
     Card(
@@ -478,8 +486,8 @@ fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier) {
 
                 fotoDePerfilUsuario(url = reseña.fotoPerfil)
 
-                Box(
-                    contentAlignment = Alignment.CenterStart,
+                    Column(
+                    horizontalAlignment = Alignment.Start,
                     modifier = Modifier
                         .fillMaxWidth(0.64f)
                 ) {
@@ -487,6 +495,11 @@ fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier) {
                         text = reseña.usuario,
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White
+                    )
+                    Text(
+                        text = tiempoTranscurrido.toString(), // Mostrar tiempo transcurrido
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray
                     )
                 }
                 Text(
@@ -504,6 +517,7 @@ fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier) {
             }
             AnimatedVisibility(visible = expanded) {
                 if(expanded){
+
                     Text(
                         modifier = modifier.padding(start = 20.dp, end = 20.dp, bottom = 15.dp),
                         text = reseña.texto,
