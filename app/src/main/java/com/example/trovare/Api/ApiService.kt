@@ -334,8 +334,8 @@ interface APIServiceSolicitaPolyline {
 }
 
 fun rawJSONRutas(
-    origen: LatLng,
     destino: LatLng,
+    origen: LatLng,
     viewModel: TrovareViewModel,
     //recuperarResultados: MutableList<RutaInfo>
 ) {
@@ -355,8 +355,8 @@ fun rawJSONRutas(
     val locationo = JSONObject()
     val latLngo = JSONObject()
 
-    latLngo.put("latitude", origen.latitude)
-    latLngo.put("longitude", origen.longitude)
+    latLngo.put("latitude", destino.latitude)
+    latLngo.put("longitude", destino.longitude)
 
     locationo.put("latLng", latLngo)
 
@@ -367,8 +367,8 @@ fun rawJSONRutas(
     val locationd = JSONObject()
     val latLngd = JSONObject()
 
-    latLngd.put("latitude", destino.latitude)
-    latLngd.put("longitude", destino.longitude)
+    latLngd.put("latitude", origen.latitude)
+    latLngd.put("longitude", origen.longitude)
 
     locationd.put("latLng", latLngd)
 
@@ -409,7 +409,9 @@ fun rawJSONRutas(
                 val rutaInfo = RutaInfo(distancia = mUser.routes.first().distance, duracion = mUser.routes.first().duration, polilinea = mUser.routes.first().polyline.encodPolyline)
 
                 viewModel.setPolilineaCod(rutaInfo.polilinea)
+                viewModel.setPolilineaCodRuta(rutaInfo.polilinea)
                 viewModel.setPolilineaInicializada(true)
+                viewModel.setPolilineaInicializadaRuta(true)
 
 
             } else {

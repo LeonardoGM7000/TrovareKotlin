@@ -311,6 +311,7 @@ fun EditarItinerario(
                 item {
                     Divisor()
                 }
+                //Lista de lugares agregados al itinerario------------------------------------------
                 if(lugares == null){
                     item {
                         Box(modifier = modifier
@@ -345,6 +346,7 @@ fun EditarItinerario(
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
+                                        //Imagen del lugar agregado---------------------------------
                                         Card(
                                             modifier = modifier
                                                 .padding(5.dp)
@@ -367,6 +369,7 @@ fun EditarItinerario(
                                                 )
                                             }
                                         }
+                                        //nombre del lugar + editar fecha y hora--------------------
                                         Column(
                                             modifier = modifier.fillMaxWidth(0.8f)
                                         ) {
@@ -421,6 +424,7 @@ fun EditarItinerario(
                                                 }
                                             }
                                         }
+                                        //borrar lugar del itinerario y modificar ruta--------------
                                         Column(
                                             modifier = modifier.fillMaxWidth(),
                                             verticalArrangement = Arrangement.SpaceBetween
@@ -444,7 +448,8 @@ fun EditarItinerario(
                                             }
                                             IconButton(
                                                 onClick = {
-                                                    //TODO NAVEGAR A PANTALLA DE RUTAS
+                                                    viewModel.setDestinoRuta(lugar.ubicacion!!)
+                                                    navController.navigate(Pantalla.AgregarRutaALugar.ruta)
                                                 }
                                             ) {
                                                 Icon(

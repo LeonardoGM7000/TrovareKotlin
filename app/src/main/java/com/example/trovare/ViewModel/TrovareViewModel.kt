@@ -144,7 +144,8 @@ class TrovareViewModel : ViewModel() {
                         val longitude = it.longitude
                         // Aquí tienes la latitud y longitud.
                         // Puedes usar estas variables en tu lógica o pasárselas al ViewModel según sea necesario.
-                        setUbicacion(LatLng(latitude, longitude))
+                        setOrigen(LatLng(latitude, longitude))
+                        setOrigenRuta(LatLng(latitude, longitude))
 
                     }
                 }
@@ -155,19 +156,48 @@ class TrovareViewModel : ViewModel() {
             e.printStackTrace()
         }
     }
-    //ubicaci[on del usuario
-    private val _ubicacion = MutableStateFlow(LatLng(19.504507, -99.147314))
-    val ubicacion = _ubicacion.asStateFlow()
-    // Función para actualizar el valor de la ubicación
-    fun setUbicacion(nuevaUbicacion: LatLng) {
-        _ubicacion.value = nuevaUbicacion
+
+    //--------------------------------------------------------------------------------------------//
+    //-------------------------------------MAPA---------------------------------------------------//
+    //--------------------------------------------------------------------------------------------//
+
+    //MAPA PRINCIPAL y MAPA AGREGAR LUGAR A ITINERARIO----------------------------------------------
+
+
+    //Origen y destino para mapa principal y seleccion de lugar
+    //Ubicacion del usuario
+    private val _origen = MutableStateFlow(LatLng(19.504507, -99.147314))
+    val origen = _origen.asStateFlow()
+
+    fun setOrigen(nuevaUbicacion: LatLng) {
+        _origen.value = nuevaUbicacion
     }
+
+    //ubicacion del destino
+    private val _destino = MutableStateFlow(LatLng(19.504507, -99.147314))
+    val destino = _destino.asStateFlow()
+    // Función para actualizar el valor de la ubicación
+
+    fun setDestino(nuevaUbicacion: LatLng) {
+        _destino.value = nuevaUbicacion
+    }
+
+
     //mostrar la polilinea de la ruta
     //Guardar la polilinea codificada
     private val _polilineaCod = MutableStateFlow("")
+
     val polilineaCod = _polilineaCod.asStateFlow()
+
     fun setPolilineaCod(newValue: String) {
         _polilineaCod.value = newValue
+    }
+
+    //mostrar la polilinea de la ruta
+    private val _polilineaInicializada = MutableStateFlow(false)
+    val polilineaInicializada: StateFlow<Boolean> = _polilineaInicializada.asStateFlow()
+    fun setPolilineaInicializada(newValue: Boolean) {
+        _polilineaInicializada.value = newValue
     }
 
     //para mostrar el marcador de un solo lugar
@@ -182,18 +212,12 @@ class TrovareViewModel : ViewModel() {
     fun setMarcadoresInicializado(newValue: Boolean) {
         _marcadoresInicializado.value = newValue
     }
+
     //mostrar la tarjeta de inofmracion del lugar
     private val _informacionInicializada = MutableStateFlow(false)
     val informacionInicializada: StateFlow<Boolean> = _informacionInicializada.asStateFlow()
     fun setInformacionInicializada(newValue: Boolean) {
         _informacionInicializada.value = newValue
-    }
-
-    //mostrar la polilinea de la ruta
-    private val _polilineaInicializada = MutableStateFlow(false)
-    val polilineaInicializada: StateFlow<Boolean> = _polilineaInicializada.asStateFlow()
-    fun setPolilineaInicializada(newValue: Boolean) {
-        _polilineaInicializada.value = newValue
     }
 
     //nombre del lugar seleccionando
@@ -217,6 +241,47 @@ class TrovareViewModel : ViewModel() {
     fun setIdLugar(nuevoId: String) {
         _idLugar.value = nuevoId
     }
+
+    private val _ubicacionLugar = MutableStateFlow(LatLng(0.0,0.0))
+    val ubicacionLugar = _ubicacionLugar.asStateFlow()
+
+    fun setUbicacionLugar(nuevaUbicacion: LatLng) {
+        _ubicacionLugar.value = nuevaUbicacion
+    }
+
+    //MAPA SELECCION DE RUTAS EN ITINERARIO---------------------------------------------------------
+
+    //origen y destino para seleccion de ruta
+    //Ubicacion del usuario
+    private val _origenRuta = MutableStateFlow(LatLng(19.504507, -99.147314))
+    val origenRuta = _origenRuta.asStateFlow()
+
+    fun setOrigenRuta(nuevaUbicacion: LatLng) {
+        _origenRuta.value = nuevaUbicacion
+    }
+
+    //ubicaci[on del usuario
+    private val _destinoRuta = MutableStateFlow(LatLng(19.504507, -99.147314))
+    val destinoRuta = _destinoRuta.asStateFlow()
+    // Función para actualizar el valor de la ubicación
+    fun setDestinoRuta(nuevaUbicacion: LatLng) {
+        _destinoRuta.value = nuevaUbicacion
+    }
+
+    private val _polilineaCodRuta = MutableStateFlow("")
+    val polilineaCodRuta = _polilineaCodRuta.asStateFlow()
+    fun setPolilineaCodRuta(newValue: String) {
+        _polilineaCodRuta.value = newValue
+    }
+
+
+    private val _polilineaInicializadaRuta = MutableStateFlow(false)
+    val polilineaInicializadaRuta: StateFlow<Boolean> = _polilineaInicializadaRuta.asStateFlow()
+    fun setPolilineaInicializadaRuta(newValue: Boolean) {
+        _polilineaInicializadaRuta.value = newValue
+    }
+
+
     //--------------------------------------------------------------------------------------------//
     //-------------------------------------ITINERARIOS--------------------------------------------//
     //--------------------------------------------------------------------------------------------//
@@ -231,8 +296,8 @@ class TrovareViewModel : ViewModel() {
         _itinerarioActual.value.nombre = nuevoNombre
     }
 
-    fun agregarLugarALItinerario(id: String, nombreLugar: String) {
-        val lugarNuevo = Lugar(id, nombreLugar, fechaDeVisita = null, horaDeVisita = null, imagen=_imagen.value)
+    fun agregarLugarALItinerario(id: String, nombreLugar: String, ubicacion: LatLng) {
+        val lugarNuevo = Lugar(id, nombreLugar, ubicacion = ubicacion, fechaDeVisita = null, horaDeVisita = null,  imagen=_imagen.value)
         val itinerarioActualValor = _itinerarioActual.value
 
         // Verificar si la lista de lugares existe, si no, crearla
@@ -414,10 +479,11 @@ class TrovareViewModel : ViewModel() {
             .addOnSuccessListener { response: FetchPlaceResponse ->
                 val place = response.place
 
-                setUbicacion(place.latLng?:LatLng(ubicacion.value.latitude, ubicacion.value.longitude))
+                setDestino(place.latLng?:LatLng(destino.value.latitude, destino.value.longitude))
                 setNombreLugar(place.name?:"")
                 setRatingLugar(place.rating?:-1.0)
                 setIdLugar(place.id?:"")
+                setUbicacionLugar(place.latLng?:LatLng(destino.value.latitude, destino.value.longitude))
 
                 val metada = place.photoMetadatas
                 if (metada != null) {
@@ -443,6 +509,39 @@ class TrovareViewModel : ViewModel() {
                             }
                         }
                 }
+
+                setMarcadorInicializado(true)
+                setInformacionInicializada(true)
+
+            }.addOnFailureListener { exception: Exception ->
+                if (exception is ApiException) {
+                    Log.e("testLugar", "Place not found: ${exception.message}")
+                    val statusCode = exception.statusCode
+                    TODO("Handle error with given status code")
+                }
+            }
+    }
+
+    //Funcion para obtener el marcador del origen
+    fun obtenerMarcadorOrigen(
+        placesClient: PlacesClient,
+        placeId: String,
+    ){
+        val placeFields = listOf(
+            //Place.Field.ID,
+            Place.Field.LAT_LNG,
+            //Place.Field.NAME,
+        )//campos que se deben obtener de la API de places
+
+        val request = FetchPlaceRequest.newInstance(placeId, placeFields)
+
+        placesClient.fetchPlace(request)
+            .addOnSuccessListener { response: FetchPlaceResponse ->
+                val place = response.place
+
+                setOrigenRuta(place.latLng?:LatLng(destino.value.latitude, destino.value.longitude))
+                //setNombreLugar(place.name?:"")
+                //setIdLugar(place.id?:"")
 
                 setMarcadorInicializado(true)
                 setInformacionInicializada(true)

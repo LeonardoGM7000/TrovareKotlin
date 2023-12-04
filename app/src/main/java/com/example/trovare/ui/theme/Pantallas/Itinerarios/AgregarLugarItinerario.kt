@@ -114,6 +114,11 @@ fun AgregarLugarItinerario(
     fusedLocationProviderClient: FusedLocationProviderClient,
     placesClient: PlacesClient
 ){
+
+    LaunchedEffect(key1 = Unit){
+        viewModel.getLastLocation(fusedLocationProviderClient)
+    }
+
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -163,12 +168,16 @@ fun AgregarLugarItinerario(
         val nombreLugar by viewModel.nombreLugar.collectAsState()
         val ratingLugar by viewModel.ratingLugar.collectAsState()
         val idLugar by viewModel.idLugar.collectAsState()
+        val ubicacionLugar by viewModel.ubicacionLugar.collectAsState()
         var zoom by remember { mutableFloatStateOf(15f) }
 
 
-        val ubicacion by viewModel.ubicacion.collectAsState()
+        val origen by viewModel.origen.collectAsState()
+        val destino by viewModel.destino.collectAsState()
+
+
         val cameraPositionState = rememberCameraPositionState {
-            position = CameraPosition.fromLatLngZoom(ubicacion, 15f)
+            position = CameraPosition.fromLatLngZoom(origen, 15f)
         }
         val mapProperties = MapProperties(
             // Only enable if user has accepted location permissions.
@@ -178,11 +187,7 @@ fun AgregarLugarItinerario(
 
         //Filtros----------------------------
         var filtroExtendido by rememberSaveable { mutableStateOf(false) }
-
         val marcadores by remember { mutableStateOf(mutableListOf<Marcador>()) }
-
-
-
 
         //UI--------------------------------------------------------------------------------------------
         //----------------------------------------------------------------------------------------------
@@ -198,14 +203,20 @@ fun AgregarLugarItinerario(
                 cameraPositionState = cameraPositionState,
                 uiSettings = MapUiSettings(mapToolbarEnabled = false)
             ) {
-                //Si cambia la ubicacion,
-                MapEffect(ubicacion) {
-                    val cameraPosition = CameraPosition.fromLatLngZoom(ubicacion, zoom)
+                //Si cambia la ubicacion del usuario,
+                MapEffect(origen) {
+                    val cameraPosition = CameraPosition.fromLatLngZoom(origen, zoom)
                     cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
                 }
+                //Si cambia la ubicacion del destino,
+                MapEffect(destino) {
+                    val cameraPosition = CameraPosition.fromLatLngZoom(destino, zoom)
+                    cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
+                }
+
                 if(marcadorInicializado){
                     MarkerInfoWindow(
-                        state = rememberMarkerState(position = ubicacion),
+                        state = rememberMarkerState(position = destino),
                         snippet = "Some stuff",
                         onClick = {
                             Log.e("pruebaclick", "pruebaclick")
@@ -220,7 +231,7 @@ fun AgregarLugarItinerario(
                         Marker(
                             state = rememberMarkerState(position = marcador.ubicacion),
                             onClick ={
-                                viewModel.setUbicacion(marcador.ubicacion)
+                                viewModel.setDestino(marcador.ubicacion)
                                 viewModel.setInformacionInicializada(false)
                                 viewModel.obtenerMarcadorEntreMuchos(
                                     placesClient = placesClient,
@@ -335,7 +346,7 @@ fun AgregarLugarItinerario(
                                                 filtro = categoria.nombre,
                                                 recuperarResultados = marcadores,
                                                 viewModel = viewModel,
-                                                ubicacion = ubicacion
+                                                ubicacion = origen
                                             )
                                         }
 
@@ -487,7 +498,7 @@ fun AgregarLugarItinerario(
                                             .fillMaxWidth()
                                             .padding(end = 5.dp, bottom = 5.dp),
                                         onClick = {
-                                            viewModel.agregarLugarALItinerario(id = idLugar, nombreLugar = nombreLugar)
+                                            viewModel.agregarLugarALItinerario(id = idLugar, nombreLugar = nombreLugar, ubicacion = ubicacionLugar)
                                             scope.launch {
                                                 snackbarHostState.showSnackbar(
                                                     message = "Guardado en el itinerario",

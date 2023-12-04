@@ -38,6 +38,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -91,6 +92,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.lang.Math.sqrt
+import kotlin.math.pow
 
 @SuppressLint("MutableCollectionMutableState")
 @OptIn(ExperimentalMaterial3Api::class, MapsComposeExperimentalApi::class)
@@ -103,6 +106,10 @@ fun MapaPrincipal(
     fusedLocationProviderClient: FusedLocationProviderClient,
     placesClient: PlacesClient
 ){
+
+    LaunchedEffect(key1 = Unit){
+        viewModel.getLastLocation(fusedLocationProviderClient)
+    }
 
     //Variables-------------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------------------
@@ -134,6 +141,8 @@ fun MapaPrincipal(
         }
     }
 
+
+
     //Mapa-------------------------------
     val marcadorInicializado by viewModel.marcadorInicializado.collectAsState()
     val marcadoresInicializado by viewModel.marcadoresInicializado.collectAsState()
@@ -144,9 +153,11 @@ fun MapaPrincipal(
     var zoom by remember { mutableFloatStateOf(15f) }
 
 
-    val ubicacion by viewModel.ubicacion.collectAsState()
+    val origen by viewModel.origen.collectAsState()
+    val destino by viewModel.destino.collectAsState()
+
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(ubicacion, 15f)
+        position = CameraPosition.fromLatLngZoom(origen, 15f)
     }
     val mapProperties = MapProperties(
         // Only enable if user has accepted location permissions.
@@ -156,15 +167,64 @@ fun MapaPrincipal(
 
     //Filtros----------------------------
     var filtroExtendido by rememberSaveable { mutableStateOf(false) }
-
     val marcadores by remember { mutableStateOf(mutableListOf<Marcador>()) }
-
-
 
     //Ruta--------------------------------
 
     val polilineaInicializada by viewModel.polilineaInicializada.collectAsState()
     val polilineaCod by viewModel.polilineaCod.collectAsState()
+
+    fun calcularZoom(punto1: LatLng, punto2: LatLng): Double {
+        val latDiff = punto2.latitude - punto1.latitude
+        val lonDiff = punto2.longitude - punto1.longitude
+
+        val distancia = sqrt(latDiff.pow(2) + lonDiff.pow(2))
+        Log.d("distancia" ,"${distancia}")
+
+        when {
+            distancia > 10 -> {
+                zoom = 5f
+            }
+            distancia > 6 -> {
+                zoom = 6f
+            }
+            distancia > 2 -> {
+                zoom = 7f
+            }
+            distancia > 1 -> {
+                zoom = 8f
+            }
+            distancia > 1 -> {
+                zoom = 8f
+            }
+            distancia > 0.5 -> {
+                zoom = 9f
+            }
+            distancia > 0.3 -> {
+                zoom = 10f
+            }
+            distancia > 0.15 -> {
+                zoom = 11f
+            }
+            distancia > 0.085 -> {
+                zoom = 12f
+            }
+
+            distancia > 0.04 -> {
+                zoom = 13f
+            }
+            distancia > 0.0 -> {
+                zoom = 14f
+            }
+
+
+
+
+        }
+
+        return distancia
+
+    }
 
 
 
@@ -183,13 +243,18 @@ fun MapaPrincipal(
             uiSettings = MapUiSettings(mapToolbarEnabled = false)
         ) {
             //Si cambia la ubicacion,
-            MapEffect(ubicacion) {
-                val cameraPosition = CameraPosition.fromLatLngZoom(ubicacion, zoom)
+            MapEffect(destino) {
+                val cameraPosition = CameraPosition.fromLatLngZoom(destino, zoom)
                 cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
             }
+            MapEffect(origen) {
+                val cameraPosition = CameraPosition.fromLatLngZoom(origen, zoom)
+                cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
+            }
+
             if(marcadorInicializado){
                 MarkerInfoWindow(
-                    state = rememberMarkerState(position = ubicacion),
+                    state = rememberMarkerState(position = destino),
                     snippet = "Some stuff",
                     onClick = {
                         Log.e("pruebaclick", "pruebaclick")
@@ -204,19 +269,24 @@ fun MapaPrincipal(
                     Marker(
                         state = rememberMarkerState(position = marcador.ubicacion),
                         onClick ={
-                            viewModel.setUbicacion(marcador.ubicacion)
+                            viewModel.setDestino(marcador.ubicacion)
                             viewModel.setInformacionInicializada(false)
                             viewModel.obtenerMarcadorEntreMuchos(
                                 placesClient = placesClient,
                                 placeId = marcador.id,
                             )
-                            //viewModel.set
                             false
                         }
                     )
                 }
             }
             if(polilineaInicializada){
+
+                MapEffect(origen) {
+                    val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(((origen.latitude+destino.latitude)/2),((origen.longitude+destino.longitude)/2)), zoom)
+                    cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
+                }
+
                 val encodedPolyline = polilineaCod // Reemplaza con tu encoded polyline
                 val decodedPolyline: List<LatLng> = PolyUtil.decode(encodedPolyline)
 
@@ -332,7 +402,7 @@ fun MapaPrincipal(
                                             filtro = categoria.nombre,
                                             recuperarResultados = marcadores,
                                             viewModel = viewModel,
-                                            ubicacion = ubicacion
+                                            ubicacion = origen
                                         )
                                     }
 
@@ -484,17 +554,17 @@ fun MapaPrincipal(
 
                                         //Log.d("Algun punto",puntosRuta[0].latitude.toString())
 
-                                        val origen = LatLng(ubicacion.latitude, ubicacion.longitude)
-                                        val destino =
-                                            state.lastKnownLocation?.latitude?.let { state.lastKnownLocation?.longitude?.let { it1 -> LatLng(it, it1) } }
-                                        if (destino != null) {
+                                        val destino = LatLng(destino.latitude, destino.longitude)
+                                        val origen = state.lastKnownLocation?.latitude?.let { state.lastKnownLocation?.longitude?.let { it1 -> LatLng(it, it1) } }
+                                        calcularZoom(origen!!, destino)
+                                        if (origen != null) {
                                             rawJSONRutas(
-                                                origen = origen,
                                                 destino = destino,
+                                                origen = origen,
                                                 viewModel = viewModel,
-                                                //recuperarResultados = rutaInfo
                                             )
                                         }
+
                                     },
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = Trv3
@@ -518,3 +588,4 @@ fun MapaPrincipal(
         }
     }
 }
+

@@ -32,6 +32,7 @@ import com.example.trovare.ui.theme.Pantallas.Ingreso.ActualizarContrasena
 import com.example.trovare.ui.theme.Pantallas.Ingreso.RecuperarContrasena
 import com.example.trovare.ui.theme.Pantallas.Ingreso.TokenRecuperarContrasena
 import com.example.trovare.ui.theme.Pantallas.Itinerarios.AgregarLugarItinerario
+import com.example.trovare.ui.theme.Pantallas.Itinerarios.RutasItinerario
 import com.example.trovare.ui.theme.Pantallas.PreguntasAdmin
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.libraries.places.api.net.PlacesClient
@@ -55,6 +56,7 @@ sealed class Pantalla(val ruta: String) {
     object Itinerarios : Pantalla("Itinerarios")
     object EditarItinerario : Pantalla("EditarItinerario")
     object AgregarLugarItinerario : Pantalla("AgregarLugarItinerario")
+    object AgregarRutaALugar : Pantalla("AgregarRutaALugar")
     object Administrador : Pantalla("Administrador")
     object PreguntasAdmin : Pantalla("PreguntasAdmin")
     object EditarPreguntas : Pantalla("EditarPreguntas")
@@ -97,22 +99,26 @@ fun Trovare(
         exitTransition = { ExitTransition.None}
 
     ) {
+        //Bienvendia--------------------------------------------------------------------------------
         composable(route = Pantalla.Bienvenida.ruta) {
             Bienvenida(
                 navController = navController
             )
         }
+        //Inicio de sesión--------------------------------------------------------------------------
         composable(route = Pantalla.InicioDeSesion.ruta) {
             InicioDeSesion(
                 navController = navController,
                 viewModel = viewModel
             )
         }
+        //Crear cuenta------------------------------------------------------------------------------
         composable(route = Pantalla.Registro.ruta) {
             CrearCuenta(
                 navController = navController
             )
         }
+        //Navegación Secundaria---------------------------------------------------------------------
         composable(route = Pantalla.NavegacionSecundaria.ruta) {
             NavegacionSecundaria(
                 viewModel = viewModel,
@@ -121,40 +127,47 @@ fun Trovare(
                 fusedLocationProviderClient = fusedLocationProviderClient
             )
         }
+        //Configuración----------------------------------------------------------------------------
         composable(route = Pantalla.Configuracion.ruta) {
             Configuracion(
                 viewModel = viewModel,
                 navController = navController,
             )
         }
+        //FAQS--------------------------------------------------------------------------------------
         composable(route = Pantalla.FAQS.ruta) {
             FAQS(
                 navController = navController
             )
         }
+        //Soporte-----------------------------------------------------------------------------------
         composable(route = Pantalla.Soporte.ruta) {
             Soporte(
                 viewModel = viewModel,
                 navController = navController
             )
         }
+        //PerfilConfiguración-----------------------------------------------------------------------
         composable(route = Pantalla.PerfilConfiguracion.ruta) {
             PerfilConfiguracion(
                 navController = navController,
                 viewModel = viewModel
             )
         }
+        //EditarPerfil------------------------------------------------------------------------------
         composable(route = Pantalla.EditarPerfil.ruta) {
             EditarPerfil(
                 navController = navController,
                 viewModel = viewModel
             )
         }
+        //BuscarLugares-----------------------------------------------------------------------------
         composable(route = Pantalla.Buscar.ruta) {
             Buscar(
                 navController = navController,
             )
         }
+        //DetallesDelLugar--------------------------------------------------------------------------
         composable(
             route = Pantalla.Detalles.ruta + "/{lugar}",
             arguments = listOf(
@@ -172,14 +185,14 @@ fun Trovare(
                 navController = navController,
             )
         }
-
+        //EditarItinerario--------------------------------------------------------------------------
         composable(route = Pantalla.EditarItinerario.ruta) {
             EditarItinerario(
                 navController = navController,
                 viewModel = viewModel
             )
         }
-
+        //AgregarLugarAItinerario-------------------------------------------------------------------
         composable(route = Pantalla.AgregarLugarItinerario.ruta) {
             AgregarLugarItinerario(
                 navController = navController,
@@ -189,7 +202,17 @@ fun Trovare(
                 placesClient = placesClient
             )
         }
-
+        //AgregarRutaALugar-------------------------------------------------------------------------
+        composable(route = Pantalla.AgregarRutaALugar.ruta) {
+            RutasItinerario(
+                state = viewModel.state.value,
+                navController = navController,
+                viewModel = viewModel,
+                fusedLocationProviderClient = fusedLocationProviderClient,
+                placesClient = placesClient
+            )
+        }
+        //Administrador-----------------------------------------------------------------------------
         composable(route = Pantalla.Administrador.ruta) {
             Administrador(
                 navController = navController

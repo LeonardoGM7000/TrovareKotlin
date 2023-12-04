@@ -10,22 +10,33 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import com.google.maps.android.compose.GoogleMap
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowBackIos
+import androidx.compose.material.icons.rounded.Circle
+import androidx.compose.material.icons.rounded.DirectionsBus
+import androidx.compose.material.icons.rounded.DirectionsCar
+import androidx.compose.material.icons.rounded.DirectionsWalk
+import androidx.compose.material.icons.rounded.EditLocationAlt
 import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.FilterListOff
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.MyLocation
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.TravelExplore
 import androidx.compose.material3.ButtonDefaults
@@ -33,17 +44,23 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -72,12 +89,15 @@ import com.example.trovare.Data.categorias
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Navegacion.Pantalla
+import com.example.trovare.ui.theme.Pantallas.Perfil.PerfilPrincipal
+import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor2
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv10
 import com.example.trovare.ui.theme.Trv3
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.AdvancedMarker
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
@@ -142,17 +162,14 @@ fun RutasItinerario(
 
     //Mapa-------------------------------
     val marcadorInicializado by viewModel.marcadorInicializado.collectAsState()
-    val marcadoresInicializado by viewModel.marcadoresInicializado.collectAsState()
-    val informacionInicializada by viewModel.informacionInicializada.collectAsState()
     val nombreLugar by viewModel.nombreLugar.collectAsState()
-    val ratingLugar by viewModel.ratingLugar.collectAsState()
-    val idLugar by viewModel.idLugar.collectAsState()
     var zoom by remember { mutableFloatStateOf(15f) }
 
+    val origenRuta by viewModel.origenRuta.collectAsState()
+    val destinoRuta by viewModel.destinoRuta.collectAsState()
 
-    val ubicacion by viewModel.ubicacion.collectAsState()
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(ubicacion, 15f)
+        position = CameraPosition.fromLatLngZoom(origenRuta, 15f)
     }
     val mapProperties = MapProperties(
         // Only enable if user has accepted location permissions.
@@ -160,357 +177,329 @@ fun RutasItinerario(
         mapStyleOptions = MapStyleOptions(MapStyle.json)
     )
 
-    //Filtros----------------------------
-    var filtroExtendido by rememberSaveable { mutableStateOf(false) }
-
-    val marcadores by remember { mutableStateOf(mutableListOf<Marcador>()) }
-
-
+    //Transporte seleccionado
+    var transporte by remember { mutableStateOf("") }
 
     //Ruta--------------------------------
 
-    val polilineaInicializada by viewModel.polilineaInicializada.collectAsState()
+    val polilineaInicializadaRuta by viewModel.polilineaInicializadaRuta.collectAsState()
     val polilineaCod by viewModel.polilineaCod.collectAsState()
+
 
 
 
     //UI--------------------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------------------
 
-    Box(modifier = modifier
-        .fillMaxSize(),
-        contentAlignment = Alignment.TopCenter
-    ){
-        //Mapa--------------------------------------------------------------------------------------
-        GoogleMap(
-            modifier = Modifier.fillMaxSize(),
-            properties = mapProperties,
-            cameraPositionState = cameraPositionState,
-            uiSettings = MapUiSettings(mapToolbarEnabled = false)
-        ) {
-            //Si cambia la ubicacion,
-            MapEffect(ubicacion) {
-                val cameraPosition = CameraPosition.fromLatLngZoom(ubicacion, zoom)
-                cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
-            }
-            if(marcadorInicializado){
-                MarkerInfoWindow(
-                    state = rememberMarkerState(position = ubicacion),
-                    snippet = "Some stuff",
-                    onClick = {
-                        Log.e("pruebaclick", "pruebaclick")
-                        false
-                    },
-                    draggable = true
-                )
-            }
-            //varios marcadores
-            if(marcadoresInicializado){
-                marcadores.forEach { marcador ->
-                    Marker(
-                        state = rememberMarkerState(position = marcador.ubicacion),
-                        onClick ={
-                            viewModel.setUbicacion(marcador.ubicacion)
-                            viewModel.setInformacionInicializada(false)
-                            viewModel.obtenerMarcadorEntreMuchos(
-                                placesClient = placesClient,
-                                placeId = marcador.id,
-                            )
-                            //viewModel.set
-                            false
-
-                        }
-                    )
-                }
-            }
-            if(polilineaInicializada){
-                val encodedPolyline = polilineaCod // Reemplaza con tu encoded polyline
-                val decodedPolyline: List<LatLng> = PolyUtil.decode(encodedPolyline)
-
-                for (latLng in decodedPolyline) {
-                    Log.d("ListadeLats", "Latitud: ${latLng.latitude}, Longitud: ${latLng.longitude}")
-                }
-
-                Polyline(
-                    points = decodedPolyline,
-                    width = 5f,
-                    color = Trv10
-                )
-            }
-        }
-
-        Column {
-            //Busqueda------------------------------------------------------------------------------
-            Card(
+    Scaffold(
+        topBar = {
+            Surface(
                 modifier = modifier
-                    .padding(start = 55.dp, top = 15.dp, end = 55.dp, bottom = 5.dp)
-                    .fillMaxWidth(),
-                colors = CardDefaults.cardColors(Color.Black),
-                border = CardDefaults.outlinedCardBorder()
-            ){
-                TextField(
-                    modifier = modifier
-                        .fillMaxWidth(),
-                    value = textoBuscar,
-                    onValueChange = {
-                        textoBuscar = it
-                        job?.cancel() // Cancela la corrutina actual si es que existe
-                        tiempoRestante = 1//resetea el timer a 1 segundo
-                        iniciarTimer()//reinicia la cuenta regresiva del timer
-                    },
-                    leadingIcon = {
+                    .wrapContentSize(),
+                color = Trv1
+            ) {
+                Column(
+                    modifier = modifier.fillMaxWidth(),
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Spacer(modifier = modifier.padding(horizontal = 5.dp))
+                        IconButton(
+                            onClick = {navController.popBackStack()}
+                        ){
+                            Icon(
+                                imageVector = Icons.Rounded.ArrowBackIos,
+                                contentDescription = ""
+                            )
+                        }
+                        Spacer(modifier = modifier.padding(horizontal = 3.dp))
+                        //icono de ubicación-------------------
                         if(busquedaEnProgreso){
                             CircularProgressIndicator(
                                 modifier = modifier.size(20.dp),
-                                color = Color.White,
-                                strokeWidth = 2.dp
+                                color = Color.White
                             )
-                        } else {
+                        }else{
                             Icon(
-                                imageVector = Icons.Rounded.TravelExplore,
-                                contentDescription = "",
-                                tint = Color.White
+                                modifier = modifier
+                                    .size(20.dp),
+                                imageVector = Icons.Rounded.MyLocation,
+                                contentDescription = ""
                             )
+                        //barra de búsqueda
                         }
-                    },
-                    trailingIcon = {
-                        IconButton(
-                            onClick = { /*TODO*/ },
-                            colors = IconButtonDefaults.iconButtonColors(
-
-                            )
-                        ){
-                            Icon(imageVector = Icons.Rounded.FilterList, contentDescription = "")
-                        }
-                        IconToggleButton(
-                            checked = filtroExtendido,
-                            onCheckedChange = { checked -> filtroExtendido = checked },
-                            colors = IconButtonDefaults.iconToggleButtonColors(
-                                containerColor = Color.Black,
-                                contentColor = Color.White,
-                                checkedContentColor = Color.White
-                            )
-                        ) {
-                            if(filtroExtendido){
-                                Icon(
-                                    imageVector = Icons.Rounded.FilterListOff,
-                                    contentDescription = ""
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Rounded.FilterList,
-                                    contentDescription = ""
-                                )
-                            }
-
-                        }
-                    },
-                    textStyle = MaterialTheme.typography.labelSmall,
-                    placeholder = { Text(text = "Buscar lugares", style = MaterialTheme.typography.labelSmall) },
-                    singleLine = true,
-                    colors = TextFieldDefaults.textFieldColors(
-                        textColor = Color.White,
-                        containerColor = Color.Black,
-                        cursorColor = Color.White,
-                    )
-                )
-            }
-            //Mostrar filtros-----------------------------------------------------------------------
-            if(filtroExtendido){
-                LazyRow(
-                    modifier = modifier
-                        .padding(horizontal = 55.dp)
-                ){
-                    items(categorias){categoria ->
                         Card(
                             modifier = modifier
-                                .padding(end = 5.dp)
-                                .clickable {
-                                    zoom = 13f
-                                    viewModel.setPolilineaInicializada(false)
-                                    viewModel.setMarcadorInicializado(false)
-                                    viewModel.setMarcadoresInicializado(false)
-                                    viewModel.setInformacionInicializada(false)
-                                    viewModel.getLastLocation(fusedLocationProviderClient = fusedLocationProviderClient)
-                                    CoroutineScope(Dispatchers.Default).launch {
-                                        delay(200)
-                                        rawJSONUbicacionesCercanas(
-                                            filtro = categoria.nombre,
-                                            recuperarResultados = marcadores,
-                                            viewModel = viewModel,
-                                            ubicacion = ubicacion
-                                        )
-                                    }
-
-                                },
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.Black,
-                                contentColor = Color.White
-                            )
+                                .size(250.dp, 70.dp)
+                                .padding(vertical = 10.dp, horizontal = 10.dp)
+                                .fillMaxWidth(),
+                            colors = CardDefaults.cardColors(Trv1),
+                            border = CardDefaults.outlinedCardBorder()
                         ){
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ){
-                                Icon(
-                                    modifier = modifier.padding(5.dp),
-                                    imageVector = categoria.icono,
-                                    contentDescription = ""
-                                )
-                                Text(
-                                    modifier = modifier.padding(end = 5.dp),
-                                    text = categoria.nombre,
-                                    style = MaterialTheme.typography.labelSmall
-                                )
-                            }
-                        }
-
-                    }
-                }
-            }
-            //Mostrar resultados de la Busqueda-----------------------------------------------------
-            if(!busquedaEnProgreso && textoBuscar.text != ""){
-                if(prediccionesBusquedaMapa.isNotEmpty()){
-                    Card(
-                        modifier = modifier
-                            .padding(horizontal = 25.dp, vertical = 5.dp)
-                            .fillMaxWidth(),
-                        colors = CardDefaults.cardColors(Color.Black),
-                        border = CardDefaults.outlinedCardBorder()
-                    ) {
-                        LazyColumn(
-                            modifier = modifier.padding(5.dp)
-                        ){
-                            items(prediccionesBusquedaMapa){lugar ->
-                                Box(
-                                    modifier = modifier.clickable {
-                                        zoom = 15f
-                                        viewModel.setPolilineaInicializada(false)
-                                        viewModel.setMarcadoresInicializado(false)
-                                        viewModel.setMarcadorInicializado(false)
-                                        viewModel.setInformacionInicializada(false)
-                                        viewModel.obtenerMarcador(
-                                            placesClient = placesClient,
-                                            placeId = lugar.id,
-                                        )
-                                        textoBuscar = TextFieldValue("")
-                                    }
-                                ){
-                                    Column(
-                                        modifier = modifier.padding(5.dp)
-                                    ) {
-                                        Text(
-                                            modifier = modifier.padding(3.dp),
-                                            text = lugar.displayName?.text?: "",
-                                            style = MaterialTheme.typography.labelMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.White
-                                        )
-                                        Text(
-                                            modifier = modifier.padding(3.dp),
-                                            text = lugar.formattedAddress?: "",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            textAlign = TextAlign.Justify,
-                                            color = Color.White
-                                        )
-                                        Divisor2()
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            //Tarjeta informacion del lugar---------------------------------------------------------
-            if(informacionInicializada){
-                Box(
-                    modifier = modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.BottomCenter
-                ){
-                    Card(
-                        modifier = modifier
-                            .padding(horizontal = 25.dp, vertical = 10.dp)
-                            .size(height = 100.dp, width = 270.dp)
-                            .clickable {
-                                navController.navigate(Pantalla.Detalles.conArgs(idLugar))
-                            },
-                        colors = CardDefaults.cardColors(Trv1)
-                    ) {
-                        Row {
-                            Card(
+                            TextField(
                                 modifier = modifier
-                                    .padding(5.dp)
-                                    .aspectRatio(1f),
-                            ) {
-                                val imagen = viewModel.imagen.value
-
-                                if (imagen != null) {
-                                    Image(
-                                        bitmap = imagen,
-                                        contentDescription = "",
-                                        modifier = Modifier
-                                            .fillMaxSize(),
-                                        contentScale = ContentScale.FillBounds
-                                    )
-                                } else {
-                                    Image(
-                                        modifier = modifier
-                                            .fillMaxSize(),
-                                        painter = painterResource(id = R.drawable.image_placeholder),
-                                        contentDescription = ""
-                                    )
-                                }
-                            }
-                            Column(
-                                verticalArrangement = Arrangement.Center
-                            ){
-                                Text(
-                                    text = nombreLugar,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    maxLines = 2
-                                )
-                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    .fillMaxWidth()
+                                    .size(250.dp, 70.dp),
+                                value = textoBuscar,
+                                onValueChange = {
+                                    textoBuscar = it
+                                    job?.cancel() // Cancela la corrutina actual si es que existe
+                                    tiempoRestante = 1//resetea el timer a 1 segundo
+                                    iniciarTimer()//reinicia la cuenta regresiva del timer
+                                },
+                                textStyle = MaterialTheme.typography.labelSmall,
+                                placeholder = {
                                     Text(
-                                        text = "${ratingLugar}/5",
+                                        text = "Tu ubicación",
                                         style = MaterialTheme.typography.labelSmall
                                     )
-                                    Icon(
-                                        imageVector = Icons.Rounded.Star,
-                                        contentDescription = "",
-                                        tint = Color.Yellow
-                                    )
-                                }
-                                TextButton(
-                                    modifier = modifier
-                                        .fillMaxWidth()
-                                        .padding(end = 5.dp, bottom = 5.dp),
-                                    onClick = {
-
-                                        //Log.d("Algun punto",puntosRuta[0].latitude.toString())
-
-                                        val origen = LatLng(ubicacion.latitude, ubicacion.longitude)
-                                        val destino =
-                                            state.lastKnownLocation?.latitude?.let { state.lastKnownLocation?.longitude?.let { it1 -> LatLng(it, it1) } }
-                                        if (destino != null) {
-                                            rawJSONRutas(
-                                                origen = origen,
-                                                destino = destino,
-                                                viewModel = viewModel,
-                                                //recuperarResultados = rutaInfo
-                                            )
-                                        }
-                                    },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Trv3
-                                    )
-                                ) {
+                                },
+                                singleLine = true,
+                                colors = TextFieldDefaults.textFieldColors(
+                                    textColor = Color.White,
+                                    containerColor = Trv1,
+                                    cursorColor = Color.White,
+                                )
+                            )
+                        }
+                    //Ubicación destino
+                    }
+                    Row(
+                        modifier = modifier
+                            .align(Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Icon(
+                            modifier = modifier
+                                .size(20.dp),
+                            imageVector = Icons.Rounded.LocationOn,
+                            contentDescription = ""
+                        )
+                        Card(
+                            modifier = modifier
+                                .size(250.dp, 50.dp)
+                                .padding(horizontal = 10.dp)
+                                .fillMaxWidth(),
+                            colors = CardDefaults.cardColors(Trv1),
+                            border = CardDefaults.outlinedCardBorder()
+                        ){
+                            TextField(
+                                enabled = false,
+                                modifier = modifier
+                                    .fillMaxWidth()
+                                    .size(250.dp, 70.dp),
+                                value = "",
+                                onValueChange = {},
+                                textStyle = MaterialTheme.typography.labelSmall,
+                                placeholder = {
                                     Text(
-                                        text = "Ruta",
-                                        color = Color.Black
+                                        text = "Ubicación destino",
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                },
+                                singleLine = true,
+                                colors = TextFieldDefaults.textFieldColors(
+                                    textColor = Color.White,
+                                    containerColor = Trv1,
+                                    cursorColor = Color.White,
+                                )
+                            )
+                        }
+                    }
+                    Row(
+                        modifier = modifier.align(Alignment.CenterHorizontally)
+                    ) {
+                        FilterChip(
+                            modifier = modifier.padding(horizontal = 5.dp),
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Rounded.DirectionsCar,
+                                    contentDescription = ""
+                                )
+                            },
+                            selected = transporte == "auto",
+                            onClick = { transporte = "auto" },
+                            colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Trv10, containerColor = Trv1),
+                            label = { Text(text = "auto") }
+                        )
+                        FilterChip(
+                            modifier = modifier.padding(horizontal = 5.dp),
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Rounded.DirectionsBus,
+                                    contentDescription = ""
+                                )
+                            },
+                            selected = transporte == "transporte",
+                            onClick = { transporte = "transporte" },
+                            colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Trv10, containerColor = Trv1),
+                            label = { Text(text = "transporte") }
+                        )
+                        FilterChip(
+                            modifier = modifier.padding(horizontal = 5.dp),
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Rounded.DirectionsWalk,
+                                    contentDescription = ""
+                                )
+                            },
+                            selected = transporte == "caminando",
+                            onClick = { transporte = "caminando" },
+                            colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Trv10, containerColor = Trv1),
+                            label = { Text(text = "caminando") }
+                        )
+                    }
+                    //Auto
+                }
+                //Busqueda------------------------------------------------------------------------------
+            }
+        },
+    //Mapa para agregar la ruta al lugar del itinerario---------------------------------------------
+    ) { it ->
+        Surface(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(it),
+            color = Trv1
+        ) {
+
+            Box(modifier = modifier
+                .fillMaxSize(),
+                contentAlignment = Alignment.TopCenter
+            ){
+                //Mapa--------------------------------------------------------------------------------------
+                GoogleMap(
+                    modifier = Modifier.fillMaxSize(),
+                    properties = mapProperties,
+                    cameraPositionState = cameraPositionState,
+                    uiSettings = MapUiSettings(mapToolbarEnabled = false)
+                ) {
+                    //Si cambia la ubicacion de origen,
+                    MapEffect(origenRuta) {
+                        val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(((origenRuta.latitude+destinoRuta.latitude)/2),((origenRuta.longitude+destinoRuta.longitude)/2)), zoom)
+                        cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
+                    }
+                    MapEffect(destinoRuta) {
+                        val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(((origenRuta.latitude+destinoRuta.latitude)/2),((origenRuta.longitude+destinoRuta.longitude)/2)), zoom)
+                        cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
+                    }
+
+                    //Mostrar marcador de origen
+                    if(marcadorInicializado){
+                        MarkerInfoWindow(
+                            state = rememberMarkerState(position = origenRuta),
+                            onClick = {
+                                false
+                            },
+                            draggable = false
+                        )
+                    }
+
+                    //Mostrar marcador de destino(siempre se muestra)
+                    MarkerInfoWindow(
+                        state = rememberMarkerState(position = destinoRuta),
+                        onClick = {
+                            false
+                        },
+                        draggable = false
+                    )
+
+                    if(polilineaInicializadaRuta){
+                        val encodedPolyline = polilineaCod // Reemplaza con tu encoded polyline
+                        val decodedPolyline: List<LatLng> = PolyUtil.decode(encodedPolyline)
+
+                        for (latLng in decodedPolyline) {
+                            Log.d("ListadeLats", "Latitud: ${latLng.latitude}, Longitud: ${latLng.longitude}")
+                        }
+                        Polyline(
+                            points = decodedPolyline,
+                            width = 5f,
+                            color = Trv10
+                        )
+                    }
+                }
+
+                Column {
+                    if(!busquedaEnProgreso && textoBuscar.text != ""){
+                        if(prediccionesBusquedaMapa.isNotEmpty()){
+                            Card(
+                                modifier = modifier
+                                    .padding(horizontal = 25.dp, vertical = 5.dp)
+                                    .fillMaxWidth(),
+                                colors = CardDefaults.cardColors(Color.Black),
+                                border = CardDefaults.outlinedCardBorder()
+                            ) {
+                                LazyColumn(
+                                    modifier = modifier.padding(5.dp)
+                                ){
+                                    items(prediccionesBusquedaMapa){lugar ->
+                                        Box(
+                                            modifier = modifier.clickable {
+                                                zoom = 15f
+                                                viewModel.setPolilineaInicializadaRuta(false)
+                                                viewModel.setMarcadorInicializado(false)
+                                                viewModel.obtenerMarcadorOrigen(
+                                                    placesClient = placesClient,
+                                                    placeId = lugar.id,
+                                                )
+                                                textoBuscar = TextFieldValue("")
+                                            }
+                                        ){
+                                            Column(
+                                                modifier = modifier.padding(5.dp)
+                                            ) {
+                                                Text(
+                                                    modifier = modifier.padding(3.dp),
+                                                    text = lugar.displayName?.text?: "",
+                                                    style = MaterialTheme.typography.labelMedium,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color.White
+                                                )
+                                                Text(
+                                                    modifier = modifier.padding(3.dp),
+                                                    text = lugar.formattedAddress?: "",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    textAlign = TextAlign.Justify,
+                                                    color = Color.White
+                                                )
+                                                Divisor2()
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    //Boton para agregar ruta-------------------------------------------------------
+                    Box(
+                        modifier = modifier
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.BottomCenter
+                    ){
+                        TextButton(
+                            enabled = transporte != "",
+                            modifier = modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 70.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Trv10,
+                                contentColor = Color.Black
+                            ),
+                            onClick = {
+                                val origen = LatLng(destinoRuta.latitude, destinoRuta.longitude)
+                                val destino = LatLng(origenRuta.latitude, origenRuta.longitude)
+                                if (destino != null) {
+                                    rawJSONRutas(
+                                        origen = origen,
+                                        destino = destino,
+                                        viewModel = viewModel,
+                                        //recuperarResultados = rutaInfo
                                     )
                                 }
                             }
+                        ) {
+                            Text(text = "Agregar ruta")
                         }
                     }
                 }

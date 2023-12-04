@@ -77,6 +77,10 @@ class MainActivity : ComponentActivity() {
         // Creamos una instancia de firebase para verificar el usuario registrado
         val auth = FirebaseAuth.getInstance()
 
+        //Recuperar ubicacion actual de usuario
+        viewModel.getLastLocation(fusedLocationProviderClient)
+
+
         // Variable que almacena la ruta de la pantalla
         var ruta = "Bienvenida"
 
