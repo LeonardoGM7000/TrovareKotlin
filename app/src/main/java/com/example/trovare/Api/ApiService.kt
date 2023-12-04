@@ -447,8 +447,12 @@ fun obtenerResenas(
                             val usuario = resena.optString("author_name", "Desconocido")
                             val puntuacion = resena.optInt("rating", -1)
                             val texto = resena.optString("text", "N/A")
+                            val tiempo = resena.optInt("time",-1)
+                            val fotoDePerfil = resena.optString("profile_photo_url","N/A")
 
-                            recuperarResultados.add(Resena(usuario, puntuacion, texto))
+                            recuperarResultados.add(Resena(usuario, puntuacion, texto, tiempo, fotoDePerfil))
+
+                            //recuperarResultados.add(Resena(usuario, puntuacion, texto))
                         }
 
                     } else {
