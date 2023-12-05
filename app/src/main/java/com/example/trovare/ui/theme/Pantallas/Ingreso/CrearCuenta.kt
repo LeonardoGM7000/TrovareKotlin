@@ -64,7 +64,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.trovare.Data.Usuario
 import com.example.trovare.Data.itinerarioPrueba
-import com.example.trovare.R
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Trv1
@@ -392,7 +391,7 @@ fun CrearCuenta(
                                 Log.i("error", "campos incompletos")
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
-                                        message = "Completar todos los campos",
+                                        message = "Campos obligatorios no completados",
                                         duration = SnackbarDuration.Short
                                     )
                                 }
