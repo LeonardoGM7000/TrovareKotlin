@@ -339,7 +339,7 @@ fun RutasItinerario(
                             selected = transporte == "auto",
                             onClick = {
                                 transporte = "auto"
-                                calcularZoom(origenRuta!!, destinoRuta)
+                                calcularZoom(origenRuta, destinoRuta)
                                 rawJSONRutas(
                                     origen = origenRuta,
                                     destino = destinoRuta,
@@ -350,7 +350,7 @@ fun RutasItinerario(
                             colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Trv10, containerColor = Trv1),
                             label = { Text(text = "auto") }
                         )
-                        //Viajar en Carro-----------------------------------------------------------
+                        //Viajar en Transporte------------------------------------------------------
                         FilterChip(
                             modifier = modifier.padding(horizontal = 5.dp),
                             leadingIcon = {
@@ -362,18 +362,19 @@ fun RutasItinerario(
                             selected = transporte == "transporte",
                             onClick = {
                                 transporte = "transporte"
-                                calcularZoom(origenRuta!!, destinoRuta)
+                                calcularZoom(origenRuta, destinoRuta)
                                 rawJSONRutas(
                                     origen = origenRuta,
                                     destino = destinoRuta,
                                     viewModel = viewModel,
+                                    travel_mode = "TRANSIT"
                                     //recuperarResultados = rutaInfo
                                 )
                             },
                             colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Trv10, containerColor = Trv1),
                             label = { Text(text = "transporte") }
                         )
-                        //Viajar en Carro-----------------------------------------------------------
+                        //Viajar Caminando-----------------------------------------------------------
                         FilterChip(
                             modifier = modifier.padding(horizontal = 5.dp),
                             leadingIcon = {
@@ -385,11 +386,12 @@ fun RutasItinerario(
                             selected = transporte == "caminando",
                             onClick = {
                                 transporte = "caminando"
-                                calcularZoom(origenRuta!!, destinoRuta)
+                                calcularZoom(origenRuta, destinoRuta)
                                 rawJSONRutas(
                                     origen = origenRuta,
                                     destino = destinoRuta,
                                     viewModel = viewModel,
+                                    travel_mode = "WALK"
                                     //recuperarResultados = rutaInfo
                                 )
                             },
@@ -420,7 +422,15 @@ fun RutasItinerario(
                     modifier = Modifier.fillMaxSize(),
                     properties = mapProperties,
                     cameraPositionState = cameraPositionState,
-                    uiSettings = MapUiSettings(mapToolbarEnabled = false),
+                    uiSettings = MapUiSettings(
+                        compassEnabled = false,
+                        mapToolbarEnabled = true,
+                        myLocationButtonEnabled = false,
+                        rotationGesturesEnabled = false,
+                        tiltGesturesEnabled = true,
+
+
+                    ),
                 ) {
 
                     MapEffect(origenRuta) {
@@ -473,6 +483,19 @@ fun RutasItinerario(
                 }
 
                 Column {
+
+                    Box(
+                        modifier = modifier.fillMaxWidth()
+                    ){
+                        Surface(
+                            modifier = modifier.fillMaxWidth(),
+                            color = Color(0x7F191B1A)
+                        ) {
+                            Text(text = "prueba")
+                        }
+                    }
+
+
                     if(!busquedaEnProgreso && textoBuscar.text != ""){
                         if(prediccionesBusquedaMapa.isNotEmpty()){
                             Card(

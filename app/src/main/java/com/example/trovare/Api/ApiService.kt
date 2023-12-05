@@ -334,6 +334,7 @@ fun rawJSONRutas(
     destino: LatLng,
     origen: LatLng,
     viewModel: TrovareViewModel,
+    travel_mode: String = "DRIVE"
     //recuperarResultados: MutableList<RutaInfo>
 ) {
 
@@ -372,7 +373,7 @@ fun rawJSONRutas(
     destination.put("location", locationd)
     jsonObject.put("destination", destination)
 
-    jsonObject.put("travelMode", "DRIVE")
+    jsonObject.put("travelMode", "${travel_mode}")
     jsonObject.put("computeAlternativeRoutes", false)
     jsonObject.put("units", "IMPERIAL")
 

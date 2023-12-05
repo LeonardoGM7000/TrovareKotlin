@@ -673,6 +673,12 @@ class TrovareViewModel : ViewModel() {
         _usuario.value = nuevoUsuario
     }
 
+    private val _listaItinerarios = MutableStateFlow(mutableListOf<Itinerario>())
+    val listaItinerario = _listaItinerarios.asStateFlow()
+
+    fun setListaItinerarios(nuevaListaItinerario: MutableList<Itinerario>){
+        _listaItinerarios.value = nuevaListaItinerario
+    }
 
     // Funciones auxiliares
     fun obtenerDato() {
@@ -700,6 +706,7 @@ class TrovareViewModel : ViewModel() {
 
             }catch(e: Exception){
                 setUsuario(usuarioPrueba)
+                //Lista de itinerarioa
             }
         }
     }
