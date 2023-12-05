@@ -2,21 +2,13 @@ package com.example.trovare.ui.theme.Pantallas.Itinerarios
 
 import com.example.trovare.ui.theme.Pantallas.Mapa.MapState
 import com.example.trovare.ui.theme.Pantallas.Mapa.MapStyle
-import com.example.trovare.ui.theme.Pantallas.Mapa.Marcador
-
-
-
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import com.google.maps.android.compose.GoogleMap
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,21 +16,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBackIos
-import androidx.compose.material.icons.rounded.Circle
 import androidx.compose.material.icons.rounded.DirectionsBus
 import androidx.compose.material.icons.rounded.DirectionsCar
 import androidx.compose.material.icons.rounded.DirectionsWalk
-import androidx.compose.material.icons.rounded.EditLocationAlt
-import androidx.compose.material.icons.rounded.FilterList
-import androidx.compose.material.icons.rounded.FilterListOff
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.MyLocation
-import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material.icons.rounded.TravelExplore
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -48,8 +33,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -57,13 +40,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -73,8 +54,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -83,21 +62,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.trovare.Api.rawJSON
 import com.example.trovare.Api.rawJSONRutas
-import com.example.trovare.Api.rawJSONUbicacionesCercanas
 import com.example.trovare.Data.Places
-import com.example.trovare.Data.categorias
-import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
-import com.example.trovare.ui.theme.Navegacion.Pantalla
-import com.example.trovare.ui.theme.Pantallas.Perfil.PerfilPrincipal
-import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor2
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv10
-import com.example.trovare.ui.theme.Trv3
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.AdvancedMarker
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
@@ -107,7 +78,6 @@ import com.google.maps.android.compose.MapEffect
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
-import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerInfoWindow
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -117,6 +87,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.pow
 
 @SuppressLint("MutableCollectionMutableState")
 @OptIn(ExperimentalMaterial3Api::class, MapsComposeExperimentalApi::class)
@@ -129,9 +100,11 @@ fun RutasItinerario(
     fusedLocationProviderClient: FusedLocationProviderClient,
     placesClient: PlacesClient
 ){
-
     //Variables-------------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------------------
+
+    //Itinerario-------------------------
+    val indiceActual by viewModel.indiceActual.collectAsState()
 
     //Busqueda---------------------------
     var tiempoRestante by rememberSaveable { mutableIntStateOf(1) }//tiempo antes de que se haga la llamada a la API de places(1 segundo)
@@ -141,6 +114,33 @@ fun RutasItinerario(
     var textoBuscar by rememberSaveable(stateSaver = TextFieldValue.Saver) {//texto a buscar
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
+    val textoLugarDestino by viewModel.nombreLugarRuta.collectAsState()
+
+    //Mapa-------------------------------
+    val marcadorInicializadoRuta by viewModel.marcadorInicializadoRuta.collectAsState()
+    val zoomRuta by viewModel.zoomRuta.collectAsState()
+
+    val origenRuta by viewModel.origenRuta.collectAsState()
+    val destinoRuta by viewModel.destinoRuta.collectAsState()
+
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(origenRuta, zoomRuta)
+    }
+    val mapProperties = MapProperties(
+        // Only enable if user has accepted location permissions.
+        isMyLocationEnabled = state.lastKnownLocation != null,
+        mapStyleOptions = MapStyleOptions(MapStyle.json)
+    )
+    //Ruta--------------------------------
+    val polilineaInicializadaRuta by viewModel.polilineaInicializadaRuta.collectAsState()
+    val polilineaCodRuta by viewModel.polilineaCodRuta.collectAsState()
+
+    //Transporte seleccionado---------------
+    var transporte by remember { mutableStateOf("") }
+
+
+
+    //Funciones
     fun iniciarTimer() {
         job = CoroutineScope(Dispatchers.Default).launch {
 
@@ -160,33 +160,50 @@ fun RutasItinerario(
         }
     }
 
-    //Mapa-------------------------------
-    val marcadorInicializado by viewModel.marcadorInicializado.collectAsState()
-    val nombreLugar by viewModel.nombreLugar.collectAsState()
-    var zoom by remember { mutableFloatStateOf(15f) }
+    fun calcularZoom(punto1: LatLng, punto2: LatLng) {
+        val latDiff = punto2.latitude - punto1.latitude
+        val lonDiff = punto2.longitude - punto1.longitude
 
-    val origenRuta by viewModel.origenRuta.collectAsState()
-    val destinoRuta by viewModel.destinoRuta.collectAsState()
+        val distancia = Math.sqrt(latDiff.pow(2) + lonDiff.pow(2))
+        Log.d("distancia" ,"${distancia}")
 
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(origenRuta, 15f)
+        when {
+            distancia > 10 -> {
+                viewModel.setZoomRuta(5f)
+            }
+            distancia > 6 -> {
+                viewModel.setZoomRuta(6f)
+            }
+            distancia > 2 -> {
+                viewModel.setZoomRuta(7f)
+            }
+            distancia > 1 -> {
+                viewModel.setZoomRuta(8f)
+            }
+            distancia > 0.5 -> {
+                viewModel.setZoomRuta(9f)
+            }
+            distancia > 0.3 -> {
+                viewModel.setZoomRuta(10f)
+            }
+            distancia > 0.15 -> {
+                viewModel.setZoomRuta(11f)
+            }
+            distancia > 0.085 -> {
+                viewModel.setZoomRuta(12f)
+            }
+            distancia > 0.04 -> {
+                viewModel.setZoomRuta(13f)
+            }
+            distancia > 0.0 -> {
+                viewModel.setZoomRuta(14f)
+            }
+        }
     }
-    val mapProperties = MapProperties(
-        // Only enable if user has accepted location permissions.
-        isMyLocationEnabled = state.lastKnownLocation != null,
-        mapStyleOptions = MapStyleOptions(MapStyle.json)
-    )
 
-    //Transporte seleccionado
-    var transporte by remember { mutableStateOf("") }
-
-    //Ruta--------------------------------
-
-    val polilineaInicializadaRuta by viewModel.polilineaInicializadaRuta.collectAsState()
-    val polilineaCod by viewModel.polilineaCod.collectAsState()
-
-
-
+    LaunchedEffect(key1 = Unit){
+        calcularZoom(origenRuta, destinoRuta)
+    }
 
     //UI--------------------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------------------
@@ -294,7 +311,7 @@ fun RutasItinerario(
                                 textStyle = MaterialTheme.typography.labelSmall,
                                 placeholder = {
                                     Text(
-                                        text = "Ubicación destino",
+                                        text = textoLugarDestino,
                                         style = MaterialTheme.typography.labelSmall
                                     )
                                 },
@@ -310,6 +327,7 @@ fun RutasItinerario(
                     Row(
                         modifier = modifier.align(Alignment.CenterHorizontally)
                     ) {
+                        //Viajar en Carro-----------------------------------------------------------
                         FilterChip(
                             modifier = modifier.padding(horizontal = 5.dp),
                             leadingIcon = {
@@ -319,10 +337,20 @@ fun RutasItinerario(
                                 )
                             },
                             selected = transporte == "auto",
-                            onClick = { transporte = "auto" },
+                            onClick = {
+                                transporte = "auto"
+                                calcularZoom(origenRuta!!, destinoRuta)
+                                rawJSONRutas(
+                                    origen = origenRuta,
+                                    destino = destinoRuta,
+                                    viewModel = viewModel,
+                                    //recuperarResultados = rutaInfo
+                                )
+                            },
                             colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Trv10, containerColor = Trv1),
                             label = { Text(text = "auto") }
                         )
+                        //Viajar en Carro-----------------------------------------------------------
                         FilterChip(
                             modifier = modifier.padding(horizontal = 5.dp),
                             leadingIcon = {
@@ -332,10 +360,20 @@ fun RutasItinerario(
                                 )
                             },
                             selected = transporte == "transporte",
-                            onClick = { transporte = "transporte" },
+                            onClick = {
+                                transporte = "transporte"
+                                calcularZoom(origenRuta!!, destinoRuta)
+                                rawJSONRutas(
+                                    origen = origenRuta,
+                                    destino = destinoRuta,
+                                    viewModel = viewModel,
+                                    //recuperarResultados = rutaInfo
+                                )
+                            },
                             colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Trv10, containerColor = Trv1),
                             label = { Text(text = "transporte") }
                         )
+                        //Viajar en Carro-----------------------------------------------------------
                         FilterChip(
                             modifier = modifier.padding(horizontal = 5.dp),
                             leadingIcon = {
@@ -345,7 +383,16 @@ fun RutasItinerario(
                                 )
                             },
                             selected = transporte == "caminando",
-                            onClick = { transporte = "caminando" },
+                            onClick = {
+                                transporte = "caminando"
+                                calcularZoom(origenRuta!!, destinoRuta)
+                                rawJSONRutas(
+                                    origen = origenRuta,
+                                    destino = destinoRuta,
+                                    viewModel = viewModel,
+                                    //recuperarResultados = rutaInfo
+                                )
+                            },
                             colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Trv10, containerColor = Trv1),
                             label = { Text(text = "caminando") }
                         )
@@ -373,20 +420,19 @@ fun RutasItinerario(
                     modifier = Modifier.fillMaxSize(),
                     properties = mapProperties,
                     cameraPositionState = cameraPositionState,
-                    uiSettings = MapUiSettings(mapToolbarEnabled = false)
+                    uiSettings = MapUiSettings(mapToolbarEnabled = false),
                 ) {
-                    //Si cambia la ubicacion de origen,
+
                     MapEffect(origenRuta) {
-                        val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(((origenRuta.latitude+destinoRuta.latitude)/2),((origenRuta.longitude+destinoRuta.longitude)/2)), zoom)
-                        cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
+                        calcularZoom(origenRuta, destinoRuta)
                     }
-                    MapEffect(destinoRuta) {
-                        val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(((origenRuta.latitude+destinoRuta.latitude)/2),((origenRuta.longitude+destinoRuta.longitude)/2)), zoom)
+                    MapEffect(zoomRuta){
+                        val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(((origenRuta.latitude+destinoRuta.latitude)/2),((origenRuta.longitude+destinoRuta.longitude)/2)), zoomRuta)
                         cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
                     }
 
                     //Mostrar marcador de origen
-                    if(marcadorInicializado){
+                    if(marcadorInicializadoRuta){
                         MarkerInfoWindow(
                             state = rememberMarkerState(position = origenRuta),
                             onClick = {
@@ -406,7 +452,13 @@ fun RutasItinerario(
                     )
 
                     if(polilineaInicializadaRuta){
-                        val encodedPolyline = polilineaCod // Reemplaza con tu encoded polyline
+
+                        MapEffect(origenRuta) {
+                            val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(((origenRuta.latitude+destinoRuta.latitude)/2),((origenRuta.longitude+destinoRuta.longitude)/2)), zoomRuta)
+                            cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
+                        }
+
+                        val encodedPolyline = polilineaCodRuta // Reemplaza con tu encoded polyline
                         val decodedPolyline: List<LatLng> = PolyUtil.decode(encodedPolyline)
 
                         for (latLng in decodedPolyline) {
@@ -436,9 +488,9 @@ fun RutasItinerario(
                                     items(prediccionesBusquedaMapa){lugar ->
                                         Box(
                                             modifier = modifier.clickable {
-                                                zoom = 15f
+                                                viewModel.setZoomRuta(15f)
                                                 viewModel.setPolilineaInicializadaRuta(false)
-                                                viewModel.setMarcadorInicializado(false)
+                                                viewModel.setMarcadorInicializadoRuta(false)
                                                 viewModel.obtenerMarcadorOrigen(
                                                     placesClient = placesClient,
                                                     placeId = lugar.id,
@@ -487,16 +539,9 @@ fun RutasItinerario(
                                 contentColor = Color.Black
                             ),
                             onClick = {
-                                val origen = LatLng(destinoRuta.latitude, destinoRuta.longitude)
-                                val destino = LatLng(origenRuta.latitude, origenRuta.longitude)
-                                if (destino != null) {
-                                    rawJSONRutas(
-                                        origen = origen,
-                                        destino = destino,
-                                        viewModel = viewModel,
-                                        //recuperarResultados = rutaInfo
-                                    )
-                                }
+                                viewModel.guardarOrigenRuta(indiceActual = indiceActual, origenNuevo = origenRuta)
+                                viewModel.guardarRutaLugar(indiceActual = indiceActual, rutaNueva = polilineaCodRuta)
+                                viewModel.guardarZoomLugar(indiceActual = indiceActual, nuevoZoom = zoomRuta)
                             }
                         ) {
                             Text(text = "Agregar ruta")

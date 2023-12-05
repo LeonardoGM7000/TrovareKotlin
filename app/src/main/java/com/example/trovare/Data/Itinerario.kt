@@ -13,9 +13,15 @@ data class Itinerario(
 data class Lugar(
     val id: String,
     val nombreLugar: String,
+    //Fehcas
     var fechaDeVisita: LocalDate?,
     var horaDeVisita: Hora?,
+    //Rutas
+    var origen: LatLng?,
     var ubicacion: LatLng?,
+    var ruta: String?,
+    var zoom: Float,
+    //
     var imagen: ImageBitmap?
 )
 

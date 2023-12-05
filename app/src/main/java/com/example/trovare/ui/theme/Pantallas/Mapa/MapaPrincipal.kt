@@ -122,24 +122,6 @@ fun MapaPrincipal(
     var textoBuscar by rememberSaveable(stateSaver = TextFieldValue.Saver) {//texto a buscar
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
-    fun iniciarTimer() {
-        job = CoroutineScope(Dispatchers.Default).launch {
-
-            busquedaEnProgreso = true
-
-            while (tiempoRestante > 0) {
-                delay(1000)
-                tiempoRestante--//resta 1 al contador de tiempo, lo que quiere decir que ha pasado un segundo
-            }
-
-            busquedaEnProgreso = false
-
-            rawJSON(
-                query = textoBuscar.text,
-                recuperarResultados = prediccionesBusquedaMapa
-            )
-        }
-    }
 
     //Mapa-------------------------------
     val marcadorInicializado by viewModel.marcadorInicializado.collectAsState()
@@ -148,14 +130,13 @@ fun MapaPrincipal(
     val nombreLugar by viewModel.nombreLugar.collectAsState()
     val ratingLugar by viewModel.ratingLugar.collectAsState()
     val idLugar by viewModel.idLugar.collectAsState()
-    var zoom by remember { mutableFloatStateOf(15f) }
-
+    val zoom by viewModel.zoom.collectAsState()
 
     val origen by viewModel.origen.collectAsState()
     val destino by viewModel.destino.collectAsState()
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(origen, 15f)
+        position = CameraPosition.fromLatLngZoom(origen, zoom)
     }
     val mapProperties = MapProperties(
         // Only enable if user has accepted location permissions.
@@ -181,43 +162,56 @@ fun MapaPrincipal(
 
         when {
             distancia > 10 -> {
-                zoom = 5f
+                viewModel.setZoom(5f)
             }
             distancia > 6 -> {
-                zoom = 6f
+                viewModel.setZoom(6f)
             }
             distancia > 2 -> {
-                zoom = 7f
+                viewModel.setZoom(7f)
             }
             distancia > 1 -> {
-                zoom = 8f
-            }
-            distancia > 1 -> {
-                zoom = 8f
+                viewModel.setZoom(8f)
             }
             distancia > 0.5 -> {
-                zoom = 9f
+                viewModel.setZoom(9f)
             }
             distancia > 0.3 -> {
-                zoom = 10f
+                viewModel.setZoom(10f)
             }
             distancia > 0.15 -> {
-                zoom = 11f
+                viewModel.setZoom(11f)
             }
             distancia > 0.085 -> {
-                zoom = 12f
+                viewModel.setZoom(12f)
             }
-
             distancia > 0.04 -> {
-                zoom = 13f
+                viewModel.setZoom(13f)
             }
             distancia > 0.0 -> {
-                zoom = 14f
+                viewModel.setZoom(14f)
             }
         }
     }
 
+    fun iniciarTimer() {
+        job = CoroutineScope(Dispatchers.Default).launch {
 
+            busquedaEnProgreso = true
+
+            while (tiempoRestante > 0) {
+                delay(1000)
+                tiempoRestante--//resta 1 al contador de tiempo, lo que quiere decir que ha pasado un segundo
+            }
+
+            busquedaEnProgreso = false
+
+            rawJSON(
+                query = textoBuscar.text,
+                recuperarResultados = prediccionesBusquedaMapa
+            )
+        }
+    }
 
     //UI--------------------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------------------
@@ -380,7 +374,7 @@ fun MapaPrincipal(
                             modifier = modifier
                                 .padding(end = 5.dp)
                                 .clickable {
-                                    zoom = 13f
+                                    viewModel.setZoom(13f)
                                     viewModel.reiniciarImagen()
                                     viewModel.setPolilineaInicializada(false)
                                     viewModel.setMarcadorInicializado(false)
@@ -438,7 +432,7 @@ fun MapaPrincipal(
                             items(prediccionesBusquedaMapa){lugar ->
                                 Box(
                                     modifier = modifier.clickable {
-                                        zoom = 15f
+                                        viewModel.setZoom(15f)
                                         viewModel.reiniciarImagen()
                                         viewModel.setPolilineaInicializada(false)
                                         viewModel.setMarcadoresInicializado(false)

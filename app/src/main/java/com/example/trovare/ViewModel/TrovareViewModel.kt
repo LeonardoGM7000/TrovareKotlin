@@ -18,6 +18,7 @@ import com.example.trovare.Data.usuarioPrueba
 import com.example.trovare.ui.theme.Pantallas.Mapa.MapState
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FetchPhotoRequest
@@ -131,7 +132,7 @@ class TrovareViewModel : ViewModel() {
     //Obtener ubicacion en temporal en LatLng y cargarla al viewmodel
     fun getLastLocation(
         fusedLocationProviderClient: FusedLocationProviderClient
-    ) {
+    ){
         try {
             fusedLocationProviderClient.lastLocation
                 .addOnSuccessListener { location ->
@@ -194,6 +195,13 @@ class TrovareViewModel : ViewModel() {
     val polilineaInicializada: StateFlow<Boolean> = _polilineaInicializada.asStateFlow()
     fun setPolilineaInicializada(newValue: Boolean) {
         _polilineaInicializada.value = newValue
+    }
+
+    //zoom del mapa
+    private val _zoom = MutableStateFlow(15f)
+    val zoom = _zoom.asStateFlow()
+    fun setZoom(nuevoZoom: Float) {
+        _zoom.value = nuevoZoom
     }
 
     //para mostrar el marcador de un solo lugar
@@ -264,18 +272,57 @@ class TrovareViewModel : ViewModel() {
         _destinoRuta.value = nuevaUbicacion
     }
 
+
     private val _polilineaCodRuta = MutableStateFlow("")
     val polilineaCodRuta = _polilineaCodRuta.asStateFlow()
     fun setPolilineaCodRuta(newValue: String) {
         _polilineaCodRuta.value = newValue
     }
 
-
     private val _polilineaInicializadaRuta = MutableStateFlow(false)
     val polilineaInicializadaRuta: StateFlow<Boolean> = _polilineaInicializadaRuta.asStateFlow()
     fun setPolilineaInicializadaRuta(newValue: Boolean) {
         _polilineaInicializadaRuta.value = newValue
     }
+
+    //zoom del mapa
+    private val _zoomRuta = MutableStateFlow(15f)
+    val zoomRuta = _zoomRuta.asStateFlow()
+    fun setZoomRuta(nuevoZoom: Float) {
+        _zoomRuta.value = nuevoZoom
+    }
+
+    //para mostrar el marcador de un solo lugar
+    private val _marcadorInicializadoRuta = MutableStateFlow(false)
+    val marcadorInicializadoRuta: StateFlow<Boolean> = _marcadorInicializadoRuta.asStateFlow()
+    fun setMarcadorInicializadoRuta(newValue: Boolean) {
+        _marcadorInicializadoRuta.value = newValue
+    }
+
+    fun guardarOrigenRuta(indiceActual: Int, origenNuevo: LatLng) {//Guarda el origen de la ruta para este lugar en especifico
+        val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
+        lugarActual?.origen = origenNuevo
+    }
+
+    fun guardarRutaLugar(indiceActual: Int, rutaNueva: String) {//Guarda la linea de la ruta codificada como string
+        val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
+        lugarActual?.ruta = rutaNueva
+    }
+
+    fun guardarZoomLugar(indiceActual: Int, nuevoZoom: Float) {//Guarda el zoom necesario para mostrar bien el mapa al abrir la pantalla RutasItinerario
+        val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
+        lugarActual?.zoom = nuevoZoom
+    }
+
+    //nombre del lugar seleccionando
+    private val _nombreLugarRuta = MutableStateFlow("")
+    val nombreLugarRuta = _nombreLugarRuta.asStateFlow()
+
+    fun setNombreLugarRuta(nuevoNombre: String) {
+        _nombreLugarRuta.value = nuevoNombre
+    }
+
+
 
 
     //--------------------------------------------------------------------------------------------//
@@ -285,6 +332,13 @@ class TrovareViewModel : ViewModel() {
     private val _itinerarioActual = MutableStateFlow(itinerarioPrueba)
     val itinerarioActual = _itinerarioActual.asStateFlow()
 
+    private val _indiceActual = MutableStateFlow(0)
+    val indiceActual = _indiceActual.asStateFlow()
+
+    fun setIndiceActual(nuevoIndice: Int) {
+        _indiceActual.value = nuevoIndice
+    }
+
     fun setItinerarioActual(nuevoItinerario: Itinerario) {
         _itinerarioActual.value = nuevoItinerario
     }
@@ -293,33 +347,40 @@ class TrovareViewModel : ViewModel() {
     }
 
     fun agregarLugarALItinerario(id: String, nombreLugar: String, ubicacion: LatLng) {
-        val lugarNuevo = Lugar(id, nombreLugar, ubicacion = ubicacion, fechaDeVisita = null, horaDeVisita = null,  imagen=_imagen.value)
+        val lugarNuevo = Lugar(
+            id = id,
+            nombreLugar =  nombreLugar,
+            fechaDeVisita = null,
+            horaDeVisita = null,
+            origen = null,
+            ubicacion = ubicacion,
+            ruta = null,
+            zoom = 15f,
+            imagen=_imagen.value
+        )
         val itinerarioActualValor = _itinerarioActual.value
 
         // Verificar si la lista de lugares existe, si no, crearla
         if (itinerarioActualValor.lugares == null) {
             itinerarioActualValor.lugares = mutableListOf()
         }
-
         // Agregar el nuevo lugar a la lista de lugares del itinerario actual
         itinerarioActualValor.lugares?.add(lugarNuevo)
-
         // Actualizar el valor del itinerario actual en MutableStateFlow
         _itinerarioActual.value = itinerarioActualValor
     }
-    fun modificarFechaDeVisita(indiceActual: Int, fechaNueva: LocalDate) {
+    fun setFechaDeVisita(indiceActual: Int, fechaNueva: LocalDate) {
             val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
             lugarActual?.fechaDeVisita = fechaNueva
     }
 
-    fun modificarHoraDeVisita(indiceActual: Int, horaNueva: Hora) {
+    fun setHoraDeVisita(indiceActual: Int, horaNueva: Hora) {
         val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
         lugarActual?.horaDeVisita = horaNueva
     }
 
     fun borrarLugarActual(lugar: Lugar) {
         _itinerarioActual.value.lugares?.remove(lugar)
-
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -524,9 +585,7 @@ class TrovareViewModel : ViewModel() {
         placeId: String,
     ){
         val placeFields = listOf(
-            //Place.Field.ID,
             Place.Field.LAT_LNG,
-            //Place.Field.NAME,
         )//campos que se deben obtener de la API de places
 
         val request = FetchPlaceRequest.newInstance(placeId, placeFields)
@@ -539,8 +598,7 @@ class TrovareViewModel : ViewModel() {
                 //setNombreLugar(place.name?:"")
                 //setIdLugar(place.id?:"")
 
-                setMarcadorInicializado(true)
-                setInformacionInicializada(true)
+                setMarcadorInicializadoRuta(true)
 
             }.addOnFailureListener { exception: Exception ->
                 if (exception is ApiException) {

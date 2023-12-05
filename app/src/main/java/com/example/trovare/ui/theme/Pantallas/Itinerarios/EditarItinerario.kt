@@ -1,5 +1,6 @@
 package com.example.trovare.ui.theme.Pantallas.Itinerarios
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -94,6 +95,7 @@ fun EditarItinerario(
     val clockState = rememberSheetState()
     var indiceActual by remember{ mutableStateOf(0) }
     var listaVisible by remember{ mutableStateOf(true) }
+    val origen by viewModel.origen.collectAsState()
 
     var mostrarBorrarDeItinerario by rememberSaveable { mutableStateOf(false) }
 
@@ -103,7 +105,7 @@ fun EditarItinerario(
             selection = CalendarSelection.Date{ fecha->
                 CoroutineScope(Dispatchers.Default).launch {
                     listaVisible = false
-                    viewModel.modificarFechaDeVisita(indiceActual = indiceActual, fechaNueva = fecha)
+                    viewModel.setFechaDeVisita(indiceActual = indiceActual, fechaNueva = fecha)
                     itinerario.lugares = lugares?.sortedBy { it.fechaDeVisita }?.toMutableList()
                     lugares = itinerario.lugares
                     listaVisible = true
@@ -121,7 +123,7 @@ fun EditarItinerario(
             selection = ClockSelection.HoursMinutes{hours, minutes ->
                 CoroutineScope(Dispatchers.Default).launch {
                     listaVisible = false
-                    viewModel.modificarHoraDeVisita(indiceActual = indiceActual, horaNueva = Hora(hora = hours, minuto = minutes))
+                    viewModel.setHoraDeVisita(indiceActual = indiceActual, horaNueva = Hora(hora = hours, minuto = minutes))
                     //itinerario.lugares = lugares?.sortedBy { it.fechaDeVisita }?.toMutableList()
                     lugares = itinerario.lugares
                     listaVisible = true
@@ -427,7 +429,12 @@ fun EditarItinerario(
                                             }
                                             IconButton(
                                                 onClick = {
-                                                    viewModel.setDestinoRuta(lugar.ubicacion!!)
+                                                    viewModel.setIndiceActual(index)//actualiza el indice para saber a que lugar guardar los cambios una vez que nos encontremos en la pantalla de RutasItienrario
+                                                    viewModel.setPolilineaCodRuta(lugar.ruta?:"")//polilinea que se debe mostrar en la ruta
+                                                    viewModel.setOrigenRuta(lugar.origen?: origen)//origen que se debe mostrar
+                                                    viewModel.setDestinoRuta(lugar.ubicacion!!)//destino que se debe mostrar
+                                                    viewModel.setZoomRuta(lugar.zoom)//zoom que se debe mostrar
+                                                    viewModel.setNombreLugarRuta(lugar.nombreLugar)//nombre del lugar que se debe mostrar
                                                     navController.navigate(Pantalla.AgregarRutaALugar.ruta)
                                                 }
                                             ) {
