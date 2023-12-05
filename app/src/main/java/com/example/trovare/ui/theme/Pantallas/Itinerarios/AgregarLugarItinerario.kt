@@ -78,6 +78,7 @@ import com.example.trovare.ui.theme.Pantallas.Mapa.Marcador
 import com.example.trovare.ui.theme.Recursos.Divisor2
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv3
+import com.example.trovare.ui.theme.Trv8
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -309,11 +310,11 @@ fun AgregarLugarItinerario(
                         textStyle = MaterialTheme.typography.labelSmall,
                         placeholder = { Text(text = "Buscar lugares", style = MaterialTheme.typography.labelSmall) },
                         singleLine = true,
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = Color.White,
-                            containerColor = Color.Black,
+                        colors = TextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            focusedContainerColor = Color.Black,
                             cursorColor = Color.White,
-                        )
+                        ),
                     )
                 }
                 //Mostrar filtros-----------------------------------------------------------------------

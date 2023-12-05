@@ -404,10 +404,16 @@ fun rawJSONRutas(
 
                 val gson1 = Gson()
                 val mUser = gson1.fromJson(prettyJson, Routes::class.java)
-                val rutaInfo = RutaInfo(distancia = mUser.routes.first().distance, duracion = mUser.routes.first().duration, polilinea = mUser.routes.first().polyline.encodPolyline)
+                val rutaInfo = RutaInfo(
+                    distancia = mUser.routes.first().distance,
+                    duracion = mUser.routes.first().duration,
+                    polilinea = mUser.routes.first().polyline.encodPolyline
+                )
 
                 viewModel.setPolilineaCod(rutaInfo.polilinea)
                 viewModel.setPolilineaCodRuta(rutaInfo.polilinea)
+                viewModel.setTiempoDeViaje(rutaInfo.duracion)
+                viewModel.setDistanciaEntrePuntos(rutaInfo.distancia)
                 viewModel.setPolilineaInicializada(true)
                 viewModel.setPolilineaInicializadaRuta(true)
 

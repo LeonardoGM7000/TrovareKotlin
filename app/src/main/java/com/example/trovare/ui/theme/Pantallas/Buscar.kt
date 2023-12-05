@@ -53,6 +53,7 @@ import com.example.trovare.Data.Places
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
+import com.example.trovare.ui.theme.Trv8
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -152,11 +153,11 @@ fun Buscar(
                                 textStyle = MaterialTheme.typography.labelSmall,
                                 placeholder = { Text(text = "Busca lugares de interés", style = MaterialTheme.typography.labelSmall) },
                                 singleLine = true,
-                                colors = TextFieldDefaults.textFieldColors(
-                                    textColor = Color.White,
-                                    containerColor = Color.Black,
+                                colors = TextFieldDefaults.colors(
+                                    focusedTextColor = Color.White,
+                                    focusedContainerColor = Color.Black,
                                     cursorColor = Color.White,
-                                )
+                                ),
                             )
                         }
                     }

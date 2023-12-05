@@ -356,11 +356,11 @@ fun MapaPrincipal(
                     textStyle = MaterialTheme.typography.labelSmall,
                     placeholder = { Text(text = "Buscar lugares", style = MaterialTheme.typography.labelSmall) },
                     singleLine = true,
-                    colors = TextFieldDefaults.textFieldColors(
-                        textColor = Color.White,
-                        containerColor = Color.Black,
+                    colors = TextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        focusedContainerColor = Color.Black,
                         cursorColor = Color.White,
-                    )
+                    ),
                 )
             }
             //Mostrar filtros-----------------------------------------------------------------------

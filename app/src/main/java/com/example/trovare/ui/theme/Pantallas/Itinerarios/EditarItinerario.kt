@@ -176,13 +176,12 @@ fun EditarItinerario(
                             fontSize = 26.sp
                         ),
                         singleLine = true,
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = Color.White,
-                            containerColor = Trv1,
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Trv1,
                             focusedIndicatorColor = Trv1,
                             unfocusedIndicatorColor = Trv1,
                             cursorColor = Color.White,
-                        )
+                        ),
                     )
                 }
                 item{

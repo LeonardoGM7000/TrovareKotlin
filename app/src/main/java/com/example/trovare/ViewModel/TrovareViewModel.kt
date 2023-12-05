@@ -279,8 +279,27 @@ class TrovareViewModel : ViewModel() {
         _polilineaCodRuta.value = newValue
     }
 
+
+    private val _distanciaEntrePuntos = MutableStateFlow(0.0f)
+    val distanciaEntrePuntos = _distanciaEntrePuntos.asStateFlow()
+
+    fun setDistanciaEntrePuntos(nuevaDsitancia: Float) {
+        _distanciaEntrePuntos.value = nuevaDsitancia
+    }
+
+    private val _tiempoDeViaje = MutableStateFlow("")
+    val tiempoDeViaje = _tiempoDeViaje.asStateFlow()
+
+    fun setTiempoDeViaje(nuevoTiempo: String) {
+        _tiempoDeViaje.value = nuevoTiempo
+    }
+
+
+
+
     private val _polilineaInicializadaRuta = MutableStateFlow(false)
     val polilineaInicializadaRuta: StateFlow<Boolean> = _polilineaInicializadaRuta.asStateFlow()
+
     fun setPolilineaInicializadaRuta(newValue: Boolean) {
         _polilineaInicializadaRuta.value = newValue
     }

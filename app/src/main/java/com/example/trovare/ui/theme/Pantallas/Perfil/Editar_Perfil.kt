@@ -192,15 +192,14 @@ fun EditarPerfil(
                                     style = MaterialTheme.typography.labelSmall
                                 )
                             },
-                            colors = TextFieldDefaults.textFieldColors(
-                                textColor = Color.White,
+                            colors = TextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
                                 focusedLabelColor = Color.White,
                                 unfocusedLabelColor = Color.White,
-                                containerColor = Trv2,
+                                focusedContainerColor = Trv2,
                                 cursorColor = Color.White,
                                 focusedIndicatorColor = Color.White,
                                 unfocusedIndicatorColor = Color.White,
-
                             ),
                             singleLine = true,
                             keyboardOptions = keyboardOptions
@@ -226,14 +225,14 @@ fun EditarPerfil(
                                     style = MaterialTheme.typography.labelSmall
                                 )
                             },
-                            colors = TextFieldDefaults.textFieldColors(
-                                textColor = Color.White,
+                            colors = TextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
                                 focusedLabelColor = Color.White,
                                 unfocusedLabelColor = Color.White,
-                                containerColor = Trv2,
+                                focusedContainerColor = Trv2,
                                 cursorColor = Color.White,
                                 focusedIndicatorColor = Color.White,
-                                unfocusedIndicatorColor = Color.White
+                                unfocusedIndicatorColor = Color.White,
                             ),
                             singleLine = true,
                             keyboardOptions = keyboardOptions
@@ -259,14 +258,14 @@ fun EditarPerfil(
                                     style = MaterialTheme.typography.labelSmall
                                 )
                             },
-                            colors = TextFieldDefaults.textFieldColors(
-                                textColor = Color.White,
+                            colors = TextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
                                 focusedLabelColor = Color.White,
                                 unfocusedLabelColor = Color.White,
-                                containerColor = Trv2,
+                                focusedContainerColor = Trv2,
                                 cursorColor = Color.White,
                                 focusedIndicatorColor = Color.White,
-                                unfocusedIndicatorColor = Color.White
+                                unfocusedIndicatorColor = Color.White,
                             ),
                             maxLines = 5,
                             keyboardOptions = keyboardOptions

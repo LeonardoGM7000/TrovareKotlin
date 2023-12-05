@@ -67,6 +67,7 @@ import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.Divisor2
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv10
+import com.example.trovare.ui.theme.Trv8
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -137,8 +138,8 @@ fun RutasItinerario(
 
     //Transporte seleccionado---------------
     var transporte by remember { mutableStateOf("") }
-
-
+    val distanciaEntrePuntos by viewModel.distanciaEntrePuntos.collectAsState()
+    val tiempoDeViaje by viewModel.tiempoDeViaje.collectAsState()
 
     //Funciones
     fun iniciarTimer() {
@@ -273,11 +274,11 @@ fun RutasItinerario(
                                     )
                                 },
                                 singleLine = true,
-                                colors = TextFieldDefaults.textFieldColors(
-                                    textColor = Color.White,
-                                    containerColor = Trv1,
-                                    cursorColor = Color.White,
-                                )
+                                colors = TextFieldDefaults.colors(
+                                    focusedTextColor = Color.White,
+                                    focusedContainerColor = Trv1,
+                                    cursorColor = Color.White
+                                ),
                             )
                         }
                     //Ubicación destino
@@ -316,11 +317,11 @@ fun RutasItinerario(
                                     )
                                 },
                                 singleLine = true,
-                                colors = TextFieldDefaults.textFieldColors(
-                                    textColor = Color.White,
-                                    containerColor = Trv1,
-                                    cursorColor = Color.White,
-                                )
+                                colors = TextFieldDefaults.colors(
+                                    focusedTextColor = Color.White,
+                                    focusedContainerColor = Trv1,
+                                    cursorColor = Color.White
+                                ),
                             )
                         }
                     }
@@ -451,7 +452,6 @@ fun RutasItinerario(
                             draggable = false
                         )
                     }
-
                     //Mostrar marcador de destino(siempre se muestra)
                     MarkerInfoWindow(
                         state = rememberMarkerState(position = destinoRuta),
@@ -460,7 +460,6 @@ fun RutasItinerario(
                         },
                         draggable = false
                     )
-
                     if(polilineaInicializadaRuta){
 
                         MapEffect(origenRuta) {
@@ -483,7 +482,6 @@ fun RutasItinerario(
                 }
 
                 Column {
-
                     Box(
                         modifier = modifier.fillMaxWidth()
                     ){
@@ -491,7 +489,12 @@ fun RutasItinerario(
                             modifier = modifier.fillMaxWidth(),
                             color = Color(0x7F191B1A)
                         ) {
-                            Text(text = "prueba")
+                            val distancia = (distanciaEntrePuntos/1000).toInt()
+                            Column {
+                                Text(text = "(${distancia} km)")
+                                //Text(text = "${tiempoDeViaje.dropLast(1).toDouble()} m")
+                            }
+                            
                         }
                     }
 
@@ -580,3 +583,4 @@ fun RutasItinerario(
         }
     }
 }
+

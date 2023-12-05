@@ -229,11 +229,11 @@ fun Soporte(
                                 style = MaterialTheme.typography.labelSmall
                             )
                         },
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = Color.White,
+                        colors = TextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
                             focusedLabelColor = Color.White,
                             unfocusedLabelColor = Color.White,
-                            containerColor = Trv1,
+                            focusedContainerColor = Trv1,
                             cursorColor = Color.White,
                             focusedIndicatorColor = Color.White,
                             unfocusedIndicatorColor = Color.White

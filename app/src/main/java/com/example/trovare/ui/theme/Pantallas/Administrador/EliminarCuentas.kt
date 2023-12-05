@@ -369,11 +369,11 @@ fun BusquedaCuenta(
                     )
                 },
                 singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(
-                    textColor = Color.White,
-                    containerColor = Color.Black,
-                    cursorColor = Color.White,
-                )
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    focusedContainerColor = Color.Black,
+                    cursorColor = Color.White
+                ),
             )
             //Log.i("Texto escrito", textoBuscar.text)
         }

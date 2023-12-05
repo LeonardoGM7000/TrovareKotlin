@@ -158,11 +158,11 @@ fun TarjetaBusqueda(
                 textStyle = MaterialTheme.typography.labelSmall,
                 placeholder = { Text(text = "Buscar Comentario", style = MaterialTheme.typography.labelSmall) },
                 singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(
-                    textColor = Color.White,
-                    containerColor = Color.Black,
-                    cursorColor = Color.White,
-                )
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    focusedContainerColor = Color.Black,
+                    cursorColor = Color.White
+                ),
             )
         }
         Icon(
