@@ -146,7 +146,7 @@ fun InicioDeSesion(
                         leadingIcon = {Icon(imageVector = Icons.Rounded.Mail, contentDescription = "")},
                         label = {
                             Text(
-                                text = "Correo",
+                                text = "Correo *",
                                 style = MaterialTheme.typography.labelSmall
                             )
                         },
@@ -187,7 +187,7 @@ fun InicioDeSesion(
                         visualTransformation = if (passwordOculta) PasswordVisualTransformation() else VisualTransformation.None,
                         label = {
                             Text(
-                                text = "Contraseña",
+                                text = "Contraseña *",
                                 style = MaterialTheme.typography.labelSmall
                             )
                         },

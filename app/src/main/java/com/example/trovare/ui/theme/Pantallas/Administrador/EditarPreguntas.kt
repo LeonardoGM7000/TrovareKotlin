@@ -15,6 +15,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -35,12 +38,9 @@ import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv6
 import com.example.trovare.ui.theme.Trv8
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -183,7 +183,7 @@ fun EditarPreguntas(
                         },
                         label = {
                             Text(
-                                text = "Pregunta",
+                                text = "Pregunta *",
                                 style = MaterialTheme.typography.labelSmall
                             )
                         },
@@ -224,7 +224,7 @@ fun EditarPreguntas(
                         onValueChange = { textoRespuesta = it },
                         label = {
                             Text(
-                                text = "Respuesta",
+                                text = "Respuesta *",
                                 style = MaterialTheme.typography.labelSmall
                             )
                         },

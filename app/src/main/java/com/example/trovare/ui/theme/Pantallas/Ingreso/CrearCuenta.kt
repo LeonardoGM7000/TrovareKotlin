@@ -391,7 +391,7 @@ fun CrearCuenta(
                                 Log.i("error", "campos incompletos")
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
-                                        message = "Completar todos los campos",
+                                        message = "Campos obligatorios no completados",
                                         duration = SnackbarDuration.Short
                                     )
                                 }
