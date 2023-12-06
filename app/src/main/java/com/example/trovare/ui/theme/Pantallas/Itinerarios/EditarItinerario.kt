@@ -20,6 +20,9 @@ import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CalendarToday
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.DeleteForever
+import androidx.compose.material.icons.rounded.DirectionsCar
+import androidx.compose.material.icons.rounded.DirectionsTransit
+import androidx.compose.material.icons.rounded.DirectionsWalk
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Place
 import androidx.compose.material.icons.rounded.Route
@@ -65,6 +68,7 @@ import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
+import com.example.trovare.ui.theme.Trv10
 import com.example.trovare.ui.theme.Trv11
 import com.example.trovare.ui.theme.Trv3
 import com.example.trovare.ui.theme.Trv6
@@ -78,6 +82,7 @@ import com.maxkeppeler.sheets.clock.models.ClockSelection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -106,7 +111,7 @@ fun EditarItinerario(
                 CoroutineScope(Dispatchers.Default).launch {
                     listaVisible = false
                     viewModel.setFechaDeVisita(indiceActual = indiceActual, fechaNueva = fecha)
-                    itinerario.lugares = lugares?.sortedBy { it.fechaDeVisita }?.toMutableList()
+                    itinerario.lugares = lugares?.sortedWith(compareBy({ it.fechaDeVisita }, { it.horaDeVisita }))?.toMutableList()
                     lugares = itinerario.lugares
                     listaVisible = true
                 }
@@ -123,7 +128,9 @@ fun EditarItinerario(
             selection = ClockSelection.HoursMinutes{hours, minutes ->
                 CoroutineScope(Dispatchers.Default).launch {
                     listaVisible = false
-                    viewModel.setHoraDeVisita(indiceActual = indiceActual, horaNueva = Hora(hora = hours, minuto = minutes))
+                    val nuevaHora = LocalTime.of(hours, minutes)
+                    viewModel.setHoraDeVisita(indiceActual = indiceActual, horaNueva = nuevaHora)
+                    itinerario.lugares = lugares?.sortedWith(compareBy({ it.fechaDeVisita }, { it.horaDeVisita }))?.toMutableList()
                     //itinerario.lugares = lugares?.sortedBy { it.fechaDeVisita }?.toMutableList()
                     lugares = itinerario.lugares
                     listaVisible = true
@@ -354,6 +361,8 @@ fun EditarItinerario(
                                         Column(
                                             modifier = modifier.fillMaxWidth(0.8f)
                                         ) {
+                                            val numero = lugar.horaDeVisita?.minute
+                                            val numeroFormateado = String.format("%02d", numero)
                                             Text(
                                                 text = lugar.nombreLugar,
                                                 color = Color.Black,
@@ -398,7 +407,7 @@ fun EditarItinerario(
                                                         tint = Color.Black
                                                     )
                                                     Text(
-                                                        text = if(lugar.horaDeVisita == null) "" else "${lugar.horaDeVisita!!.hora}:${lugar.horaDeVisita!!.minuto}",
+                                                        text = if(lugar.horaDeVisita == null) "" else "${lugar.horaDeVisita!!.hour}:${numeroFormateado}",
                                                         color = Color.Black,
                                                         fontSize = 20.sp
                                                     )
@@ -435,13 +444,33 @@ fun EditarItinerario(
                                                     viewModel.setDestinoRuta(lugar.ubicacion!!)//destino que se debe mostrar
                                                     viewModel.setZoomRuta(lugar.zoom)//zoom que se debe mostrar
                                                     viewModel.setNombreLugarRuta(lugar.nombreLugar)//nombre del lugar que se debe mostrar
+                                                    viewModel.setTransporteRuta(lugar.transporte)//tipo de transporte que se utiliza en la ruta
+                                                    viewModel.setIdLugarRuta(lugar.id)//Id del lugar para hacer la consulta a la API
                                                     navController.navigate(Pantalla.AgregarRutaALugar.ruta)
                                                 }
                                             ) {
                                                 Icon(
-                                                    imageVector = Icons.Rounded.Route,
+                                                    imageVector =
+                                                        when {
+                                                            lugar.transporte == "" -> {
+                                                                Icons.Rounded.Route
+                                                            }
+
+                                                            lugar.transporte == "auto" -> {
+                                                                Icons.Rounded.DirectionsCar
+                                                            }
+
+                                                            lugar.transporte == "transporte" -> {
+                                                                Icons.Rounded.DirectionsTransit
+                                                            }
+                                                            else -> {Icons.Rounded.DirectionsWalk}
+                                                        },
                                                     contentDescription = "",
-                                                    tint = Color.Black,
+                                                    tint = if(lugar.ruta == null){
+                                                        Color.Black
+                                                    } else {
+                                                        Trv6
+                                                    },
                                                 )
                                             }
                                         }

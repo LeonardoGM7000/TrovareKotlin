@@ -1,5 +1,6 @@
 package com.example.trovare.ui.theme.Pantallas
 
+import android.text.format.DateUtils
 import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
@@ -46,12 +47,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.trovare.Api.obtenerResenas
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
@@ -70,8 +73,9 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
+import java.util.concurrent.TimeUnit
 
-data class Resena(val usuario: String, val puntuacion: Int, val texto: String)
+data class Resena(val usuario: String, val puntuacion: Int, val texto: String, val tiempo: Int, val fotoPerfil: String)
 
 @Composable
 fun Detalles(
@@ -384,6 +388,11 @@ fun TarjetaReseña(
             )
         )
 
+    val tiempoActual = System.currentTimeMillis() // Tiempo actual en milisegundos
+    val tiempoResena = TimeUnit.SECONDS.toMillis(resena.tiempo.toLong()) // Convertir a milisegundos
+
+    val tiempoTranscurrido = DateUtils.getRelativeTimeSpanString(tiempoResena, tiempoActual, DateUtils.MINUTE_IN_MILLIS)
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -410,15 +419,9 @@ fun TarjetaReseña(
                     ){ expanded = !expanded },
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    modifier = Modifier
-                        .padding(13.dp),
-                    imageVector = Icons.Filled.AccountCircle,
-                    contentDescription = "",
-                    tint = Color.White,
-                )
-                Box(
-                    contentAlignment = Alignment.CenterStart,
+                fotoDePerfilUsuario(url = resena.fotoPerfil)
+                Column(
+                    horizontalAlignment = Alignment.Start,
                     modifier = Modifier
                         .fillMaxWidth(0.64f)
                 ) {
@@ -426,6 +429,11 @@ fun TarjetaReseña(
                         text = resena.usuario,
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White
+                    )
+                    Text(
+                        text = tiempoTranscurrido.toString(), // Mostrar tiempo transcurrido
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray
                     )
                 }
                 Text(
@@ -453,4 +461,12 @@ fun TarjetaReseña(
 
         }
     }
+}
+@Composable
+fun fotoDePerfilUsuario(url: String) {
+    AsyncImage(
+        model = url,
+        contentDescription = null,
+        modifier = Modifier.size(80.dp, 80.dp).clip(CircleShape).padding(13.dp)
+    )
 }

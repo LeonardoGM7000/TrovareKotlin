@@ -81,11 +81,13 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.trovare.Api.obtenerResenas
 import com.example.trovare.Api.rawJSON
 import com.example.trovare.Api.rawJSONRutas
 import com.example.trovare.Data.Places
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
+import com.example.trovare.ui.theme.Pantallas.Resena
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Recursos.Divisor2
 import com.example.trovare.ui.theme.Trv1
@@ -139,6 +141,7 @@ fun RutasItinerario(
     var textoBuscar by rememberSaveable(stateSaver = TextFieldValue.Saver) {//texto a buscar
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
+
     val colores = FilterChipDefaults.filterChipColors(
         iconColor = Color.White,
         selectedLeadingIconColor = Color.Black,
@@ -172,7 +175,7 @@ fun RutasItinerario(
     val polilineaCodRuta by viewModel.polilineaCodRuta.collectAsState()
 
     //Transporte seleccionado---------------
-    var transporte by remember { mutableStateOf("") }
+    val transporteRuta by viewModel.transporteRuta.collectAsState()
     val distanciaEntrePuntos by viewModel.distanciaEntrePuntos.collectAsState()
     val tiempoDeViaje by viewModel.tiempoDeViaje.collectAsState()
 
@@ -204,6 +207,8 @@ fun RutasItinerario(
             )
         }
     }
+
+
 
     fun calcularZoom(punto1: LatLng, punto2: LatLng) {
         val latDiff = punto2.latitude - punto1.latitude
@@ -246,15 +251,76 @@ fun RutasItinerario(
         }
     }
 
+    val idRuta by viewModel.idLugarRuta.collectAsState()
+    var nombre by rememberSaveable { mutableStateOf("") }
+    var direccion by rememberSaveable { mutableStateOf("") }
+    var numeroTelefono by rememberSaveable { mutableStateOf("") }
+    var paginaWeb by rememberSaveable { mutableStateOf("") }
+    var calificacion by rememberSaveable { mutableStateOf(-1.0) }
+
+
+
     LaunchedEffect(key1 = Unit){
+        viewModel.obtenerLugarRuta(
+            placesClient = placesClient,
+            placeId = idRuta,
+            nombre = { nombre = it?:"" },
+            direccion = { direccion = it?:""},
+            rating =  { calificacion = it?: -1.0},
+            numeroTelefono = {numeroTelefono = it?: ""},
+            paginaWeb = {paginaWeb = it?: ""},
+        )
         calcularZoom(origenRuta, destinoRuta)
+        when {
+            transporteRuta == "auto" -> {
+                scope.launch {
+                    peekHeight = 100.dp
+                }
+                viewModel.setTransporteRuta("auto")
+                calcularZoom(origenRuta, destinoRuta)
+                rawJSONRutas(
+                    origen = origenRuta,
+                    destino = destinoRuta,
+                    viewModel = viewModel,
+                    //recuperarResultados = rutaInfo
+                )
+            }
+            transporteRuta == "transporte" -> {
+                scope.launch {
+                    peekHeight = 100.dp
+                }
+                calcularZoom(origenRuta, destinoRuta)
+                rawJSONRutas(
+                    origen = origenRuta,
+                    destino = destinoRuta,
+                    viewModel = viewModel,
+                    travel_mode = "TRANSIT"
+                    //recuperarResultados = rutaInfo
+                )
+            }
+            transporteRuta == "caminando" -> {
+                scope.launch {
+                    peekHeight = 100.dp
+                }
+                calcularZoom(origenRuta, destinoRuta)
+                rawJSONRutas(
+                    origen = origenRuta,
+                    destino = destinoRuta,
+                    viewModel = viewModel,
+                    travel_mode = "WALK"
+                    //recuperarResultados = rutaInfo
+                )
+            }
+        }
     }
 
     //UI--------------------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------------------
+    
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
+        containerColor = Trv1,
         sheetPeekHeight = peekHeight,
         //Tarjeta superior para seleccionar lugar de origen-----------------------------------------
         topBar = {
@@ -389,12 +455,13 @@ fun RutasItinerario(
                                     contentDescription = ""
                                 )
                             },
-                            selected = transporte == "auto",
+                            selected = transporteRuta == "auto",
                             onClick = {
+                                viewModel.setPolilineaInicializadaRuta(false)
                                 scope.launch {
                                     peekHeight = 100.dp
                                 }
-                                transporte = "auto"
+                                viewModel.setTransporteRuta("auto")
                                 calcularZoom(origenRuta, destinoRuta)
                                 rawJSONRutas(
                                     origen = origenRuta,
@@ -415,12 +482,13 @@ fun RutasItinerario(
                                     contentDescription = "",
                                 )
                             },
-                            selected = transporte == "transporte",
+                            selected = transporteRuta == "transporte",
                             onClick = {
+                                viewModel.setPolilineaInicializadaRuta(false)
                                 scope.launch {
                                     peekHeight = 100.dp
                                 }
-                                transporte = "transporte"
+                                viewModel.setTransporteRuta("transporte")
                                 calcularZoom(origenRuta, destinoRuta)
                                 rawJSONRutas(
                                     origen = origenRuta,
@@ -442,12 +510,13 @@ fun RutasItinerario(
                                     contentDescription = "",
                                 )
                             },
-                            selected = transporte == "caminando",
+                            selected = transporteRuta == "caminando",
                             onClick = {
+                                viewModel.setPolilineaInicializadaRuta(false)
                                 scope.launch {
                                     peekHeight = 100.dp
                                 }
-                                transporte = "caminando"
+                                viewModel.setTransporteRuta("caminando")
                                 calcularZoom(origenRuta, destinoRuta)
                                 rawJSONRutas(
                                     origen = origenRuta,
@@ -487,10 +556,10 @@ fun RutasItinerario(
                                modifier = modifier.size(35.dp),
                                imageVector =
                                when {
-                                   transporte == "caminando" -> {
+                                   transporteRuta == "caminando" -> {
                                        Icons.Rounded.DirectionsWalk
                                    }
-                                   transporte == "transporte" -> {
+                                   transporteRuta == "transporte" -> {
                                        Icons.Rounded.DirectionsBus
                                    }
                                    else -> {
@@ -521,7 +590,7 @@ fun RutasItinerario(
                     }
                     //Boton agregar ruta-----
                     TextButton(
-                        enabled = transporte != "",
+                        enabled = polilineaInicializadaRuta,
                         onClick = {
                             scope.launch {
                                 scaffoldState.bottomSheetState.show()
@@ -533,7 +602,7 @@ fun RutasItinerario(
                             viewModel.guardarOrigenRuta(indiceActual = indiceActual, origenNuevo = origenRuta)
                             viewModel.guardarRutaLugar(indiceActual = indiceActual, rutaNueva = polilineaCodRuta)
                             viewModel.guardarZoomLugar(indiceActual = indiceActual, nuevoZoom = zoomRuta)
-
+                            viewModel.guardarTransporte(indiceActual = indiceActual, nuevoTransporte = transporteRuta)
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Trv10,
@@ -623,7 +692,7 @@ fun RutasItinerario(
                     Text(
                         modifier = modifier
                             .fillMaxWidth(0.7f),
-                        text = "nombre",
+                        text = nombre,
                         textAlign = TextAlign.Justify,
                         color = Color.White,
                         style = MaterialTheme.typography.labelMedium
@@ -634,7 +703,7 @@ fun RutasItinerario(
                     ) {
                         Text(
                             modifier = modifier.fillMaxWidth(0.75f),
-                            text = "1/5",
+                            text = "${calificacion}/5",
                             textAlign = TextAlign.Right,
                             color = Color.White,
                             style = MaterialTheme.typography.bodyMedium
@@ -646,12 +715,12 @@ fun RutasItinerario(
                         )
                     }
                 }
-                /*
+
 
                 //Direccion-----------------------------------------------------------------------------
                 if(direccion != ""){
                     Row(modifier = modifier
-                        .padding(horizontal = 45.dp, vertical = 15.dp),
+                        .padding(vertical = 15.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -670,7 +739,7 @@ fun RutasItinerario(
                 //Horario de apertura-------------------------------------------------------------------
                 if(numeroTelefono != ""){
                     Row(modifier = modifier
-                        .padding(horizontal = 45.dp, vertical = 15.dp),
+                        .padding(vertical = 15.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -689,7 +758,7 @@ fun RutasItinerario(
                 //Pagina web----------------------------------------------------------------------------
                 if(paginaWeb != ""){
                     Row(modifier = modifier
-                        .padding(horizontal = 45.dp, vertical = 15.dp),
+                        .padding(vertical = 15.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -706,8 +775,6 @@ fun RutasItinerario(
                         )
                     }
                 }
-
-                 */
             }
         },
         //Mensajes------------
@@ -809,6 +876,7 @@ fun RutasItinerario(
                                                 viewModel.setZoomRuta(15f)
                                                 viewModel.setPolilineaInicializadaRuta(false)
                                                 viewModel.setMarcadorInicializadoRuta(false)
+                                                viewModel.setTransporteRuta("")
                                                 viewModel.obtenerMarcadorOrigen(
                                                     placesClient = placesClient,
                                                     placeId = lugar.id,
