@@ -485,7 +485,7 @@ fun Detalles(
                 if (reseñasList.isNotEmpty()) {
                     reseñasList.forEach { reseña ->
                         TarjetaReseña(reseña = reseña, clave = placeId.toString(), APIoApp = false, onDeleteClick = {},
-                        )
+                            navController = navController)
                         Spacer(modifier = Modifier.height(15.dp))
                     }
                 } else {
@@ -749,7 +749,7 @@ fun Detalles(
 
                             //mostrar mensaje de eliminado
                     },
-                                clave = placeId.toString(), APIoApp = true)
+                                clave = placeId.toString(), APIoApp = true, navController = navController)
                     Spacer(modifier = Modifier.height(15.dp))
                 }
             }
@@ -760,6 +760,7 @@ fun Detalles(
 @Composable
 fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier,
                   clave: String, APIoApp: Boolean,    onDeleteClick: () -> Unit,
+                  navController: NavController
 ) {
     var mostrarBorrarCuenta by rememberSaveable { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
@@ -844,7 +845,7 @@ fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier,
                                     modifier = Modifier
                                         .padding(13.dp)
                                         .clickable {
-                                            //navController.navigate(Pantalla.EditarComentario.ruta + "/${clave}")
+                                            navController.navigate(Pantalla.EditarComentario.ruta + "/${clave}")
                                         },
                                     imageVector = Icons.Rounded.Edit,
                                     contentDescription = "",

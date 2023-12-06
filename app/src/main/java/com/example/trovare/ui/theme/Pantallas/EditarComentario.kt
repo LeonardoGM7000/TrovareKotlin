@@ -2,16 +2,26 @@ package com.example.trovare.ui.theme.Pantallas
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -39,9 +49,14 @@ import kotlinx.coroutines.tasks.await
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+var estrellass:Int = 0
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditarComentario(
@@ -55,7 +70,7 @@ fun EditarComentario(
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
     var isErrorL: Int by rememberSaveable { mutableIntStateOf(0) }
-    val maximoLetras = 100
+    val maximoLetras = 250
 
     // Estado para manejar la carga de la pregunta desde Firestore
     var preguntaActual by remember(placeId) { mutableStateOf("") }
@@ -82,15 +97,13 @@ fun EditarComentario(
     // Utilizar LaunchedEffect para cargar la pregunta una vez al ingresar a la pantalla
     LaunchedEffect(placeId) {
         // Simulación de carga de datos desde Firestore
-        val preguntaRespuesta = loadPreguntaFromFirestore(placeId!!)
+        val preguntaRespuesta = loadComentarioFromFirestore(placeId!!)
 
         // Verificar si se pudo cargar la pregunta y la respuesta desde Firestore
         if (preguntaRespuesta != null) {
-            preguntaActual = preguntaRespuesta.pregunta ?: ""
+            preguntaActual = preguntaRespuesta.descripcion ?: ""
             textoPregunta = TextFieldValue(preguntaActual)
 
-            respuestaActual = preguntaRespuesta.respuesta ?: ""
-            textoRespuesta = TextFieldValue(respuestaActual)
         }
     }
 
@@ -99,7 +112,7 @@ fun EditarComentario(
             delay(1000)
             try {
                 // Lógica de guardado en Firestore
-                saveComentarioToFirestore(placeId!!, textoPregunta.text, textoRespuesta.text)
+                saveComentarioToFirestore(placeId!!, textoPregunta.text, estrellass.toString())
 
                 // Restablecer el estado
                 guardadoExitoso = false
@@ -127,7 +140,7 @@ fun EditarComentario(
             ) {
                 Button(
                     onClick = {
-                        if(textoPregunta.text.isBlank() || textoRespuesta.text.isBlank()){
+                        if(textoPregunta.text.isBlank()){
                             scope.launch {
                                 snackbarHostState.showSnackbar(
                                     message = "Campos obligatorios no completados",
@@ -137,7 +150,7 @@ fun EditarComentario(
                         }else{
                             scope.launch {
                                 snackbarHostState.showSnackbar(
-                                    message = "Pregunta guardada exitosamente",
+                                    message = "Reseña guardada exitosamente",
                                     duration = SnackbarDuration.Short
                                 )
                             }
@@ -165,15 +178,18 @@ fun EditarComentario(
         ) {
             LazyColumn() {
                 item {
-                    TituloAdmin(titulo = "EDITAR PREGUNTA")
+                    TituloAdmin(titulo = "EDITAR RESEÑA")
                 }
                 item {
                     Divisor(modifier = Modifier.padding(top = 13.dp))
                 }
                 item {
+                    RatingScreenn()
+                }
+                item {
                     OutlinedTextField(
                         modifier = modifier
-                            .fillMaxWidth()
+                            .fillMaxSize()
                             .padding(bottom = 15.dp, start = 50.dp, end = 50.dp),
                         value = textoPregunta,
                         onValueChange = {
@@ -183,7 +199,7 @@ fun EditarComentario(
                         },
                         label = {
                             Text(
-                                text = "Pregunta",
+                                text = "Reseña",
                                 style = MaterialTheme.typography.labelSmall
                             )
                         },
@@ -197,17 +213,11 @@ fun EditarComentario(
                             focusedIndicatorColor = Color.White,
                             unfocusedIndicatorColor = Color.White
                         ),
-                        singleLine = true,
+                        maxLines = 5,
                         keyboardOptions = keyboardOptionsTexto,
                         supportingText = {
                             isErrorL = isErrorL
-                            if (isErrorL == 1) {
-                                Text(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    text = "Ingresa solo letras",
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            } else if (isErrorL == 2) {
+                            if (isErrorL == 2) {
                                 Text(
                                     modifier = Modifier.fillMaxWidth(),
                                     text = "Máximo $maximoLetras carácteres",
@@ -216,46 +226,23 @@ fun EditarComentario(
                             }
                         },
                     )
-                    OutlinedTextField(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 15.dp, start = 50.dp, end = 50.dp),
-                        value = textoRespuesta,
-                        onValueChange = { textoRespuesta = it },
-                        label = {
-                            Text(
-                                text = "Respuesta",
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                        },
-                        textStyle = MaterialTheme.typography.labelSmall,
-                        colors = TextFieldDefaults.textFieldColors(
-                            textColor = Color.White,
-                            focusedLabelColor = Color.White,
-                            unfocusedLabelColor = Color.White,
-                            containerColor = Trv8,
-                            cursorColor = Color.White,
-                            focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White
-                        ),
-                        singleLine = true,
-                        keyboardOptions = keyboardOptionsTexto,
-                    )
                 }
             }
         }
     }
 }
 
-data class ComentarioCalificacion(val pregunta: String?, val respuesta: String?)
+data class ComentarioCalificacion(val descripcion: String?, val calificacion: String?)
 
-suspend fun loadComentarioFromFirestore(preguntaId: String): PreguntaRespuesta? {
+suspend fun loadComentarioFromFirestore(preguntaId: String): ComentarioCalificacion? {
     return try {
         val firestore = FirebaseFirestore.getInstance()
-        val documentSnapshot = firestore.collection("FAQS").document(preguntaId).get().await()
-        PreguntaRespuesta(
-            pregunta = documentSnapshot.getString("pregunta"),
-            respuesta = documentSnapshot.getString("respuesta")
+        val auth: FirebaseAuth by lazy { Firebase.auth }
+        val documentSnapshot = firestore.collection("Usuario").document(auth.currentUser?.email.toString())
+            .collection("comentarios").document(preguntaId).get().await()
+        ComentarioCalificacion(
+            descripcion  = documentSnapshot.getString("descripcion"),
+            calificacion = documentSnapshot.getString("calificacion")
         )
     } catch (e: Exception) {
         null
@@ -270,15 +257,79 @@ suspend fun saveComentarioToFirestore(
     nuevaRespuesta: String
 ) {
     try {
+        val auth: FirebaseAuth by lazy { Firebase.auth }
         val firestore = FirebaseFirestore.getInstance()
-        val preguntaRef = firestore.collection("FAQS").document(preguntaId)
+        val preguntaRef = firestore.collection("Usuario").document(auth.currentUser?.email.toString())
+            .collection("comentarios").document(preguntaId)
         preguntaRef.update(
             mapOf(
-                "pregunta" to nuevaPregunta,
-                "respuesta" to nuevaRespuesta
+                "descripcion" to nuevaPregunta,
+                "calificacion" to nuevaRespuesta,
+                "fecha" to (System.currentTimeMillis() / 1000).toString()
             )
         ).await()
     } catch (e: Exception) {
         Log.i("savePregunta",e.toString())
     }
+}
+
+@Composable
+fun RatingScreenn() {
+    var rating by remember { mutableStateOf(0) }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 15.dp, start = 50.dp, end = 50.dp),
+    ) {
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Mostrar estrellas seleccionables
+        StarRatingg(
+            rating = rating,
+            onRatingChanged = { newRating ->
+                rating = newRating
+            }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Log.i("calificacion lugar",rating.toString())
+        estrellass = rating
+        // Puedes incluir otros elementos aquí, como comentarios o botones de enviar.
+    }
+}
+@Composable
+fun StarRatingg(
+    rating: Int,
+    onRatingChanged: (Int) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        for (i in 1..5) {
+            val starIcon = if (i <= rating) Icons.Default.Star else Icons.Default.StarBorder
+            StarIconn(
+                icon = starIcon,
+                onStarClicked = { onRatingChanged(i) },
+                tint = if (i <= rating) Color.Yellow else Color.Gray
+            )
+        }
+    }
+}
+
+@Composable
+fun StarIconn(
+    icon: ImageVector,
+    onStarClicked: () -> Unit,
+    tint: Color = Color.Gray
+) {
+    Icon(
+        imageVector = icon,
+        contentDescription = "Estrella",
+        tint = tint,
+        modifier = Modifier
+            .size(40.dp)
+            .clickable { onStarClicked() }
+    )
 }

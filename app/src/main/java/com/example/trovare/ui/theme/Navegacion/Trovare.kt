@@ -25,6 +25,7 @@ import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Pantallas.Administrador
 import com.example.trovare.ui.theme.Pantallas.CategoriaSeleccionada
 import com.example.trovare.ui.theme.Pantallas.CrearCuenta
+import com.example.trovare.ui.theme.Pantallas.EditarComentario
 import com.example.trovare.ui.theme.Pantallas.EditarPreguntas
 import com.example.trovare.ui.theme.Pantallas.EliminarComentarios
 import com.example.trovare.ui.theme.Pantallas.EliminarCuentas
@@ -58,6 +59,7 @@ sealed class Pantalla(val ruta: String) {
     object Administrador : Pantalla("Administrador")
     object PreguntasAdmin : Pantalla("PreguntasAdmin")
     object EditarPreguntas : Pantalla("EditarPreguntas")
+    object EditarComentario : Pantalla("EditarComentario")
     object EliminarCuentas : Pantalla("EliminarCuentas")
     object EliminarComentarios : Pantalla("EliminarComentarios")
     object RecuperarContrasena : Pantalla("RecuperarContrasena")
@@ -205,6 +207,13 @@ fun Trovare(
             EditarPreguntas(
                 navController = navController,
                 preguntaId = preguntaId
+            )
+        }
+        composable(route = Pantalla.EditarComentario.ruta + "/{preguntaId}") { navBackStackEntry ->
+            val preguntaId = navBackStackEntry.arguments?.getString("preguntaId") ?: ""
+            EditarComentario(
+                navController = navController,
+                placeId = preguntaId
             )
         }
         composable(route = Pantalla.EliminarCuentas.ruta) {
