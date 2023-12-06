@@ -4,11 +4,14 @@ import com.example.trovare.ui.theme.Pantallas.Mapa.MapState
 import com.example.trovare.ui.theme.Pantallas.Mapa.MapStyle
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import com.google.maps.android.compose.GoogleMap
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,30 +19,46 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBackIos
 import androidx.compose.material.icons.rounded.DirectionsBus
 import androidx.compose.material.icons.rounded.DirectionsCar
 import androidx.compose.material.icons.rounded.DirectionsWalk
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.MyLocation
+import androidx.compose.material.icons.rounded.Phone
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.Web
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -49,11 +68,13 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -63,10 +84,13 @@ import androidx.navigation.NavController
 import com.example.trovare.Api.rawJSON
 import com.example.trovare.Api.rawJSONRutas
 import com.example.trovare.Data.Places
+import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
+import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Recursos.Divisor2
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv10
+import com.example.trovare.ui.theme.Trv6
 import com.example.trovare.ui.theme.Trv8
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -115,6 +139,17 @@ fun RutasItinerario(
     var textoBuscar by rememberSaveable(stateSaver = TextFieldValue.Saver) {//texto a buscar
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
+    val colores = FilterChipDefaults.filterChipColors(
+        iconColor = Color.White,
+        selectedLeadingIconColor = Color.Black,
+        labelColor = Color.White,
+        selectedLabelColor = Color.Black,
+        selectedContainerColor = Trv10,
+        containerColor = Trv1
+    )
+
+
+
     val textoLugarDestino by viewModel.nombreLugarRuta.collectAsState()
 
     //Mapa-------------------------------
@@ -140,6 +175,15 @@ fun RutasItinerario(
     var transporte by remember { mutableStateOf("") }
     val distanciaEntrePuntos by viewModel.distanciaEntrePuntos.collectAsState()
     val tiempoDeViaje by viewModel.tiempoDeViaje.collectAsState()
+
+
+    //bottom sheet
+    val scaffoldState = rememberBottomSheetScaffoldState()
+    var peekHeight by remember { mutableStateOf(0.dp) }
+    val scope = rememberCoroutineScope()
+
+    //Mensajes
+    val snackbarHostState = remember { SnackbarHostState() }
 
     //Funciones
     fun iniciarTimer() {
@@ -209,7 +253,10 @@ fun RutasItinerario(
     //UI--------------------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------------------
 
-    Scaffold(
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetPeekHeight = peekHeight,
+        //Tarjeta superior para seleccionar lugar de origen-----------------------------------------
         topBar = {
             Surface(
                 modifier = modifier
@@ -228,7 +275,8 @@ fun RutasItinerario(
                         ){
                             Icon(
                                 imageVector = Icons.Rounded.ArrowBackIos,
-                                contentDescription = ""
+                                contentDescription = "",
+                                tint = Color.White
                             )
                         }
                         Spacer(modifier = modifier.padding(horizontal = 3.dp))
@@ -243,9 +291,10 @@ fun RutasItinerario(
                                 modifier = modifier
                                     .size(20.dp),
                                 imageVector = Icons.Rounded.MyLocation,
-                                contentDescription = ""
+                                contentDescription = "",
+                                tint = Color.White
                             )
-                        //barra de búsqueda
+                            //barra de búsqueda
                         }
                         Card(
                             modifier = modifier
@@ -275,13 +324,14 @@ fun RutasItinerario(
                                 },
                                 singleLine = true,
                                 colors = TextFieldDefaults.colors(
+                                    unfocusedContainerColor = Trv1,
                                     focusedTextColor = Color.White,
                                     focusedContainerColor = Trv1,
                                     cursorColor = Color.White
                                 ),
                             )
                         }
-                    //Ubicación destino
+                        //Ubicación destino
                     }
                     Row(
                         modifier = modifier
@@ -292,7 +342,8 @@ fun RutasItinerario(
                             modifier = modifier
                                 .size(20.dp),
                             imageVector = Icons.Rounded.LocationOn,
-                            contentDescription = ""
+                            contentDescription = "",
+                            tint = Color.White
                         )
                         Card(
                             modifier = modifier
@@ -318,6 +369,7 @@ fun RutasItinerario(
                                 },
                                 singleLine = true,
                                 colors = TextFieldDefaults.colors(
+                                    disabledContainerColor = Trv1,
                                     focusedTextColor = Color.White,
                                     focusedContainerColor = Trv1,
                                     cursorColor = Color.White
@@ -339,6 +391,9 @@ fun RutasItinerario(
                             },
                             selected = transporte == "auto",
                             onClick = {
+                                scope.launch {
+                                    peekHeight = 100.dp
+                                }
                                 transporte = "auto"
                                 calcularZoom(origenRuta, destinoRuta)
                                 rawJSONRutas(
@@ -348,7 +403,7 @@ fun RutasItinerario(
                                     //recuperarResultados = rutaInfo
                                 )
                             },
-                            colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Trv10, containerColor = Trv1),
+                            colors = colores,
                             label = { Text(text = "auto") }
                         )
                         //Viajar en Transporte------------------------------------------------------
@@ -357,11 +412,14 @@ fun RutasItinerario(
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Rounded.DirectionsBus,
-                                    contentDescription = ""
+                                    contentDescription = "",
                                 )
                             },
                             selected = transporte == "transporte",
                             onClick = {
+                                scope.launch {
+                                    peekHeight = 100.dp
+                                }
                                 transporte = "transporte"
                                 calcularZoom(origenRuta, destinoRuta)
                                 rawJSONRutas(
@@ -372,7 +430,7 @@ fun RutasItinerario(
                                     //recuperarResultados = rutaInfo
                                 )
                             },
-                            colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Trv10, containerColor = Trv1),
+                            colors = colores,
                             label = { Text(text = "transporte") }
                         )
                         //Viajar Caminando-----------------------------------------------------------
@@ -381,11 +439,14 @@ fun RutasItinerario(
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Rounded.DirectionsWalk,
-                                    contentDescription = ""
+                                    contentDescription = "",
                                 )
                             },
                             selected = transporte == "caminando",
                             onClick = {
+                                scope.launch {
+                                    peekHeight = 100.dp
+                                }
                                 transporte = "caminando"
                                 calcularZoom(origenRuta, destinoRuta)
                                 rawJSONRutas(
@@ -396,7 +457,7 @@ fun RutasItinerario(
                                     //recuperarResultados = rutaInfo
                                 )
                             },
-                            colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Trv10, containerColor = Trv1),
+                            colors = colores,
                             label = { Text(text = "caminando") }
                         )
                     }
@@ -405,8 +466,257 @@ fun RutasItinerario(
                 //Busqueda------------------------------------------------------------------------------
             }
         },
-    //Mapa para agregar la ruta al lugar del itinerario---------------------------------------------
-    ) { it ->
+        //Contenido de la tarjeta inferior----------------------------------------------------------
+        sheetContent = {
+            // Sheet content
+            val distancia = (distanciaEntrePuntos/1000).toInt()
+            val tiempoDeViajeTemp = tiempoDeViaje.dropLast(1).toIntOrNull()
+
+            Column(
+                modifier = modifier.padding(horizontal = 25.dp)
+            ) {
+                //Mostrar icono de transporte seleccionado
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(modifier = modifier.fillMaxWidth(0.7f)){
+                       Row(
+                           verticalAlignment = Alignment.CenterVertically
+                       ) {
+                           Icon(
+                               modifier = modifier.size(35.dp),
+                               imageVector =
+                               when {
+                                   transporte == "caminando" -> {
+                                       Icons.Rounded.DirectionsWalk
+                                   }
+                                   transporte == "transporte" -> {
+                                       Icons.Rounded.DirectionsBus
+                                   }
+                                   else -> {
+                                       Icons.Rounded.DirectionsCar
+                                   }
+                               },
+                               contentDescription = ""
+                           )
+                           Spacer(modifier = modifier.padding(horizontal = 3.dp))
+                           if(tiempoDeViajeTemp != null){
+                               if(((tiempoDeViajeTemp/60)/60)!=0){
+                                   Text(
+                                       text = "${((tiempoDeViajeTemp/60)/60)} hrs ",
+                                       style = MaterialTheme.typography.labelMedium
+                                   )
+                               }
+                               Text(
+                                   text = "${tiempoDeViajeTemp%60} min",
+                                   style = MaterialTheme.typography.labelMedium
+                               )
+                           }
+                           Spacer(modifier = modifier.padding(horizontal = 3.dp))
+                           Text(
+                               text = "(${distancia} km)",
+                               style = MaterialTheme.typography.labelMedium
+                           )
+                       }
+                    }
+                    //Boton agregar ruta-----
+                    TextButton(
+                        enabled = transporte != "",
+                        onClick = {
+                            scope.launch {
+                                scaffoldState.bottomSheetState.show()
+                                snackbarHostState.showSnackbar(
+                                    message = "Ruta guardada",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                            viewModel.guardarOrigenRuta(indiceActual = indiceActual, origenNuevo = origenRuta)
+                            viewModel.guardarRutaLugar(indiceActual = indiceActual, rutaNueva = polilineaCodRuta)
+                            viewModel.guardarZoomLugar(indiceActual = indiceActual, nuevoZoom = zoomRuta)
+
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Trv10,
+                            contentColor = Color.Black
+                        ),
+                    ) {
+                        Text(
+                            text = "Agregar ruta"
+                        )
+                    }
+                }
+                Divider(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(top = 5.dp, bottom = 10.dp),
+                    color = Color.White
+                )
+                //Mostrar imágenes del lugar
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 5.dp)
+                ){
+                    item{
+                        Card(
+                            modifier = modifier
+                                .padding(end = 5.dp)
+                                .size(150.dp)
+                                .aspectRatio(1F),
+                        ){
+                            Box(
+                                modifier = modifier.fillMaxSize(),
+                                contentAlignment = Alignment.BottomEnd
+                            ){
+                                Image(
+                                    modifier = modifier
+                                        .fillMaxSize(),
+                                    painter = painterResource(id = R.drawable.image_placeholder),
+                                    contentDescription = ""
+                                )
+                            }
+                        }
+                    }
+                    item{
+                        Card(
+                            modifier = modifier
+                                .padding(end = 5.dp)
+                                .size(150.dp)
+                                .aspectRatio(1F),
+                        ){
+                            Box(
+                                modifier = modifier.fillMaxSize(),
+                                contentAlignment = Alignment.BottomEnd
+                            ){
+                                Image(
+                                    modifier = modifier
+                                        .fillMaxSize(),
+                                    painter = painterResource(id = R.drawable.image_placeholder),
+                                    contentDescription = ""
+                                )
+                            }
+                        }
+                    }
+                    item{
+                        Card(
+                            modifier = modifier
+                                .padding(end = 5.dp)
+                                .size(150.dp)
+                                .aspectRatio(1F),
+                        ){
+                            Box(
+                                modifier = modifier.fillMaxSize(),
+                                contentAlignment = Alignment.BottomEnd
+                            ){
+                                Image(
+                                    modifier = modifier
+                                        .fillMaxSize(),
+                                    painter = painterResource(id = R.drawable.image_placeholder),
+                                    contentDescription = ""
+                                )
+                            }
+                        }
+                    }
+                }
+                Row(
+                    modifier = modifier.padding(vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        modifier = modifier
+                            .fillMaxWidth(0.7f),
+                        text = "nombre",
+                        textAlign = TextAlign.Justify,
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Row( modifier = modifier
+                        .fillMaxWidth(1f),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            modifier = modifier.fillMaxWidth(0.75f),
+                            text = "1/5",
+                            textAlign = TextAlign.Right,
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Icon(
+                            imageVector = Icons.Rounded.Star,
+                            contentDescription = "",
+                            tint = Color.Yellow
+                        )
+                    }
+                }
+                /*
+
+                //Direccion-----------------------------------------------------------------------------
+                if(direccion != ""){
+                    Row(modifier = modifier
+                        .padding(horizontal = 45.dp, vertical = 15.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            modifier = modifier.padding(end = 5.dp),
+                            imageVector = Icons.Rounded.LocationOn,
+                            contentDescription = "",
+                            tint = Color.White
+                        )
+                        Text(
+                            text = direccion,
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+                //Horario de apertura-------------------------------------------------------------------
+                if(numeroTelefono != ""){
+                    Row(modifier = modifier
+                        .padding(horizontal = 45.dp, vertical = 15.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            modifier = modifier.padding(end = 5.dp),
+                            imageVector = Icons.Rounded.Phone,
+                            contentDescription = "",
+                            tint = Color.White
+                        )
+                        Text(
+                            text = numeroTelefono,
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+                //Pagina web----------------------------------------------------------------------------
+                if(paginaWeb != ""){
+                    Row(modifier = modifier
+                        .padding(horizontal = 45.dp, vertical = 15.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            modifier = modifier.padding(end = 5.dp),
+                            imageVector = Icons.Rounded.Web,
+                            contentDescription = "",
+                            tint = Color.White
+                        )
+                        Text(
+                            //modifier = modifier.clickable { context.startActivity(intent) },
+                            text = paginaWeb,
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+
+                 */
+            }
+        },
+        //Mensajes------------
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState)
+        },
+
+    ) {
         Surface(
             modifier = modifier
                 .fillMaxSize()
@@ -429,11 +739,9 @@ fun RutasItinerario(
                         myLocationButtonEnabled = false,
                         rotationGesturesEnabled = false,
                         tiltGesturesEnabled = true,
-
-
+                        zoomControlsEnabled = false
                     ),
                 ) {
-
                     MapEffect(origenRuta) {
                         calcularZoom(origenRuta, destinoRuta)
                     }
@@ -482,22 +790,6 @@ fun RutasItinerario(
                 }
 
                 Column {
-                    Box(
-                        modifier = modifier.fillMaxWidth()
-                    ){
-                        Surface(
-                            modifier = modifier.fillMaxWidth(),
-                            color = Color(0x7F191B1A)
-                        ) {
-                            val distancia = (distanciaEntrePuntos/1000).toInt()
-                            Column {
-                                Text(text = "(${distancia} km)")
-                                //Text(text = "${tiempoDeViaje.dropLast(1).toDouble()} m")
-                            }
-                            
-                        }
-                    }
-
 
                     if(!busquedaEnProgreso && textoBuscar.text != ""){
                         if(prediccionesBusquedaMapa.isNotEmpty()){
@@ -547,30 +839,6 @@ fun RutasItinerario(
                                     }
                                 }
                             }
-                        }
-                    }
-                    //Boton para agregar ruta-------------------------------------------------------
-                    Box(
-                        modifier = modifier
-                            .fillMaxSize(),
-                        contentAlignment = Alignment.BottomCenter
-                    ){
-                        TextButton(
-                            enabled = transporte != "",
-                            modifier = modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 70.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Trv10,
-                                contentColor = Color.Black
-                            ),
-                            onClick = {
-                                viewModel.guardarOrigenRuta(indiceActual = indiceActual, origenNuevo = origenRuta)
-                                viewModel.guardarRutaLugar(indiceActual = indiceActual, rutaNueva = polilineaCodRuta)
-                                viewModel.guardarZoomLugar(indiceActual = indiceActual, nuevoZoom = zoomRuta)
-                            }
-                        ) {
-                            Text(text = "Agregar ruta")
                         }
                     }
                 }

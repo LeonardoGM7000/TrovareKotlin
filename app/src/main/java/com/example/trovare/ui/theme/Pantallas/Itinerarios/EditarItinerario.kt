@@ -177,6 +177,7 @@ fun EditarItinerario(
                         ),
                         singleLine = true,
                         colors = TextFieldDefaults.colors(
+                            unfocusedContainerColor = Trv1,
                             focusedContainerColor = Trv1,
                             focusedIndicatorColor = Trv1,
                             unfocusedIndicatorColor = Trv1,
