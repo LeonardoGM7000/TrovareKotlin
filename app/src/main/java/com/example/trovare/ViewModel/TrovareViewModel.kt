@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
+import java.time.LocalTime
 
 /**
  * [TrovareViewModel] guarda información de la aplicación dentro del ciclo de vida.
@@ -393,9 +394,11 @@ class TrovareViewModel : ViewModel() {
             lugarActual?.fechaDeVisita = fechaNueva
     }
 
-    fun setHoraDeVisita(indiceActual: Int, horaNueva: Hora) {
+    fun setHoraDeVisita(indiceActual: Int, horaNueva: LocalTime) {
         val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
         lugarActual?.horaDeVisita = horaNueva
+        /*val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
+        lugarActual?.horaDeVisita = horaNueva*/
     }
 
     fun borrarLugarActual(lugar: Lugar) {

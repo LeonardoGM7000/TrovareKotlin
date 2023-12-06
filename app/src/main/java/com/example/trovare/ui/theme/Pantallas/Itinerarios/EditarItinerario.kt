@@ -78,6 +78,7 @@ import com.maxkeppeler.sheets.clock.models.ClockSelection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -106,7 +107,8 @@ fun EditarItinerario(
                 CoroutineScope(Dispatchers.Default).launch {
                     listaVisible = false
                     viewModel.setFechaDeVisita(indiceActual = indiceActual, fechaNueva = fecha)
-                    itinerario.lugares = lugares?.sortedBy { it.fechaDeVisita }?.toMutableList()
+                    itinerario.lugares = lugares?.sortedWith(compareBy({ it.fechaDeVisita }, { it.horaDeVisita }))?.toMutableList()
+                    //itinerario.lugares = lugares?.sortedBy { it.fechaDeVisita }?.toMutableList()
                     lugares = itinerario.lugares
                     listaVisible = true
                 }
@@ -123,7 +125,10 @@ fun EditarItinerario(
             selection = ClockSelection.HoursMinutes{hours, minutes ->
                 CoroutineScope(Dispatchers.Default).launch {
                     listaVisible = false
-                    viewModel.setHoraDeVisita(indiceActual = indiceActual, horaNueva = Hora(hora = hours, minuto = minutes))
+                    val nuevaHora = LocalTime.of(hours, minutes)
+                    viewModel.setHoraDeVisita(indiceActual = indiceActual, horaNueva = nuevaHora)
+                    itinerario.lugares = lugares?.sortedWith(compareBy({ it.fechaDeVisita }, { it.horaDeVisita }))?.toMutableList()
+                    //viewModel.setHoraDeVisita(indiceActual = indiceActual, horaNueva = Hora(hora = hours, minuto = minutes))
                     //itinerario.lugares = lugares?.sortedBy { it.fechaDeVisita }?.toMutableList()
                     lugares = itinerario.lugares
                     listaVisible = true
@@ -398,7 +403,7 @@ fun EditarItinerario(
                                                         tint = Color.Black
                                                     )
                                                     Text(
-                                                        text = if(lugar.horaDeVisita == null) "" else "${lugar.horaDeVisita!!.hora}:${lugar.horaDeVisita!!.minuto}",
+                                                        text = if(lugar.horaDeVisita == null) "" else "${lugar.horaDeVisita!!.hour}:${lugar.horaDeVisita!!.minute}",
                                                         color = Color.Black,
                                                         fontSize = 20.sp
                                                     )

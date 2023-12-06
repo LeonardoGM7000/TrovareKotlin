@@ -3,6 +3,7 @@ package com.example.trovare.Data
 import androidx.compose.ui.graphics.ImageBitmap
 import com.google.android.gms.maps.model.LatLng
 import java.time.LocalDate
+import java.time.LocalTime
 
 data class Itinerario(
     var nombre: String,
@@ -15,7 +16,7 @@ data class Lugar(
     val nombreLugar: String,
     //Fehcas
     var fechaDeVisita: LocalDate?,
-    var horaDeVisita: Hora?,
+    var horaDeVisita: LocalTime?,
     //Rutas
     var origen: LatLng?,
     var ubicacion: LatLng?,
