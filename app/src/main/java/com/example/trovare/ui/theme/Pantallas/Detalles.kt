@@ -7,7 +7,6 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,12 +23,9 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.rounded.Edit
@@ -42,7 +38,6 @@ import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.Web
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -75,24 +70,16 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter
-import coil.compose.rememberImagePainter
-import coil.transform.CircleCropTransformation
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.Divisor
-import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
-import com.example.trovare.ui.theme.Recursos.VentanaDeAlerta
 import com.example.trovare.ui.theme.Recursos.VentanaDeAlerta
 import com.example.trovare.ui.theme.Trv1
-import com.example.trovare.ui.theme.Trv2
-import com.example.trovare.ui.theme.Trv3
 import com.example.trovare.ui.theme.Trv6
 import com.example.trovare.ui.theme.Trv7
 import com.google.android.gms.maps.model.CameraPosition
@@ -101,7 +88,9 @@ import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
@@ -111,14 +100,17 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.CollectionReference
 
-data class Comentario(val placeId: String, var descripcion: String, var calificacion: String )
+data class ComentarioR(val Nombre:String, val fecha: String, val foto:String, val placeId: String,
+                       var descripcion: String, var calificacion: String, val revisar: Boolean )
+data class DatoRes(val placeId: String)
 var estrellas : Int = 0
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -140,6 +132,10 @@ fun Detalles(
     var calificacion by rememberSaveable { mutableStateOf(-1.0) }
     var latLng by rememberSaveable { mutableStateOf(LatLng(0.0,0.0)) }
     var reseñasList by remember { mutableStateOf(mutableListOf<Resena>()) }
+    var reseñasPropias by remember { mutableStateOf(mutableListOf<Resena>()) }
+    var fecha:Int = 0
+    var foto:String = ""
+    var NoexisteComPropios:Boolean = true
 
     fun obtenerResenas(apiKey: String, placeId: String) {
         val url = "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey&language=es"
@@ -180,7 +176,6 @@ fun Detalles(
         }
         Log.i("resena",reseñasList.toString())
     }
-    var cargar by remember { mutableStateOf(false) }
 
     var textoComentario by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
@@ -193,8 +188,8 @@ fun Detalles(
     val auth: FirebaseAuth by lazy { Firebase.auth }
     val firestore = FirebaseFirestore.getInstance()
     var userId by remember { mutableStateOf<String?>(null) }
+    var usuarioActual by remember { mutableStateOf("Desconocido")}
 
-    //LaunchedEffect(Unit) {
     // Verificar si hay un usuario autenticado
     val currentUser = auth.currentUser
     if (currentUser != null) {
@@ -206,7 +201,7 @@ fun Detalles(
 
     // ID del comentario a modificar (reemplaza con el ID real)
     val comentarioId = placeId.toString()
-    // Actualizar el valor del campo en Firestore o crearlo
+    // Obtener valores iniciales del comentario para mostrar modificar o nuevo
     comentariosCollection.document(comentarioId).get()
         .addOnSuccessListener { documentSnapshot ->
             if (documentSnapshot.exists()) {
@@ -489,7 +484,8 @@ fun Detalles(
             item {
                 if (reseñasList.isNotEmpty()) {
                     reseñasList.forEach { reseña ->
-                        TarjetaReseña(reseña = reseña, clave = placeId.toString(), APIoApp = false)
+                        TarjetaReseña(reseña = reseña, clave = placeId.toString(), APIoApp = false, onDeleteClick = {},
+                        )
                         Spacer(modifier = Modifier.height(15.dp))
                     }
                 } else {
@@ -514,6 +510,27 @@ fun Detalles(
                     style = MaterialTheme.typography.displaySmall
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+
+                    firestore.collection("Reseñas").document(comentarioId).get()
+                    .addOnSuccessListener { documentSnapshot ->
+                        if (documentSnapshot.exists()) {
+                            /*Agregar funcion para mostrar comentarios de nuestros Usuarios*/
+                            NoexisteComPropios = false
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        println("Error al verificar la existencia del comentario en Firestore: $e")
+                    }
+                if(NoexisteComPropios){
+                    Text(
+                        text = "No hay reseñas de usuarios Trovare.",
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+
             }
             item {
                 Divisor()
@@ -523,7 +540,7 @@ fun Detalles(
                     Text(
                         modifier = modifier
                             .padding(horizontal = 25.dp),
-                        text = "Deja tu comentario",
+                        text = "Deja tu Reseña",
                         textAlign = TextAlign.Justify,
                         color = Color.White,
                         style = MaterialTheme.typography.displaySmall
@@ -543,14 +560,14 @@ fun Detalles(
                         onValueChange = { textoComentario = it },
                         label = {
                             Text(
-                                text = "Comentarios",
+                                text = "Reseña",
                                 style = MaterialTheme.typography.labelSmall
                             )
                         },
                         textStyle = MaterialTheme.typography.labelSmall,
                         placeholder = {
                             Text(
-                                text = "Escribe tus comentarios",
+                                text = "Escribe tu reseña",
                                 style = MaterialTheme.typography.labelSmall
                             )
                         },
@@ -569,6 +586,17 @@ fun Detalles(
 
                         )
                 }
+                firestore.collection("Usuario").document(auth.currentUser?.email.toString())
+                    .get()
+                    .addOnSuccessListener { document ->
+                        // Verificar si el documento existe y contiene el campo "name"
+                        if (document.exists()) {
+                            usuarioActual = document.getString("nombre") ?: "Desconocido"
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        // Manejar errores al realizar la consulta
+                    }
                 item {
                     Box(
                         modifier = modifier
@@ -594,32 +622,14 @@ fun Detalles(
                                     val comentarioId = placeId.toString()
                                     val aux = textoComentario.text
                                     Log.i("descripción",aux)
-                                    // Actualizar el valor del campo en Firestore o crearlo
+
+                                    // Actualizar el valor del campo en Firestore o crearlo en la coleccion de Usuario
                                     comentariosCollection.document(comentarioId).get()
                                         .addOnSuccessListener { documentSnapshot ->
-                                            if (documentSnapshot.exists()) {
-                                                // El comentario existe, modificarlo
-                                                comentariosCollection.document(comentarioId).update(
-                                                    mapOf(
-                                                        "calificacion" to estrellas.toString(),
-                                                        "descripcion" to aux
-                                                    )
-                                                )
-                                                    .addOnSuccessListener {
-                                                        scope.launch {
-                                                            snackbarHostState.showSnackbar(
-                                                                message = "Comentario modificado con éxito",
-                                                                duration = SnackbarDuration.Short
-                                                            )
-                                                        }
-                                                        println("Comentario modificado exitosamente en Firestore")
-                                                    }
-                                                    .addOnFailureListener { e ->
-                                                        println("Error al modificar el comentario en Firestore: $e")
-                                                    }
-                                            } else {
+                                            if (!documentSnapshot.exists()) {
                                                 // El comentario no existe, crearlo
-                                                val comentarioData = Comentario(placeId.toString(), aux, estrellas.toString())
+                                                val comentarioData = ComentarioR(usuarioActual,(System.currentTimeMillis() / 1000).toString(), "url",
+                                                    placeId.toString(),aux, estrellas.toString(),false)
                                                 comentariosCollection.document(comentarioId).set(comentarioData)
                                                     .addOnSuccessListener {
                                                         scope.launch {
@@ -638,17 +648,33 @@ fun Detalles(
                                         .addOnFailureListener { e ->
                                             println("Error al verificar la existencia del comentario en Firestore: $e")
                                         }
-                                    //crear o modificar en la coleccion de Firebase reseña
+                                    //crear o modificar en la coleccion de Firebase Reseñas
                                     resenasCollection.document(comentarioId).get()
                                         .addOnSuccessListener { documentSnapshot ->
-                                            if (documentSnapshot.exists()) {
-                                                // La reseña existe, modificarlo
-                                                //val UserResCollection = resenasCollection.document(comentarioId).collection(auth.currentUser?.email.toString())
-                                                //UserResCollection.document()
-                                            } else {
+                                            if (!documentSnapshot.exists()) {
+                                                val ClaveRes = DatoRes(placeId.toString())
                                                 // El comentario no existe, crearlo
-                                                //val comentarioData = Comentario(placeId.toString(), aux, "5")
-                                                resenasCollection.document(comentarioId).set(comentarioId.toString())
+                                                resenasCollection.document(comentarioId).set(ClaveRes)
+                                                    .addOnSuccessListener {
+                                                        println("Lugar creado exitosamente en Firestore")
+                                                    }
+                                                    .addOnFailureListener { e ->
+                                                        println("Error al crear el lugar en Firestore: $e")
+                                                    }
+                                            }
+                                        }
+                                        .addOnFailureListener { e ->
+                                            println("Error al verificar la existencia del comentario en Firestore: $e")
+                                        }
+                                    //agrega la reseña del usuario dentro de la collecion de reseñas del lugar
+                                    Log.i("usuario activo",auth.currentUser!!.uid)
+                                    resenasCollection.document(comentarioId).collection(auth.currentUser!!.uid).document(comentarioId).get()
+                                        .addOnSuccessListener { documentSnapshot ->
+                                            if (!documentSnapshot.exists()) {
+                                                val dataRes = ComentarioR(usuarioActual,(System.currentTimeMillis() / 1000).toString(),"url",placeId.toString(),aux,
+                                                    estrellas.toString(),false)
+                                                // El comentario no existe, crearlo
+                                                resenasCollection.document(comentarioId).collection(auth.currentUser!!.uid).document(comentarioId).set(dataRes)
                                                     .addOnSuccessListener {
                                                         println("Comentario creado exitosamente en Firestore")
                                                     }
@@ -681,7 +707,7 @@ fun Detalles(
                 }
             } else {
                 //hay comentario del usuario y lo puede modificar
-                //agregar foto y corregir la fecha de publicacion
+                //agregar foto
                 item {
                     Text(
                         modifier = modifier
@@ -694,23 +720,37 @@ fun Detalles(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
                 item {
-                    val detalleComentario = Resena(FirebaseAuth.getInstance().currentUser!!.displayName.toString(),estrellas,
-                        textoComentario.text,5,"prueba")
-                    TarjetaReseña(reseña = detalleComentario, clave = placeId.toString(), APIoApp = true)
-                    Spacer(modifier = Modifier.height(15.dp))
-                    /*TarjetaComentario(
-                        question = textoComentario.text,
-                        calificacion = calificacion.toString(),
+                    comentariosCollection.document(comentarioId).get()
+                        .addOnSuccessListener { documentSnapshot ->
+                            if (documentSnapshot.exists()) {
+                                // El comentario existe, obtener comentario previo
+                                textoComentario = TextFieldValue(documentSnapshot.getString("descripcion").toString())
+                                existeComentario = true
+                                estrellas = documentSnapshot.getString("calificacion")!!.toInt()
+                                usuarioActual = documentSnapshot.getString("nombre").toString()
+                                fecha = documentSnapshot.getString("fecha")!!.toInt()
+                                foto = documentSnapshot.getString("foto")!!.toString()
+                            } else {
+                                // El comentario no existe, iniciar en 0
+                                textoComentario = TextFieldValue("")
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            println("Error al verificar la existencia del comentario en Firestore: $e")
+                        }
+                    val detalleComentario = Resena(usuarioActual,estrellas,
+                        textoComentario.text,fecha,foto)
+                    TarjetaReseña(reseña = detalleComentario,
                         onDeleteClick = {
-                            // Eliminar la pregunta de Firestore
-                            /*firestore.collection("FAQS").document(question.id)
-                                .delete()
-                            questions = questions.filterNot { it.id == question.id }
-                            borrarPregunta = true*/
-                        },
-                        modifier = modifier.padding(top = 8.dp, bottom = 8.dp),
-                        navController = navController
-                    )*/
+                        // Eliminar la pregunta de Firestore
+                        firestore.collection("Usuario").document(auth.currentUser?.email.toString())
+                            .collection("comentarios").document(placeId.toString())
+                            .delete()
+
+                            //mostrar mensaje de eliminado
+                    },
+                                clave = placeId.toString(), APIoApp = true)
+                    Spacer(modifier = Modifier.height(15.dp))
                 }
             }
         }
@@ -718,8 +758,10 @@ fun Detalles(
 }
 
 @Composable
-fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier, clave: String, APIoApp: Boolean) {
-
+fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier,
+                  clave: String, APIoApp: Boolean,    onDeleteClick: () -> Unit,
+) {
+    var mostrarBorrarCuenta by rememberSaveable { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     val cardSizeModifier = Modifier
         .animateContentSize(
@@ -734,9 +776,6 @@ fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier, clave: String
 
     val tiempoTranscurrido = DateUtils.getRelativeTimeSpanString(tiempoResena, tiempoActual, DateUtils.MINUTE_IN_MILLIS)
 
-
-
-
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -744,11 +783,6 @@ fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier, clave: String
             .padding(horizontal = 25.dp),
     ) {
         Column(
-            /*modifier = Modifier
-                .background(
-                    color = if (expanded) Trv2
-                    else Trv1
-                )*/
         ) {
             Row(
                 modifier = Modifier
@@ -820,13 +854,26 @@ fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier, clave: String
                                     modifier = Modifier
                                         .padding(13.dp)
                                         .clickable {
-                                            //mostrarBorrarCuenta = true
+                                            mostrarBorrarCuenta = true
                                         },
                                     imageVector = Icons.Default.Delete,
                                     contentDescription = "",
                                     tint = Color.White,
                                 )
                             }
+                            VentanaDeAlerta(
+                                mostrar = mostrarBorrarCuenta,
+                                alRechazar = { mostrarBorrarCuenta = false },
+                                alConfirmar = { //Necesita eliminar la pregunta
+                                    onDeleteClick()
+                                    mostrarBorrarCuenta = false
+                                },
+                                textoConfirmar = "Borrar Reseña",
+                                titulo = "Borrar Reseña",
+                                texto = "¿Quieres borrar la Reseña?",
+                                icono = Icons.Filled.DeleteForever,
+                                colorConfirmar = Color.Red
+                            )
                         }
                     }
                 }
@@ -834,125 +881,6 @@ fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier, clave: String
         }
     }
 }
-
-@Composable
-fun TarjetaComentario(
-    question: String,
-    calificacion: String,
-    onDeleteClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    navController: NavController
-) {
-    var mostrarBorrarCuenta by rememberSaveable { mutableStateOf(false) }
-    var expanded by remember { mutableStateOf(false) }
-
-    val cardSizeModifier = Modifier
-        .animateContentSize(
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessMediumLow,
-            )
-        )
-
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .then(cardSizeModifier) // Aplicar el modificador de tamaño aquí
-            .padding(horizontal = 25.dp),
-
-        colors = CardDefaults
-            .cardColors(containerColor = Trv1)
-    ) {
-        Column(
-            modifier = Modifier
-                .background(
-                    color = if (expanded) Trv2
-                    else Trv1
-                )
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { expanded = !expanded },
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    modifier = Modifier
-                        .padding(13.dp),
-                    imageVector = Icons.Filled.Info,
-                    contentDescription = "",
-                    tint = Color.White,
-                )
-                Box(
-                    contentAlignment = Alignment.CenterStart,
-                    modifier = Modifier
-                        .fillMaxWidth(0.64f)
-                ) {
-                    Text(
-                        modifier = modifier.padding(start = 20.dp, end = 20.dp, bottom = 15.dp),
-                        text = "$calificacion/5",
-                        textAlign = TextAlign.Justify,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White
-                    )
-                    Icon(
-                        imageVector = Icons.Rounded.Star,
-                        contentDescription = "",
-                        tint = Color.Yellow
-                    )
-                }
-                Icon(
-                    modifier = Modifier
-                        .padding(13.dp)
-                        .clickable {
-                            //navController.navigate(Pantalla.EditarPreguntas.ruta + "/${question.id}")
-                        },
-                    imageVector = Icons.Rounded.Edit,
-                    contentDescription = "",
-                    tint = Color.White
-                )
-                Icon(
-                    modifier = Modifier
-                        .padding(13.dp)
-                        .clickable {
-                            mostrarBorrarCuenta = true
-                        },
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "",
-                    tint = Color.White,
-                )
-            }
-            VentanaDeAlerta(
-                mostrar = mostrarBorrarCuenta,
-                alRechazar = { mostrarBorrarCuenta = false },
-                alConfirmar = { //Necesita eliminar la pregunta
-                    onDeleteClick()
-                    mostrarBorrarCuenta = false
-                },
-                textoConfirmar = "Borrar Comentario",
-                titulo = "Borrar Comentario",
-                texto = "¿Quieres borrar tu comentario?",
-                icono = Icons.Filled.DeleteForever,
-                colorConfirmar = Color.Red
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            AnimatedVisibility(visible = expanded) {
-                if(expanded){
-                    Text(
-                        modifier = modifier.padding(start = 20.dp, end = 20.dp, bottom = 15.dp),
-                        text = question,
-                        textAlign = TextAlign.Justify,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White
-                    )
-                }
-            }
-        }
-    }
-}
-
 @Composable
 fun RatingScreen() {
     var rating by remember { mutableStateOf(0) }
