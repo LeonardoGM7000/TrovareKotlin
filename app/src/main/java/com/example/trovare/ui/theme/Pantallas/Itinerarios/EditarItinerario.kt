@@ -64,9 +64,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.trovare.Data.Hora
 import com.example.trovare.Data.Lugar
+import com.example.trovare.Data.Usuario
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.CalendarTheme
@@ -80,6 +82,9 @@ import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv11
 import com.example.trovare.ui.theme.Trv3
 import com.example.trovare.ui.theme.Trv6
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
@@ -105,6 +110,7 @@ fun EditarItinerario(
     viewModel: TrovareViewModel
 ){
 
+    val usuario by viewModel.usuario.collectAsState()
     val itinerario by viewModel.itinerarioActual.collectAsState()
     var nombreItinerario by remember { mutableStateOf(itinerario.nombre) }
     var publico by rememberSaveable { mutableStateOf(false) }
@@ -113,8 +119,9 @@ fun EditarItinerario(
     val clockState = rememberSheetState()
     var indiceActual by remember{ mutableStateOf(0) }
     var listaVisible by remember{ mutableStateOf(true) }
-
     var mostrarBorrarDeItinerario by rememberSaveable { mutableStateOf(false) }
+
+    
 
     CalendarTheme {
         CalendarDialog(
@@ -163,6 +170,8 @@ fun EditarItinerario(
                 .fillMaxSize(),
             color = Trv1
         ) {
+
+
             LazyColumn(
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
@@ -187,6 +196,7 @@ fun EditarItinerario(
                         onValueChange = {nuevoNombre->
                             nombreItinerario = nuevoNombre
                             viewModel.setNombreItinerario(nuevoNombre)
+
                         },
                         textStyle = TextStyle(
                             textAlign = TextAlign.Center,
@@ -433,6 +443,8 @@ fun EditarItinerario(
                                                     viewModel.borrarLugarActual(lugar)
                                                     lugares = itinerario.lugares
                                                     listaVisible = true
+
+
                                                 }
                                             ) {
                                                 Icon(
@@ -463,4 +475,28 @@ fun EditarItinerario(
             }
         }
     }
+}
+
+
+// Funciones auxiliares
+private fun actualizarItinerario(nombre_itinerario: String, usuario: Usuario, id: Int) {
+
+
+    usuario.itinerarios.get(id).nombre = nombre_itinerario
+
+    // Creamos instancias para firebase
+    val firestore = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
+
+    Log.i("actualizar_itinerario", "Actualizando datos...")
+
+    firestore.collection("Usuario").document(auth.currentUser?.email.toString()).set(usuario, SetOptions.merge())
+        .addOnSuccessListener {
+            Log.i("actualizar_itinerario", "Datos guardados")
+        }
+        .addOnFailureListener{
+            Log.i("actualizar_itinerario", "Datos no guardados")
+        }
+
+
 }

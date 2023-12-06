@@ -4,9 +4,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
@@ -17,9 +15,7 @@ import com.example.trovare.Data.Lugar
 import com.example.trovare.Data.Usuario
 import com.example.trovare.Data.itinerarioPrueba
 import com.example.trovare.Data.usuarioPrueba
-import com.example.trovare.R
 import com.example.trovare.ui.theme.Pantallas.Mapa.MapState
-import com.example.trovare.ui.theme.Pantallas.Mapa.RutaInfo
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
@@ -514,6 +510,46 @@ class TrovareViewModel : ViewModel() {
     //--------------------------------------------------------------------------------------------//
     //-------------------------------------FIREBASE-----------------------------------------------//
     //--------------------------------------------------------------------------------------------//
+
+    // Itinerario funciones
+    private val _listaItinerario = MutableStateFlow(emptyList<Itinerario>())
+    val listaItinerario = _listaItinerario.asStateFlow()
+
+    fun setlistaItinerario(nuevaLista: MutableList<Itinerario>){
+        _listaItinerario.value = nuevaLista
+    }
+
+    fun obtenerItinerario() {
+        viewModelScope.launch{
+
+            Log.d("Itinerario_prueba", "Iniciando carga de datos")
+
+            try{
+
+                val auth = FirebaseAuth.getInstance()
+                val firestore = FirebaseFirestore.getInstance()
+
+                //Log.d("TTTT", firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().await().getString("nombre").toString())
+                //firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().result.id
+                val documento =  firestore.collection("Usuario").document(auth.currentUser?.email.toString()).collection("Itinerario").get().await()
+
+                //val tam = documento.toObjects(Iti)
+
+                Log.d("Itinerario_prueba", "Se obtuvieronitinerarios ")
+
+
+                //setlistaItinerario(lista_itinerario)
+
+
+            }catch(e: Exception){
+
+                Log.d("Itinerario_prueba", "Error al obtener itinerarios")
+
+            }
+        }
+    }
+
+
     private val _usuario = MutableStateFlow(usuarioPrueba)
     val usuario = _usuario.asStateFlow()
     fun setUsuario(nuevoUsuario: Usuario) {
@@ -533,6 +569,32 @@ class TrovareViewModel : ViewModel() {
                 //Log.d("TTTT", firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().await().getString("nombre").toString())
                 //firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().result.id
                 val documento =  firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().await()
+                val itinerarios_lista = mutableListOf<Itinerario>()
+
+                val itinerarioData = documento["itinerarios"] as? List<*>
+
+                itinerarioData?.forEach{item ->
+
+                    if(item is Map<*,*>){
+                        Log.d("Itinerario_datos", "es Map")
+                        val id = item["id"] as? Int
+                        val nombre = item["nombre"] as? String
+                        val autor = item["autor"] as? String
+
+
+
+                        val Itinerario = Itinerario(id, nombre.orEmpty(), autor.orEmpty(), null)
+                        itinerarios_lista.add(Itinerario)
+
+                    }
+                }
+
+                for(datos in itinerarios_lista){
+
+                    Log.d("Itinerario_datos", "$datos")
+                }
+
+
                 val usuario = Usuario(
                         nombre = documento.getString("nombre").toString(),
                         foto_perfil = documento.getString("foto_perfil").toString(),
@@ -540,12 +602,14 @@ class TrovareViewModel : ViewModel() {
                         descripcion = documento.getString("descripcion").toString(),
                         lugarDeOrigen = documento.getString("lugarDeOrigen").toString(),
                         comentarios = null,
-                        itinerarios = mutableListOf()
+                        itinerarios = itinerarios_lista
                 )
 
                 setUsuario(usuario)
 
             }catch(e: Exception){
+
+                Log.d("Itinerario_datos", "No se cargaron los datos correctamente")
                 setUsuario(usuarioPrueba)
             }
         }

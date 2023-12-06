@@ -15,24 +15,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,26 +36,30 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.trovare.Data.Itinerario
+import com.example.trovare.Data.Usuario
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv3
-import com.maxkeppeker.sheets.core.models.base.rememberSheetState
-import com.maxkeppeler.sheets.calendar.CalendarDialog
-import com.maxkeppeler.sheets.calendar.models.CalendarSelection
-import java.time.LocalDate
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 @Composable
 fun Itinerarios(
     modifier: Modifier = Modifier,
     navController: NavController,
     viewModel: TrovareViewModel
-){
+) {
 
     val usuario by viewModel.usuario.collectAsState()
+    val itinerario by viewModel.itinerarioActual.collectAsState()
 
+    // Lo hacemos para actualizar cada pantalla
+    //usuario.itinerarios.get(itinerario.id!!).nombre = itinerario.nombre
+    // guardarItinerario(usuario)
 
     Surface(
         modifier = modifier
@@ -100,12 +98,18 @@ fun Itinerarios(
                         onClick = {
                             //Crear nuevo itinerario
                             val nuevoItinerario = Itinerario(
+                                id = usuario.itinerarios.size,
                                 nombre = "nuevo Itinerario",
                                 autor = usuario.nombre,
                                 lugares = null,
                             )
+
+                            //guardarItinerario(nuevoItinerario.nombre, nuevoItinerario.autor)
                             navController.navigate(Pantalla.EditarItinerario.ruta)//
                             usuario.itinerarios.add(nuevoItinerario)//
+
+                            guardarItinerario(usuario)
+
                             viewModel.setItinerarioActual(nuevoItinerario)//
                         },
                         containerColor = Color.White,
@@ -203,3 +207,23 @@ fun Itinerarios(
 }
 
 
+// Funciones axiliares
+private fun guardarItinerario(usuario: Usuario) {
+
+    // Creamos instancias para firebase
+    val firestore = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
+
+    Log.i("guardar_itinerario", "Guardando datos...")
+
+    firestore.collection("Usuario").document(auth.currentUser?.email.toString()).set(usuario, SetOptions.merge())
+        .addOnSuccessListener {
+            Log.i("guardar_itinerario", "Datos guardados")
+        }
+        .addOnFailureListener{
+
+            Log.i("guardar_itinerario", "Datos no guardados")
+        }
+
+
+}

@@ -1,10 +1,10 @@
 package com.example.trovare.Data
 
-import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.ImageBitmap
 import java.time.LocalDate
 
 data class Itinerario(
+    var id: Int?,
     var nombre: String,
     var autor: String,
     var lugares: MutableList<Lugar>?
@@ -24,6 +24,7 @@ data class Hora(
 )
 
 val itinerarioPrueba: Itinerario = Itinerario(
+    id = 0,
     nombre = "Itinerario",
     autor = "",
     lugares = null
