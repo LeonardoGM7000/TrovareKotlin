@@ -189,6 +189,7 @@ fun Detalles(
     val firestore = FirebaseFirestore.getInstance()
     var userId by remember { mutableStateOf<String?>(null) }
     var usuarioActual by remember { mutableStateOf("Desconocido")}
+    var usuarioFoto by remember { mutableStateOf("")}
 
     // Verificar si hay un usuario autenticado
     val currentUser = auth.currentUser
@@ -592,6 +593,7 @@ fun Detalles(
                         // Verificar si el documento existe y contiene el campo "name"
                         if (document.exists()) {
                             usuarioActual = document.getString("nombre") ?: "Desconocido"
+                            usuarioFoto = document.getString("foto_perfil") ?: ""
                         }
                     }
                     .addOnFailureListener { e ->
@@ -628,7 +630,7 @@ fun Detalles(
                                         .addOnSuccessListener { documentSnapshot ->
                                             if (!documentSnapshot.exists()) {
                                                 // El comentario no existe, crearlo
-                                                val comentarioData = ComentarioR(usuarioActual,(System.currentTimeMillis() / 1000).toString(), "url",
+                                                val comentarioData = ComentarioR(usuarioActual,(System.currentTimeMillis() / 1000).toString(), usuarioFoto,
                                                     placeId.toString(),aux, estrellas.toString(),false)
                                                 comentariosCollection.document(comentarioId).set(comentarioData)
                                                     .addOnSuccessListener {
@@ -671,7 +673,7 @@ fun Detalles(
                                     resenasCollection.document(comentarioId).collection(auth.currentUser!!.uid).document(comentarioId).get()
                                         .addOnSuccessListener { documentSnapshot ->
                                             if (!documentSnapshot.exists()) {
-                                                val dataRes = ComentarioR(usuarioActual,(System.currentTimeMillis() / 1000).toString(),"url",placeId.toString(),aux,
+                                                val dataRes = ComentarioR(usuarioActual,(System.currentTimeMillis() / 1000).toString(),usuarioFoto,placeId.toString(),aux,
                                                     estrellas.toString(),false)
                                                 // El comentario no existe, crearlo
                                                 resenasCollection.document(comentarioId).collection(auth.currentUser!!.uid).document(comentarioId).set(dataRes)
