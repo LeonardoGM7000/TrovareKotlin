@@ -630,7 +630,7 @@ fun Detalles(
                                         .addOnSuccessListener { documentSnapshot ->
                                             if (!documentSnapshot.exists()) {
                                                 // El comentario no existe, crearlo
-                                                val comentarioData = ComentarioR(usuarioActual,(System.currentTimeMillis() / 1000).toString(), usuarioFoto,
+                                                val comentarioData = ComentarioR(nombre,(System.currentTimeMillis() / 1000).toString(), usuarioFoto,
                                                     placeId.toString(),aux, estrellas.toString(),false)
                                                 comentariosCollection.document(comentarioId).set(comentarioData)
                                                     .addOnSuccessListener {
@@ -729,7 +729,6 @@ fun Detalles(
                                 textoComentario = TextFieldValue(documentSnapshot.getString("descripcion").toString())
                                 existeComentario = true
                                 estrellas = documentSnapshot.getString("calificacion")!!.toInt()
-                                usuarioActual = documentSnapshot.getString("nombre").toString()
                                 fecha = documentSnapshot.getString("fecha")!!.toInt()
                                 foto = documentSnapshot.getString("foto")!!.toString()
                             } else {
