@@ -32,6 +32,7 @@ import com.example.trovare.ui.theme.Pantallas.Ingreso.ActualizarContrasena
 import com.example.trovare.ui.theme.Pantallas.Ingreso.RecuperarContrasena
 import com.example.trovare.ui.theme.Pantallas.Ingreso.TokenRecuperarContrasena
 import com.example.trovare.ui.theme.Pantallas.PreguntasAdmin
+import com.example.trovare.ui.theme.Pantallas.CarruselSeleccionado
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.libraries.places.api.net.PlacesClient
 
@@ -62,6 +63,7 @@ sealed class Pantalla(val ruta: String) {
     object TokenRecuperarContrasena : Pantalla("TokenRecuperarContrasena")
     object ActualizarContrasena : Pantalla("ActualizarContrasena")
     object CategoriaSeleccionada : Pantalla("CategoriaSeleccionada")
+    object CarruselSeleccionado : Pantalla("CarruselSeleccionado")
 
     fun conArgs(vararg args: String): String {
         return buildString {
@@ -231,6 +233,25 @@ fun Trovare(
             )
         ) {
             CategoriaSeleccionada(
+                categoria = it.arguments?.getString("categoria") ?: "Atracciones",
+                viewModel = viewModel,
+                placesClient = placesClient,
+                navController = navController
+            )
+        }
+
+        //CarruselSeleccionado---------------------------------------------------------------------
+        composable(
+            route = Pantalla.CarruselSeleccionado.ruta + "/{categoria}",
+            arguments = listOf(
+                navArgument("categoria") {
+                    type = NavType.StringType
+                    defaultValue = "Atracciones"
+                    nullable = true
+                }
+            )
+        ) {
+            CarruselSeleccionado(
                 categoria = it.arguments?.getString("categoria") ?: "Atracciones",
                 viewModel = viewModel,
                 placesClient = placesClient,

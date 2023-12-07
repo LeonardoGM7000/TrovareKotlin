@@ -159,7 +159,9 @@ fun Inicio(
                                     }
                             ){
                                 Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier
+                                        .clickable { navController.navigate(Pantalla.CarruselSeleccionado.conArgs(listaDeExplorar[pagina].Titulo)) }
                                 ) {
                                     Text(
                                         modifier = modifier.fillMaxWidth(),
