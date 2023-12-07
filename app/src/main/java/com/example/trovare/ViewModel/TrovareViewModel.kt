@@ -4,27 +4,21 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.trovare.Api.obtenerResenas
-import com.example.trovare.Data.Hora
 import com.example.trovare.Data.Itinerario
 import com.example.trovare.Data.Lugar
 import com.example.trovare.Data.Usuario
 import com.example.trovare.Data.itinerarioPrueba
 import com.example.trovare.Data.usuarioPrueba
 import com.example.trovare.ui.theme.Pantallas.Mapa.MapState
-import com.example.trovare.ui.theme.Pantallas.Resena
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FetchPhotoRequest
@@ -46,7 +40,6 @@ import java.time.LocalTime
 /**
  * [TrovareViewModel] guarda información de la aplicación dentro del ciclo de vida.
  */
-//F por Uzias
 
 class TrovareViewModel : ViewModel() {
 
@@ -72,8 +65,8 @@ class TrovareViewModel : ViewModel() {
 
     //guardar variables de estado de la UI----------------------------------------------------------
 
-    private val _estadoUi = MutableStateFlow(TrovareEstadoUi())
-    val uiState: StateFlow<TrovareEstadoUi> = _estadoUi.asStateFlow()
+    private val _estadoUi = MutableStateFlow(TrovareEstadoConfiguracion())
+    val uiState: StateFlow<TrovareEstadoConfiguracion> = _estadoUi.asStateFlow()
 
     fun setIdioma(nuevoIdioma: String) {
         _estadoUi.update { estadoActual ->
@@ -113,6 +106,13 @@ class TrovareViewModel : ViewModel() {
 
     //Ubicacion-------------------------------------------------------------------------------------
 
+    private val _ubicacionActual = MutableStateFlow(LatLng(19.504507, -99.147314))
+    val ubicacionActual = _ubicacionActual.asStateFlow()
+
+    fun setUbicacionActual(nuevoValor: LatLng) {
+        _ubicacionActual.value = nuevoValor
+    }
+
     val state: MutableState<MapState> = mutableStateOf(
         MapState(
             lastKnownLocation = null,
@@ -148,9 +148,7 @@ class TrovareViewModel : ViewModel() {
                         val longitude = it.longitude
                         // Aquí tienes la latitud y longitud.
                         // Puedes usar estas variables en tu lógica o pasárselas al ViewModel según sea necesario.
-                        setOrigen(LatLng(latitude, longitude))
-                        setOrigenRuta(LatLng(latitude, longitude))
-
+                        setUbicacionActual(LatLng(latitude, longitude))
                     }
                 }
                 .addOnFailureListener { exception ->
@@ -162,187 +160,206 @@ class TrovareViewModel : ViewModel() {
     }
 
     //--------------------------------------------------------------------------------------------//
-    //-------------------------------------MAPA---------------------------------------------------//
+    //---------------------------------MAPA PRINCIPAL---------------------------------------------//
     //--------------------------------------------------------------------------------------------//
 
-    //MAPA PRINCIPAL y MAPA AGREGAR LUGAR A ITINERARIO----------------------------------------------
+    //MAPA PRINCIPAL -------------------------------------------------------------------------------
 
+    private val _estadoMapa = MutableStateFlow(TrovareEstadoMapaPrincipal())
+    val estadoMapa: StateFlow<TrovareEstadoMapaPrincipal> = _estadoMapa.asStateFlow()
 
-    //Origen y destino para mapa principal y seleccion de lugar
-    //Ubicacion del usuario
-    private val _origen = MutableStateFlow(LatLng(19.504507, -99.147314))
-    val origen = _origen.asStateFlow()
-
-    fun setOrigen(nuevaUbicacion: LatLng) {
-        _origen.value = nuevaUbicacion
+    fun setOrigen(nuevoValor: LatLng) {
+        _estadoMapa.update { estadoActual ->
+            estadoActual.copy(
+                origen = nuevoValor,
+            )
+        }
     }
 
-    //ubicacion del destino
-    private val _destino = MutableStateFlow(LatLng(19.504507, -99.147314))
-    val destino = _destino.asStateFlow()
-    // Función para actualizar el valor de la ubicación
-
-    fun setDestino(nuevaUbicacion: LatLng) {
-        _destino.value = nuevaUbicacion
+    fun setDestino(nuevoValor: LatLng) {
+        _estadoMapa.update { estadoActual ->
+            estadoActual.copy(
+                destino = nuevoValor,
+            )
+        }
     }
 
-
-    //mostrar la polilinea de la ruta
-    //Guardar la polilinea codificada
-    private val _polilineaCod = MutableStateFlow("")
-
-    val polilineaCod = _polilineaCod.asStateFlow()
-
-    fun setPolilineaCod(newValue: String) {
-        _polilineaCod.value = newValue
+    fun setPolilineaCod(nuevoValor: String) {
+        _estadoMapa.update { estadoActual ->
+            estadoActual.copy(
+                polilineaCod = nuevoValor,
+            )
+        }
     }
 
-    //mostrar la polilinea de la ruta
-    private val _polilineaInicializada = MutableStateFlow(false)
-    val polilineaInicializada: StateFlow<Boolean> = _polilineaInicializada.asStateFlow()
-    fun setPolilineaInicializada(newValue: Boolean) {
-        _polilineaInicializada.value = newValue
+    fun setPolilineaInicializada(nuevoValor: Boolean) {
+        _estadoMapa.update { estadoActual ->
+            estadoActual.copy(
+                polilineaInicializada = nuevoValor,
+            )
+        }
     }
 
-    //zoom del mapa
-    private val _zoom = MutableStateFlow(15f)
-    val zoom = _zoom.asStateFlow()
-    fun setZoom(nuevoZoom: Float) {
-        _zoom.value = nuevoZoom
+    fun setZoom(nuevoValor: Float) {
+        _estadoMapa.update { estadoActual ->
+            estadoActual.copy(
+                zoom = nuevoValor,
+            )
+        }
     }
 
-    //para mostrar el marcador de un solo lugar
-    private val _marcadorInicializado = MutableStateFlow(false)
-    val marcadorInicializado: StateFlow<Boolean> = _marcadorInicializado.asStateFlow()
-    fun setMarcadorInicializado(newValue: Boolean) {
-        _marcadorInicializado.value = newValue
-    }
-    //mostrar los marcadores de varios lugares
-    private val _marcadoresInicializado = MutableStateFlow(false)
-    val marcadoresInicializado: StateFlow<Boolean> = _marcadoresInicializado.asStateFlow()
-    fun setMarcadoresInicializado(newValue: Boolean) {
-        _marcadoresInicializado.value = newValue
+    fun setMarcadorInicializado(nuevoValor: Boolean) {
+        _estadoMapa.update { estadoActual ->
+            estadoActual.copy(
+                marcadorInicializado = nuevoValor,
+            )
+        }
     }
 
-    //mostrar la tarjeta de inofmracion del lugar
-    private val _informacionInicializada = MutableStateFlow(false)
-    val informacionInicializada: StateFlow<Boolean> = _informacionInicializada.asStateFlow()
-    fun setInformacionInicializada(newValue: Boolean) {
-        _informacionInicializada.value = newValue
+    fun setMarcadoresInicializado(nuevoValor: Boolean) {
+        _estadoMapa.update { estadoActual ->
+            estadoActual.copy(
+                marcadoresInicializado = nuevoValor,
+            )
+        }
     }
 
-    //nombre del lugar seleccionando
-    private val _nombreLugar = MutableStateFlow("")
-    val nombreLugar = _nombreLugar.asStateFlow()
-
-    fun setNombreLugar(nuevoNombre: String) {
-        _nombreLugar.value = nuevoNombre
-    }
-    //rating del lugar seleccionado
-    private val _ratingLugar = MutableStateFlow(-1.0)
-    val ratingLugar = _ratingLugar.asStateFlow()
-
-    fun setRatingLugar(nuevoRating: Double) {
-        _ratingLugar.value = nuevoRating
-    }
-    //id del lugar seleccionado
-    private val _idLugar = MutableStateFlow("")
-    val idLugar = _idLugar.asStateFlow()
-
-    fun setIdLugar(nuevoId: String) {
-        _idLugar.value = nuevoId
+    fun setInformacionInicializada(nuevoValor: Boolean) {
+        _estadoMapa.update { estadoActual ->
+            estadoActual.copy(
+                informacionInicializada = nuevoValor,
+            )
+        }
     }
 
-    private val _ubicacionLugar = MutableStateFlow(LatLng(0.0,0.0))
-    val ubicacionLugar = _ubicacionLugar.asStateFlow()
-
-    fun setUbicacionLugar(nuevaUbicacion: LatLng) {
-        _ubicacionLugar.value = nuevaUbicacion
+    fun setNombreLugar(nuevoValor: String) {
+        _estadoMapa.update { estadoActual ->
+            estadoActual.copy(
+                nombreLugar = nuevoValor,
+            )
+        }
     }
+
+    fun setRatingLugar(nuevoValor: Double) {
+        _estadoMapa.update { estadoActual ->
+            estadoActual.copy(
+                ratingLugar = nuevoValor,
+            )
+        }
+    }
+
+    fun setIdLugar(nuevoValor: String) {
+        _estadoMapa.update { estadoActual ->
+            estadoActual.copy(
+                idLugar = nuevoValor,
+            )
+        }
+    }
+
+    fun setUbicacionLugar(nuevoValor: LatLng) {
+        _estadoMapa.update { estadoActual ->
+            estadoActual.copy(
+                ubicacionLugar = nuevoValor,
+            )
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------//
+    //------------------------------MAPA DE RUTAS ITINERARIO--------------------------------------//
+    //--------------------------------------------------------------------------------------------//
 
     //MAPA SELECCION DE RUTAS EN ITINERARIO---------------------------------------------------------
 
-    //origen y destino para seleccion de ruta
-    //Ubicacion del usuario
-    private val _origenRuta = MutableStateFlow(LatLng(19.504507, -99.147314))
-    val origenRuta = _origenRuta.asStateFlow()
+    private val _estadoMapaRuta = MutableStateFlow(TrovareEstadoMapaRuta())
+    val estadoMapaRuta: StateFlow<TrovareEstadoMapaRuta> = _estadoMapaRuta.asStateFlow()
 
-    fun setOrigenRuta(nuevaUbicacion: LatLng) {
-        _origenRuta.value = nuevaUbicacion
+    fun setOrigenRuta(nuevoValor: LatLng) {
+        _estadoMapaRuta.update { estadoActual ->
+            estadoActual.copy(
+                origenRuta = nuevoValor,
+            )
+        }
     }
 
-    //ubicaci[on del usuario
-    private val _destinoRuta = MutableStateFlow(LatLng(19.504507, -99.147314))
-    val destinoRuta = _destinoRuta.asStateFlow()
-    // Función para actualizar el valor de la ubicación
-    fun setDestinoRuta(nuevaUbicacion: LatLng) {
-        _destinoRuta.value = nuevaUbicacion
+    fun setDestinoRuta(nuevoValor: LatLng) {
+        _estadoMapaRuta.update { estadoActual ->
+            estadoActual.copy(
+                destinoRuta = nuevoValor,
+            )
+        }
     }
 
-
-    private val _polilineaCodRuta = MutableStateFlow("")
-    val polilineaCodRuta = _polilineaCodRuta.asStateFlow()
-    fun setPolilineaCodRuta(newValue: String) {
-        _polilineaCodRuta.value = newValue
+    fun setPolilineaCodRuta(nuevoValor: String) {
+        _estadoMapaRuta.update { estadoActual ->
+            estadoActual.copy(
+                polilineaCodRuta = nuevoValor,
+            )
+        }
     }
 
-    private val _distanciaEntrePuntos = MutableStateFlow(0.0f)
-    val distanciaEntrePuntos = _distanciaEntrePuntos.asStateFlow()
-
-    fun setDistanciaEntrePuntos(nuevaDsitancia: Float) {
-        _distanciaEntrePuntos.value = nuevaDsitancia
+    fun setPolilineaInicializadaRuta(nuevoValor: Boolean) {
+        _estadoMapaRuta.update { estadoActual ->
+            estadoActual.copy(
+                polilineaInicializadaRuta = nuevoValor,
+            )
+        }
     }
 
-    private val _tiempoDeViaje = MutableStateFlow("")
-    val tiempoDeViaje = _tiempoDeViaje.asStateFlow()
-
-    fun setTiempoDeViaje(nuevoTiempo: String) {
-        _tiempoDeViaje.value = nuevoTiempo
+    fun setZoomRuta(nuevoValor: Float) {
+        _estadoMapaRuta.update { estadoActual ->
+            estadoActual.copy(
+                zoomRuta = nuevoValor,
+            )
+        }
     }
 
-    //id del lugar seleccionado
-    private val _idLugarRuta = MutableStateFlow("")
-    val idLugarRuta = _idLugarRuta.asStateFlow()
-
-    fun setIdLugarRuta(nuevoId: String) {
-        _idLugarRuta.value = nuevoId
+    fun setMarcadorInicializadoRuta(nuevoValor: Boolean) {
+        _estadoMapaRuta.update { estadoActual ->
+            estadoActual.copy(
+                marcadorInicializadoRuta = nuevoValor,
+            )
+        }
     }
 
-    private val _polilineaInicializadaRuta = MutableStateFlow(false)
-    val polilineaInicializadaRuta: StateFlow<Boolean> = _polilineaInicializadaRuta.asStateFlow()
-
-    fun setPolilineaInicializadaRuta(newValue: Boolean) {
-        _polilineaInicializadaRuta.value = newValue
+    fun setNombreLugarRuta(nuevoValor: String) {
+        _estadoMapaRuta.update { estadoActual ->
+            estadoActual.copy(
+                nombreLugarRuta = nuevoValor,
+            )
+        }
     }
 
-    //zoom del mapa
-    private val _zoomRuta = MutableStateFlow(15f)
-    val zoomRuta = _zoomRuta.asStateFlow()
-    fun setZoomRuta(nuevoZoom: Float) {
-        _zoomRuta.value = nuevoZoom
+    fun setIdLugarRuta(nuevoValor: String) {
+        _estadoMapaRuta.update { estadoActual ->
+            estadoActual.copy(
+                idLugarRuta = nuevoValor,
+            )
+        }
     }
 
-    private val _transporteRuta = MutableStateFlow("")
-    val transporteRuta = _transporteRuta.asStateFlow()
-    fun setTransporteRuta(nuevoTransporte:String) {
-        _transporteRuta.value = nuevoTransporte
+    fun setDistanciaEntrePuntos(nuevoValor: Float) {
+        _estadoMapaRuta.update { estadoActual ->
+            estadoActual.copy(
+                distanciaEntrePuntos = nuevoValor,
+            )
+        }
     }
 
-    //para mostrar el marcador de un solo lugar
-    private val _marcadorInicializadoRuta = MutableStateFlow(false)
-    val marcadorInicializadoRuta: StateFlow<Boolean> = _marcadorInicializadoRuta.asStateFlow()
-    fun setMarcadorInicializadoRuta(newValue: Boolean) {
-        _marcadorInicializadoRuta.value = newValue
+    fun setTiempoDeViaje(nuevoValor: String) {
+        _estadoMapaRuta.update { estadoActual ->
+            estadoActual.copy(
+                tiempoDeViaje = nuevoValor,
+            )
+        }
     }
 
-    //nombre del lugar seleccionando
-    private val _nombreLugarRuta = MutableStateFlow("")
-    val nombreLugarRuta = _nombreLugarRuta.asStateFlow()
-
-    fun setNombreLugarRuta(nuevoNombre: String) {
-        _nombreLugarRuta.value = nuevoNombre
+    fun setTransporteRuta(nuevoValor: String) {
+        _estadoMapaRuta.update { estadoActual ->
+            estadoActual.copy(
+                transporteRuta = nuevoValor,
+            )
+        }
     }
-
 
     fun guardarOrigenRuta(indiceActual: Int, origenNuevo: LatLng) {//Guarda el origen de la ruta para este lugar en especifico
         val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
@@ -363,11 +380,6 @@ class TrovareViewModel : ViewModel() {
         val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
         lugarActual?.transporte = nuevoTransporte
     }
-
-
-
-
-
 
     //--------------------------------------------------------------------------------------------//
     //-------------------------------------ITINERARIOS--------------------------------------------//
@@ -636,6 +648,7 @@ class TrovareViewModel : ViewModel() {
         placesClient: PlacesClient,
         placeId: String,
     ){
+
         val placeFields = listOf(
             Place.Field.ID,
             Place.Field.LAT_LNG,
@@ -650,11 +663,11 @@ class TrovareViewModel : ViewModel() {
             .addOnSuccessListener { response: FetchPlaceResponse ->
                 val place = response.place
 
-                setDestino(place.latLng?:LatLng(destino.value.latitude, destino.value.longitude))
+                setDestino(place.latLng?:LatLng(estadoMapa.value.destino.latitude, estadoMapa.value.destino.longitude))
                 setNombreLugar(place.name?:"")
                 setRatingLugar(place.rating?:-1.0)
                 setIdLugar(place.id?:"")
-                setUbicacionLugar(place.latLng?:LatLng(destino.value.latitude, destino.value.longitude))
+                setUbicacionLugar(place.latLng?:LatLng(estadoMapa.value.destino.latitude, estadoMapa.value.destino.longitude))
 
                 val metada = place.photoMetadatas
                 if (metada != null) {
@@ -708,7 +721,7 @@ class TrovareViewModel : ViewModel() {
             .addOnSuccessListener { response: FetchPlaceResponse ->
                 val place = response.place
 
-                setOrigenRuta(place.latLng?:LatLng(destino.value.latitude, destino.value.longitude))
+                setOrigenRuta(place.latLng?:LatLng(estadoMapa.value.destino.latitude, estadoMapa.value.destino.longitude))
                 //setNombreLugar(place.name?:"")
                 //setIdLugar(place.id?:"")
 

@@ -157,22 +157,12 @@ fun AgregarLugarItinerario(
         }
 
         //Mapa-------------------------------
-        val marcadorInicializado by viewModel.marcadorInicializado.collectAsState()
-        val marcadoresInicializado by viewModel.marcadoresInicializado.collectAsState()
-        val informacionInicializada by viewModel.informacionInicializada.collectAsState()
-        val nombreLugar by viewModel.nombreLugar.collectAsState()
-        val ratingLugar by viewModel.ratingLugar.collectAsState()
-        val idLugar by viewModel.idLugar.collectAsState()
-        val ubicacionLugar by viewModel.ubicacionLugar.collectAsState()
+        val estadoMapa by viewModel.estadoMapa.collectAsState()
         var zoom by remember { mutableFloatStateOf(15f) }
 
 
-        val origen by viewModel.origen.collectAsState()
-        val destino by viewModel.destino.collectAsState()
-
-
         val cameraPositionState = rememberCameraPositionState {
-            position = CameraPosition.fromLatLngZoom(origen, 15f)
+            position = CameraPosition.fromLatLngZoom(estadoMapa.origen, 15f)
         }
         val mapProperties = MapProperties(
             // Only enable if user has accepted location permissions.
@@ -199,19 +189,19 @@ fun AgregarLugarItinerario(
                 uiSettings = MapUiSettings(mapToolbarEnabled = false)
             ) {
                 //Si cambia la ubicacion del usuario,
-                MapEffect(origen) {
-                    val cameraPosition = CameraPosition.fromLatLngZoom(origen, zoom)
+                MapEffect(estadoMapa.origen) {
+                    val cameraPosition = CameraPosition.fromLatLngZoom(estadoMapa.origen, zoom)
                     cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
                 }
                 //Si cambia la ubicacion del destino,
-                MapEffect(destino) {
-                    val cameraPosition = CameraPosition.fromLatLngZoom(destino, zoom)
+                MapEffect(estadoMapa.destino) {
+                    val cameraPosition = CameraPosition.fromLatLngZoom(estadoMapa.destino, zoom)
                     cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
                 }
 
-                if(marcadorInicializado){
+                if(estadoMapa.marcadorInicializado){
                     MarkerInfoWindow(
-                        state = rememberMarkerState(position = destino),
+                        state = rememberMarkerState(position = estadoMapa.destino),
                         snippet = "Some stuff",
                         onClick = {
                             Log.e("pruebaclick", "pruebaclick")
@@ -221,7 +211,7 @@ fun AgregarLugarItinerario(
                     )
                 }
                 //varios marcadores
-                if(marcadoresInicializado){
+                if(estadoMapa.marcadoresInicializado){
                     marcadores.forEach { marcador ->
                         Marker(
                             state = rememberMarkerState(position = marcador.ubicacion),
@@ -342,7 +332,7 @@ fun AgregarLugarItinerario(
                                                 filtro = categoria.nombre,
                                                 recuperarResultados = marcadores,
                                                 viewModel = viewModel,
-                                                ubicacion = origen
+                                                ubicacion = estadoMapa.origen
                                             )
                                         }
 
@@ -426,7 +416,7 @@ fun AgregarLugarItinerario(
                     }
                 }
                 //Tarjeta informacion del lugar---------------------------------------------------------
-                if(informacionInicializada){
+                if(estadoMapa.informacionInicializada){
                     Box(
                         modifier = modifier
                             .fillMaxSize(),
@@ -437,7 +427,7 @@ fun AgregarLugarItinerario(
                                 .padding(horizontal = 25.dp, vertical = 10.dp)
                                 .size(height = 100.dp, width = 270.dp)
                                 .clickable {
-                                    navController.navigate(Pantalla.Detalles.conArgs(idLugar))
+                                    navController.navigate(Pantalla.Detalles.conArgs(estadoMapa.idLugar))
                                 },
                             colors = CardDefaults.cardColors(
                                 containerColor = Trv1,
@@ -473,14 +463,14 @@ fun AgregarLugarItinerario(
                                     verticalArrangement = Arrangement.Center
                                 ){
                                     Text(
-                                        text = nombreLugar,
+                                        text = estadoMapa.nombreLugar,
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Bold,
                                         maxLines = 2
                                     )
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Text(
-                                            text = "${ratingLugar}/5",
+                                            text = "${estadoMapa.ratingLugar}/5",
                                             style = MaterialTheme.typography.labelSmall
                                         )
                                         Icon(
@@ -494,7 +484,7 @@ fun AgregarLugarItinerario(
                                             .fillMaxWidth()
                                             .padding(end = 5.dp, bottom = 5.dp),
                                         onClick = {
-                                            viewModel.agregarLugarALItinerario(id = idLugar, nombreLugar = nombreLugar, ubicacion = ubicacionLugar)
+                                            viewModel.agregarLugarALItinerario(id = estadoMapa.idLugar, nombreLugar = estadoMapa.nombreLugar, ubicacion = estadoMapa.ubicacionLugar)
                                             scope.launch {
                                                 snackbarHostState.showSnackbar(
                                                     message = "Guardado en el itinerario",

@@ -124,19 +124,11 @@ fun MapaPrincipal(
     }
 
     //Mapa-------------------------------
-    val marcadorInicializado by viewModel.marcadorInicializado.collectAsState()
-    val marcadoresInicializado by viewModel.marcadoresInicializado.collectAsState()
-    val informacionInicializada by viewModel.informacionInicializada.collectAsState()
-    val nombreLugar by viewModel.nombreLugar.collectAsState()
-    val ratingLugar by viewModel.ratingLugar.collectAsState()
-    val idLugar by viewModel.idLugar.collectAsState()
-    val zoom by viewModel.zoom.collectAsState()
+    val estadoMapa by viewModel.estadoMapa.collectAsState()
 
-    val origen by viewModel.origen.collectAsState()
-    val destino by viewModel.destino.collectAsState()
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(origen, zoom)
+        position = CameraPosition.fromLatLngZoom(estadoMapa.origen, estadoMapa.zoom)
     }
     val mapProperties = MapProperties(
         // Only enable if user has accepted location permissions.
@@ -148,10 +140,6 @@ fun MapaPrincipal(
     var filtroExtendido by rememberSaveable { mutableStateOf(false) }
     val marcadores by remember { mutableStateOf(mutableListOf<Marcador>()) }
 
-    //Ruta--------------------------------
-
-    val polilineaInicializada by viewModel.polilineaInicializada.collectAsState()
-    val polilineaCod by viewModel.polilineaCod.collectAsState()
 
     fun calcularZoom(punto1: LatLng, punto2: LatLng) {
         val latDiff = punto2.latitude - punto1.latitude
@@ -228,18 +216,18 @@ fun MapaPrincipal(
             uiSettings = MapUiSettings(mapToolbarEnabled = false)
         ) {
             //Si cambia la ubicacion,
-            MapEffect(destino) {
-                val cameraPosition = CameraPosition.fromLatLngZoom(destino, zoom)
+            MapEffect(estadoMapa.destino) {
+                val cameraPosition = CameraPosition.fromLatLngZoom(estadoMapa.destino, estadoMapa.zoom)
                 cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
             }
-            MapEffect(origen) {
-                val cameraPosition = CameraPosition.fromLatLngZoom(origen, zoom)
+            MapEffect(estadoMapa.origen) {
+                val cameraPosition = CameraPosition.fromLatLngZoom(estadoMapa.origen, estadoMapa.zoom)
                 cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
             }
 
-            if(marcadorInicializado){
+            if(estadoMapa.marcadorInicializado){
                 MarkerInfoWindow(
-                    state = rememberMarkerState(position = destino),
+                    state = rememberMarkerState(position = estadoMapa.destino),
                     snippet = "Some stuff",
                     onClick = {
                         Log.e("pruebaclick", "pruebaclick")
@@ -249,7 +237,7 @@ fun MapaPrincipal(
                 )
             }
             //varios marcadores
-            if(marcadoresInicializado){
+            if(estadoMapa.marcadoresInicializado){
                 marcadores.forEach { marcador ->
                     Marker(
                         state = rememberMarkerState(position = marcador.ubicacion),
@@ -265,14 +253,14 @@ fun MapaPrincipal(
                     )
                 }
             }
-            if(polilineaInicializada){
+            if(estadoMapa.polilineaInicializada){
 
-                MapEffect(origen) {
-                    val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(((origen.latitude+destino.latitude)/2),((origen.longitude+destino.longitude)/2)), zoom)
+                MapEffect(estadoMapa.origen) {
+                    val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(((estadoMapa.origen.latitude+estadoMapa.destino.latitude)/2),((estadoMapa.origen.longitude+estadoMapa.destino.longitude)/2)), estadoMapa.zoom)
                     cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
                 }
 
-                val encodedPolyline = polilineaCod // Reemplaza con tu encoded polyline
+                val encodedPolyline = estadoMapa.polilineaCod // Reemplaza con tu encoded polyline
                 val decodedPolyline: List<LatLng> = PolyUtil.decode(encodedPolyline)
 
                 for (latLng in decodedPolyline) {
@@ -388,7 +376,7 @@ fun MapaPrincipal(
                                             filtro = categoria.nombre,
                                             recuperarResultados = marcadores,
                                             viewModel = viewModel,
-                                            ubicacion = origen
+                                            ubicacion = estadoMapa.origen
                                         )
                                     }
 
@@ -472,7 +460,7 @@ fun MapaPrincipal(
                 }
             }
             //Tarjeta informacion del lugar---------------------------------------------------------
-            if(informacionInicializada){
+            if(estadoMapa.informacionInicializada){
                 Box(
                     modifier = modifier
                         .fillMaxSize(),
@@ -483,7 +471,7 @@ fun MapaPrincipal(
                             .padding(horizontal = 25.dp, vertical = 10.dp)
                             .size(height = 100.dp, width = 270.dp)
                             .clickable {
-                                navController.navigate(Pantalla.Detalles.conArgs(idLugar))
+                                navController.navigate(Pantalla.Detalles.conArgs(estadoMapa.idLugar))
                             },
                         colors = CardDefaults.cardColors(Trv1)
                     ) {
@@ -516,14 +504,14 @@ fun MapaPrincipal(
                                 verticalArrangement = Arrangement.Center
                             ){
                                 Text(
-                                    text = nombreLugar,
+                                    text = estadoMapa.nombreLugar,
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     maxLines = 2
                                 )
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
-                                        text = "${ratingLugar}/5",
+                                        text = "${estadoMapa.ratingLugar}/5",
                                         style = MaterialTheme.typography.labelSmall
                                     )
                                     Icon(
@@ -540,7 +528,7 @@ fun MapaPrincipal(
 
                                         //Log.d("Algun punto",puntosRuta[0].latitude.toString())
 
-                                        val destino = LatLng(destino.latitude, destino.longitude)
+                                        val destino = LatLng(estadoMapa.destino.latitude, estadoMapa.destino.longitude)
                                         val origen = state.lastKnownLocation?.latitude?.let { state.lastKnownLocation?.longitude?.let { it1 -> LatLng(it, it1) } }
                                         calcularZoom(origen!!, destino)
                                         if (origen != null) {
