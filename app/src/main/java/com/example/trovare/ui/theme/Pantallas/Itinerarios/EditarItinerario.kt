@@ -72,6 +72,7 @@ import com.example.trovare.ui.theme.Trv10
 import com.example.trovare.ui.theme.Trv11
 import com.example.trovare.ui.theme.Trv3
 import com.example.trovare.ui.theme.Trv6
+import com.google.android.gms.maps.model.LatLng
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
@@ -100,7 +101,8 @@ fun EditarItinerario(
     val clockState = rememberSheetState()
     var indiceActual by remember{ mutableStateOf(0) }
     var listaVisible by remember{ mutableStateOf(true) }
-    val origen by viewModel.origen.collectAsState()
+    val origen = LatLng(19.504507, -99.147314)
+
 
     var mostrarBorrarDeItinerario by rememberSaveable { mutableStateOf(false) }
 
@@ -437,6 +439,9 @@ fun EditarItinerario(
 
                                             }
                                             IconButton(
+
+
+
                                                 onClick = {
                                                     viewModel.setIndiceActual(index)//actualiza el indice para saber a que lugar guardar los cambios una vez que nos encontremos en la pantalla de RutasItienrario
                                                     viewModel.setPolilineaCodRuta(lugar.ruta?:"")//polilinea que se debe mostrar en la ruta

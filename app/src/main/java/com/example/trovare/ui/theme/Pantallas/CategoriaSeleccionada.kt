@@ -56,9 +56,9 @@ fun CategoriaSeleccionada(
         "ChIJFzoDI5X50YURKYeRnBn0AtU"
         )
 
+    val estadoMapa by viewModel.estadoMapa.collectAsState()
     val lugaresCercanos by remember { mutableStateOf(mutableStateListOf<NearbyPlaces>()) }
     val lugaresId by remember { mutableStateOf(mutableStateListOf<String>()) }
-    val ubicacion by viewModel.destino.collectAsState()
 
     //Rutina que se ejecuta al componer la página, recupera los lugares cercanos dependiendo del filtro
     LaunchedEffect(key1 = Unit){
@@ -70,7 +70,7 @@ fun CategoriaSeleccionada(
                     filtro = categoria,
                     recuperarResultados = lugaresCercanos,
                     recuperarId = lugaresId,
-                    ubicacion = ubicacion
+                    ubicacion = estadoMapa.destino
                 )
             }
             viewModel.obtenerFotoLugarCercano(placesClient = placesClient, placesId = lista)

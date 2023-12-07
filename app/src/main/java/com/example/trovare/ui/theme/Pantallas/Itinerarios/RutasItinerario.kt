@@ -142,6 +142,8 @@ fun RutasItinerario(
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
 
+    val ubicacionActual by viewModel.ubicacionActual.collectAsState()
+
     val colores = FilterChipDefaults.filterChipColors(
         iconColor = Color.White,
         selectedLeadingIconColor = Color.Black,
@@ -152,32 +154,18 @@ fun RutasItinerario(
     )
 
 
+    val estadoMapaRuta by viewModel.estadoMapaRuta.collectAsState()
 
-    val textoLugarDestino by viewModel.nombreLugarRuta.collectAsState()
 
-    //Mapa-------------------------------
-    val marcadorInicializadoRuta by viewModel.marcadorInicializadoRuta.collectAsState()
-    val zoomRuta by viewModel.zoomRuta.collectAsState()
-
-    val origenRuta by viewModel.origenRuta.collectAsState()
-    val destinoRuta by viewModel.destinoRuta.collectAsState()
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(origenRuta, zoomRuta)
+        position = CameraPosition.fromLatLngZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.zoomRuta)
     }
     val mapProperties = MapProperties(
         // Only enable if user has accepted location permissions.
         isMyLocationEnabled = state.lastKnownLocation != null,
         mapStyleOptions = MapStyleOptions(MapStyle.json)
     )
-    //Ruta--------------------------------
-    val polilineaInicializadaRuta by viewModel.polilineaInicializadaRuta.collectAsState()
-    val polilineaCodRuta by viewModel.polilineaCodRuta.collectAsState()
-
-    //Transporte seleccionado---------------
-    val transporteRuta by viewModel.transporteRuta.collectAsState()
-    val distanciaEntrePuntos by viewModel.distanciaEntrePuntos.collectAsState()
-    val tiempoDeViaje by viewModel.tiempoDeViaje.collectAsState()
 
 
     //bottom sheet
@@ -251,7 +239,6 @@ fun RutasItinerario(
         }
     }
 
-    val idRuta by viewModel.idLugarRuta.collectAsState()
     var nombre by rememberSaveable { mutableStateOf("") }
     var direccion by rememberSaveable { mutableStateOf("") }
     var numeroTelefono by rememberSaveable { mutableStateOf("") }
@@ -261,51 +248,56 @@ fun RutasItinerario(
 
 
     LaunchedEffect(key1 = Unit){
+        viewModel.getLastLocation(fusedLocationProviderClient)
+        if(estadoMapaRuta.polilineaCodRuta == ""){
+            viewModel.setOrigenRuta(ubicacionActual)
+        }
+
         viewModel.obtenerLugarRuta(
             placesClient = placesClient,
-            placeId = idRuta,
+            placeId = estadoMapaRuta.idLugarRuta,
             nombre = { nombre = it?:"" },
             direccion = { direccion = it?:""},
             rating =  { calificacion = it?: -1.0},
             numeroTelefono = {numeroTelefono = it?: ""},
             paginaWeb = {paginaWeb = it?: ""},
         )
-        calcularZoom(origenRuta, destinoRuta)
+        calcularZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.destinoRuta)
         when {
-            transporteRuta == "auto" -> {
+            estadoMapaRuta.transporteRuta == "auto" -> {
                 scope.launch {
                     peekHeight = 100.dp
                 }
                 viewModel.setTransporteRuta("auto")
-                calcularZoom(origenRuta, destinoRuta)
+                calcularZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.destinoRuta)
                 rawJSONRutas(
-                    origen = origenRuta,
-                    destino = destinoRuta,
+                    origen = estadoMapaRuta.origenRuta,
+                    destino = estadoMapaRuta.destinoRuta,
                     viewModel = viewModel,
                     //recuperarResultados = rutaInfo
                 )
             }
-            transporteRuta == "transporte" -> {
+            estadoMapaRuta.transporteRuta == "transporte" -> {
                 scope.launch {
                     peekHeight = 100.dp
                 }
-                calcularZoom(origenRuta, destinoRuta)
+                calcularZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.destinoRuta)
                 rawJSONRutas(
-                    origen = origenRuta,
-                    destino = destinoRuta,
+                    origen = estadoMapaRuta.origenRuta,
+                    destino = estadoMapaRuta.destinoRuta,
                     viewModel = viewModel,
                     travel_mode = "TRANSIT"
                     //recuperarResultados = rutaInfo
                 )
             }
-            transporteRuta == "caminando" -> {
+            estadoMapaRuta.transporteRuta == "caminando" -> {
                 scope.launch {
                     peekHeight = 100.dp
                 }
-                calcularZoom(origenRuta, destinoRuta)
+                calcularZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.destinoRuta)
                 rawJSONRutas(
-                    origen = origenRuta,
-                    destino = destinoRuta,
+                    origen = estadoMapaRuta.origenRuta,
+                    destino = estadoMapaRuta.destinoRuta,
                     viewModel = viewModel,
                     travel_mode = "WALK"
                     //recuperarResultados = rutaInfo
@@ -429,7 +421,7 @@ fun RutasItinerario(
                                 textStyle = MaterialTheme.typography.labelSmall,
                                 placeholder = {
                                     Text(
-                                        text = textoLugarDestino,
+                                        text = estadoMapaRuta.nombreLugarRuta,
                                         style = MaterialTheme.typography.labelSmall
                                     )
                                 },
@@ -455,17 +447,17 @@ fun RutasItinerario(
                                     contentDescription = ""
                                 )
                             },
-                            selected = transporteRuta == "auto",
+                            selected = estadoMapaRuta.transporteRuta == "auto",
                             onClick = {
                                 viewModel.setPolilineaInicializadaRuta(false)
                                 scope.launch {
                                     peekHeight = 100.dp
                                 }
                                 viewModel.setTransporteRuta("auto")
-                                calcularZoom(origenRuta, destinoRuta)
+                                calcularZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.destinoRuta)
                                 rawJSONRutas(
-                                    origen = origenRuta,
-                                    destino = destinoRuta,
+                                    origen = estadoMapaRuta.origenRuta,
+                                    destino = estadoMapaRuta.destinoRuta,
                                     viewModel = viewModel,
                                     //recuperarResultados = rutaInfo
                                 )
@@ -482,17 +474,17 @@ fun RutasItinerario(
                                     contentDescription = "",
                                 )
                             },
-                            selected = transporteRuta == "transporte",
+                            selected = estadoMapaRuta.transporteRuta == "transporte",
                             onClick = {
                                 viewModel.setPolilineaInicializadaRuta(false)
                                 scope.launch {
                                     peekHeight = 100.dp
                                 }
                                 viewModel.setTransporteRuta("transporte")
-                                calcularZoom(origenRuta, destinoRuta)
+                                calcularZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.destinoRuta)
                                 rawJSONRutas(
-                                    origen = origenRuta,
-                                    destino = destinoRuta,
+                                    origen = estadoMapaRuta.origenRuta,
+                                    destino = estadoMapaRuta.destinoRuta,
                                     viewModel = viewModel,
                                     travel_mode = "TRANSIT"
                                     //recuperarResultados = rutaInfo
@@ -510,17 +502,17 @@ fun RutasItinerario(
                                     contentDescription = "",
                                 )
                             },
-                            selected = transporteRuta == "caminando",
+                            selected = estadoMapaRuta.transporteRuta == "caminando",
                             onClick = {
                                 viewModel.setPolilineaInicializadaRuta(false)
                                 scope.launch {
                                     peekHeight = 100.dp
                                 }
                                 viewModel.setTransporteRuta("caminando")
-                                calcularZoom(origenRuta, destinoRuta)
+                                calcularZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.destinoRuta)
                                 rawJSONRutas(
-                                    origen = origenRuta,
-                                    destino = destinoRuta,
+                                    origen = estadoMapaRuta.origenRuta,
+                                    destino = estadoMapaRuta.destinoRuta,
                                     viewModel = viewModel,
                                     travel_mode = "WALK"
                                     //recuperarResultados = rutaInfo
@@ -538,8 +530,8 @@ fun RutasItinerario(
         //Contenido de la tarjeta inferior----------------------------------------------------------
         sheetContent = {
             // Sheet content
-            val distancia = (distanciaEntrePuntos/1000).toInt()
-            val tiempoDeViajeTemp = tiempoDeViaje.dropLast(1).toIntOrNull()
+            val distancia = (estadoMapaRuta.distanciaEntrePuntos/1000).toInt()
+            val tiempoDeViajeTemp = estadoMapaRuta.tiempoDeViaje.dropLast(1).toIntOrNull()
 
             Column(
                 modifier = modifier.padding(horizontal = 25.dp)
@@ -556,10 +548,10 @@ fun RutasItinerario(
                                modifier = modifier.size(35.dp),
                                imageVector =
                                when {
-                                   transporteRuta == "caminando" -> {
+                                   estadoMapaRuta.transporteRuta == "caminando" -> {
                                        Icons.Rounded.DirectionsWalk
                                    }
-                                   transporteRuta == "transporte" -> {
+                                   estadoMapaRuta.transporteRuta == "transporte" -> {
                                        Icons.Rounded.DirectionsBus
                                    }
                                    else -> {
@@ -590,7 +582,7 @@ fun RutasItinerario(
                     }
                     //Boton agregar ruta-----
                     TextButton(
-                        enabled = polilineaInicializadaRuta,
+                        enabled = estadoMapaRuta.polilineaInicializadaRuta,
                         onClick = {
                             scope.launch {
                                 scaffoldState.bottomSheetState.show()
@@ -599,10 +591,10 @@ fun RutasItinerario(
                                     duration = SnackbarDuration.Short
                                 )
                             }
-                            viewModel.guardarOrigenRuta(indiceActual = indiceActual, origenNuevo = origenRuta)
-                            viewModel.guardarRutaLugar(indiceActual = indiceActual, rutaNueva = polilineaCodRuta)
-                            viewModel.guardarZoomLugar(indiceActual = indiceActual, nuevoZoom = zoomRuta)
-                            viewModel.guardarTransporte(indiceActual = indiceActual, nuevoTransporte = transporteRuta)
+                            viewModel.guardarOrigenRuta(indiceActual = indiceActual, origenNuevo = estadoMapaRuta.origenRuta)
+                            viewModel.guardarRutaLugar(indiceActual = indiceActual, rutaNueva = estadoMapaRuta.polilineaCodRuta)
+                            viewModel.guardarZoomLugar(indiceActual = indiceActual, nuevoZoom = estadoMapaRuta.zoomRuta)
+                            viewModel.guardarTransporte(indiceActual = indiceActual, nuevoTransporte = estadoMapaRuta.transporteRuta)
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Trv10,
@@ -809,18 +801,23 @@ fun RutasItinerario(
                         zoomControlsEnabled = false
                     ),
                 ) {
-                    MapEffect(origenRuta) {
-                        calcularZoom(origenRuta, destinoRuta)
+                    MapEffect(estadoMapaRuta.origenRuta) {
+                        calcularZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.destinoRuta)
                     }
-                    MapEffect(zoomRuta){
-                        val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(((origenRuta.latitude+destinoRuta.latitude)/2),((origenRuta.longitude+destinoRuta.longitude)/2)), zoomRuta)
+                    MapEffect(estadoMapaRuta.zoomRuta){
+                        val cameraPosition = CameraPosition.fromLatLngZoom(
+                            LatLng(
+                                ((estadoMapaRuta.origenRuta.latitude+estadoMapaRuta.destinoRuta.latitude)/2),
+                                ((estadoMapaRuta.origenRuta.longitude+estadoMapaRuta.destinoRuta.longitude)/2)),
+                            estadoMapaRuta.zoomRuta
+                        )
                         cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
                     }
 
                     //Mostrar marcador de origen
-                    if(marcadorInicializadoRuta){
+                    if(estadoMapaRuta.marcadorInicializadoRuta){
                         MarkerInfoWindow(
-                            state = rememberMarkerState(position = origenRuta),
+                            state = rememberMarkerState(position = estadoMapaRuta.origenRuta),
                             onClick = {
                                 false
                             },
@@ -829,20 +826,20 @@ fun RutasItinerario(
                     }
                     //Mostrar marcador de destino(siempre se muestra)
                     MarkerInfoWindow(
-                        state = rememberMarkerState(position = destinoRuta),
+                        state = rememberMarkerState(position = estadoMapaRuta.destinoRuta),
                         onClick = {
                             false
                         },
                         draggable = false
                     )
-                    if(polilineaInicializadaRuta){
+                    if(estadoMapaRuta.polilineaInicializadaRuta){
 
-                        MapEffect(origenRuta) {
-                            val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(((origenRuta.latitude+destinoRuta.latitude)/2),((origenRuta.longitude+destinoRuta.longitude)/2)), zoomRuta)
+                        MapEffect(estadoMapaRuta.origenRuta) {
+                            val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(((estadoMapaRuta.origenRuta.latitude+estadoMapaRuta.destinoRuta.latitude)/2),((estadoMapaRuta.origenRuta.longitude+estadoMapaRuta.destinoRuta.longitude)/2)), estadoMapaRuta.zoomRuta)
                             cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
                         }
 
-                        val encodedPolyline = polilineaCodRuta // Reemplaza con tu encoded polyline
+                        val encodedPolyline = estadoMapaRuta.polilineaCodRuta // Reemplaza con tu encoded polyline
                         val decodedPolyline: List<LatLng> = PolyUtil.decode(encodedPolyline)
 
                         for (latLng in decodedPolyline) {

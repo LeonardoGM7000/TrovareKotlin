@@ -75,7 +75,7 @@ class MainActivity : ComponentActivity() {
         val auth = FirebaseAuth.getInstance()
 
         //Recuperar ubicacion actual de usuario
-        viewModel.getLastLocation(fusedLocationProviderClient)
+
 
 
         // Variable que almacena la ruta de la pantalla
