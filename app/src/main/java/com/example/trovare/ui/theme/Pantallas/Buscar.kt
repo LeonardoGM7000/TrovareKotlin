@@ -155,6 +155,7 @@ fun Buscar(
                                 singleLine = true,
                                 colors = TextFieldDefaults.colors(
                                     focusedTextColor = Color.White,
+                                    unfocusedContainerColor = Color.Black,
                                     focusedContainerColor = Color.Black,
                                     cursorColor = Color.White,
                                 ),

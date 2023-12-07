@@ -22,6 +22,7 @@ data class Lugar(
     var ubicacion: LatLng?,
     var ruta: String?,
     var zoom: Float,
+    var transporte: String = "",
     //
     var imagen: ImageBitmap?
 )

@@ -152,6 +152,7 @@ fun RecuperarContrasena(
                             focusedTextColor = Color.White,
                             focusedLabelColor = Color.White,
                             unfocusedLabelColor = Color.White,
+                            unfocusedContainerColor = Trv8,
                             focusedContainerColor = Trv8,
                             cursorColor = Color.White,
                             focusedIndicatorColor = Color.White,

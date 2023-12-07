@@ -4,11 +4,16 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.trovare.Api.obtenerResenas
 import com.example.trovare.Data.Hora
 import com.example.trovare.Data.Itinerario
 import com.example.trovare.Data.Lugar
@@ -16,6 +21,7 @@ import com.example.trovare.Data.Usuario
 import com.example.trovare.Data.itinerarioPrueba
 import com.example.trovare.Data.usuarioPrueba
 import com.example.trovare.ui.theme.Pantallas.Mapa.MapState
+import com.example.trovare.ui.theme.Pantallas.Resena
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.CameraPosition
@@ -280,7 +286,6 @@ class TrovareViewModel : ViewModel() {
         _polilineaCodRuta.value = newValue
     }
 
-
     private val _distanciaEntrePuntos = MutableStateFlow(0.0f)
     val distanciaEntrePuntos = _distanciaEntrePuntos.asStateFlow()
 
@@ -295,8 +300,13 @@ class TrovareViewModel : ViewModel() {
         _tiempoDeViaje.value = nuevoTiempo
     }
 
+    //id del lugar seleccionado
+    private val _idLugarRuta = MutableStateFlow("")
+    val idLugarRuta = _idLugarRuta.asStateFlow()
 
-
+    fun setIdLugarRuta(nuevoId: String) {
+        _idLugarRuta.value = nuevoId
+    }
 
     private val _polilineaInicializadaRuta = MutableStateFlow(false)
     val polilineaInicializadaRuta: StateFlow<Boolean> = _polilineaInicializadaRuta.asStateFlow()
@@ -312,12 +322,27 @@ class TrovareViewModel : ViewModel() {
         _zoomRuta.value = nuevoZoom
     }
 
+    private val _transporteRuta = MutableStateFlow("")
+    val transporteRuta = _transporteRuta.asStateFlow()
+    fun setTransporteRuta(nuevoTransporte:String) {
+        _transporteRuta.value = nuevoTransporte
+    }
+
     //para mostrar el marcador de un solo lugar
     private val _marcadorInicializadoRuta = MutableStateFlow(false)
     val marcadorInicializadoRuta: StateFlow<Boolean> = _marcadorInicializadoRuta.asStateFlow()
     fun setMarcadorInicializadoRuta(newValue: Boolean) {
         _marcadorInicializadoRuta.value = newValue
     }
+
+    //nombre del lugar seleccionando
+    private val _nombreLugarRuta = MutableStateFlow("")
+    val nombreLugarRuta = _nombreLugarRuta.asStateFlow()
+
+    fun setNombreLugarRuta(nuevoNombre: String) {
+        _nombreLugarRuta.value = nuevoNombre
+    }
+
 
     fun guardarOrigenRuta(indiceActual: Int, origenNuevo: LatLng) {//Guarda el origen de la ruta para este lugar en especifico
         val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
@@ -334,13 +359,12 @@ class TrovareViewModel : ViewModel() {
         lugarActual?.zoom = nuevoZoom
     }
 
-    //nombre del lugar seleccionando
-    private val _nombreLugarRuta = MutableStateFlow("")
-    val nombreLugarRuta = _nombreLugarRuta.asStateFlow()
-
-    fun setNombreLugarRuta(nuevoNombre: String) {
-        _nombreLugarRuta.value = nuevoNombre
+    fun guardarTransporte(indiceActual: Int, nuevoTransporte: String) {
+        val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
+        lugarActual?.transporte = nuevoTransporte
     }
+
+
 
 
 
@@ -400,6 +424,7 @@ class TrovareViewModel : ViewModel() {
         /*val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
         lugarActual?.horaDeVisita = horaNueva*/
     }
+
 
     fun borrarLugarActual(lugar: Lugar) {
         _itinerarioActual.value.lugares?.remove(lugar)
@@ -479,6 +504,75 @@ class TrovareViewModel : ViewModel() {
                 }
             }
     }
+
+    //Obtener info para las rutas
+    fun obtenerLugarRuta(
+        placesClient: PlacesClient,
+        placeId: String,
+        nombre: (String?) -> Unit,
+        direccion: (String?) -> Unit,
+        rating: (Double?) -> Unit,
+        numeroTelefono: (String?) -> Unit,
+        paginaWeb: (String?) -> Unit,
+    ){
+        val placeFields = listOf(
+            Place.Field.NAME,
+            Place.Field.ADDRESS,
+            Place.Field.RATING,
+            Place.Field.PHONE_NUMBER,
+            Place.Field.WEBSITE_URI,
+            Place.Field.PHOTO_METADATAS
+        )//campos que se deben obtener de la API de places
+        val request = FetchPlaceRequest.newInstance(placeId, placeFields)
+
+        placesClient.fetchPlace(request)
+            .addOnSuccessListener { response: FetchPlaceResponse ->
+                val place = response.place
+
+
+                nombre(place.name)
+                direccion(place.address)
+                rating(place.rating)
+                numeroTelefono(place.phoneNumber)
+
+                if(place.websiteUri != null){
+                    paginaWeb(place.websiteUri?.toString())
+                }
+
+                // Obtener metadatos de la foto-----------------------------------------------------
+                val metada = place.photoMetadatas
+                if (metada != null) {
+
+                    val photoMetadata = metada.first()
+
+                    // Create a FetchPhotoRequest.
+                    val photoRequest = FetchPhotoRequest.builder(photoMetadata)
+                        .setMaxWidth(500) // Optional.
+                        .setMaxHeight(500) // Optional.
+                        .build()
+                    placesClient.fetchPhoto(photoRequest)
+                        .addOnSuccessListener { fetchPhotoResponse: FetchPhotoResponse ->
+
+                            val image = fetchPhotoResponse.bitmap
+                            val imagenBitmap: ImageBitmap = image.asImageBitmap()
+                            _imagen.value = imagenBitmap
+                        }.addOnFailureListener { exception: Exception ->
+                            if (exception is ApiException) {
+                                val statusCode = exception.statusCode
+                                TODO("Handle error with given status code.")
+                            }
+                        }
+                }
+
+            }.addOnFailureListener { exception: Exception ->
+                if (exception is ApiException) {
+                    val statusCode = exception.statusCode
+                    TODO("Handle error with given status code")
+                }
+            }
+    }
+
+
     //Funci[on para obtener detalles para lugares cercanos------------------------------------------
 
     fun obtenerFotoLugarCercano(
