@@ -44,6 +44,7 @@ data class TrovareEstadoMapaRuta(
     val distanciaEntrePuntos: Float = 0.0f,
     val tiempoDeViaje: String = "",
     val transporteRuta: String = "",
+    val imgsInicializadas: Boolean = false
 
 )
 

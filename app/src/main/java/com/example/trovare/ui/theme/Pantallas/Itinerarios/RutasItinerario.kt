@@ -3,6 +3,8 @@ package com.example.trovare.ui.theme.Pantallas.Itinerarios
 import com.example.trovare.ui.theme.Pantallas.Mapa.MapState
 import com.example.trovare.ui.theme.Pantallas.Mapa.MapStyle
 import android.annotation.SuppressLint
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -62,6 +64,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -84,6 +87,8 @@ import androidx.navigation.NavController
 import com.example.trovare.Api.obtenerResenas
 import com.example.trovare.Api.rawJSON
 import com.example.trovare.Api.rawJSONRutas
+import com.example.trovare.Api.rawJSONUriFotos
+import com.example.trovare.Api.rawJSONVariasFotos
 import com.example.trovare.Data.Places
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
@@ -142,6 +147,7 @@ fun RutasItinerario(
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
 
+    val nombresFotos by remember { mutableStateOf(mutableStateListOf<String>()) }
     val ubicacionActual by viewModel.ubicacionActual.collectAsState()
 
     val colores = FilterChipDefaults.filterChipColors(
@@ -192,6 +198,14 @@ fun RutasItinerario(
             rawJSON(
                 query = textoBuscar.text,
                 recuperarResultados = prediccionesBusquedaMapa
+            )
+
+            viewModel.setImgsInicializadas(false)
+            val lugar = estadoMapaRuta.idLugarRuta
+            rawJSONVariasFotos(
+                placeid = lugar,
+                recuperarResultados = nombresFotos,
+                viewModel = viewModel
             )
         }
     }
@@ -616,6 +630,18 @@ fun RutasItinerario(
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 5.dp)
                 ){
+
+                    if(estadoMapaRuta.imgsInicializadas /*&& estadoMapaRuta.marcadorInicializadoRuta*/){
+                        Log.d("¿Hay nombre?", nombresFotos.toString())
+                    }
+                    //viewModel.setImgsInicializadas(false)
+                    /*val fotoUri = mutableListOf<String>()
+                    rawJSONUriFotos(
+                        photoName = nombresFotos.first(),
+                        recuperarResultados = fotoUri
+                    )*/
+
+
                     item{
                         Card(
                             modifier = modifier

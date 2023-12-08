@@ -361,6 +361,14 @@ class TrovareViewModel : ViewModel() {
         }
     }
 
+    fun setImgsInicializadas(nuevoValor: Boolean) {
+        _estadoMapaRuta.update { estadoActual ->
+            estadoActual.copy(
+                imgsInicializadas = nuevoValor,
+            )
+        }
+    }
+
     fun guardarOrigenRuta(indiceActual: Int, origenNuevo: LatLng) {//Guarda el origen de la ruta para este lugar en especifico
         val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
         lugarActual?.origen = origenNuevo

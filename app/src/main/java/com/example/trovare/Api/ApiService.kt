@@ -1,9 +1,14 @@
 package com.example.trovare.Api
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.trovare.Data.NearbyLocationsClass
 import com.example.trovare.Data.NearbyPlaces
 import com.example.trovare.Data.NearbyPlacesClass
+import com.example.trovare.Data.PhotoNames
+import com.example.trovare.Data.PhotoNamesClass
+import com.example.trovare.Data.PhotoURI
 import com.example.trovare.Data.Places
 import com.example.trovare.Data.PlacesClass
 import com.example.trovare.Data.Routes
@@ -30,8 +35,11 @@ import org.json.JSONObject
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 
 interface APIServiceBuscarTexto {
@@ -212,6 +220,124 @@ fun rawJSONLugarCercano(
         }
     }
 }
+
+interface APIServiceVariasFotos {
+    @Headers(
+        "Content-Type: application/json",
+        "X-Goog-Api-Key: AIzaSyBpmAJRF6PsRJVNm6oq1qmfXbdaBjNA5mQ",
+        "X-Goog-FieldMask: photos",
+    )
+    @GET("/v1/places/{ID}")
+    suspend fun createDifferentPhotos(@Path("ID") placeID: String): Response<ResponseBody>//cambiar import de response?
+}
+
+fun rawJSONVariasFotos(
+    placeid: String,
+    recuperarResultados: MutableList<String>,
+    viewModel: TrovareViewModel
+) {
+
+    // Crear Retrofit
+    val retrofit = Retrofit.Builder()
+        .baseUrl("https://places.googleapis.com")
+        .build()
+
+    // Crear Servicio
+    val service = retrofit.create(APIServiceVariasFotos::class.java)
+
+    //recuperarResultados.clear()
+
+    CoroutineScope(Dispatchers.IO).launch {
+
+        //Hacer el request POST y obtener respuesta
+        val response = service.createDifferentPhotos(placeid)
+        withContext(Dispatchers.Main) {
+            if (response.isSuccessful) {
+
+                // Convertir raw JSON a pretty JSON usando la libreria GSON
+                val gson = GsonBuilder().setPrettyPrinting().create()
+                val prettyJson = gson.toJson(
+                    JsonParser.parseString(
+                        response.body()
+                            ?.string() // : https://github.com/square/retrofit/issues/3255
+                    )
+                )
+
+                Log.d("Pretty Printed JSON photos:", prettyJson)
+
+                val gson1 = Gson()
+                val mUser = gson1.fromJson(prettyJson, PhotoNamesClass::class.java)
+
+                recuperarResultados.clear()
+                if(mUser.photoNames != null){
+                    mUser.photoNames!!.forEach { foto ->
+                        if (foto != null) {
+                            recuperarResultados.add(foto.photoName.toString())
+                        } else {
+                            //TODO No se encontraorn resultados
+                        }
+
+                    }
+                }
+                Log.d("Se pudo con las fotos",recuperarResultados.first())
+                viewModel.setImgsInicializadas(true)
+            } else {
+                //TODO Error retrofit
+            }
+        }
+    }
+}
+
+interface APIServiceUriFotos {
+    @GET("/v1/{name}/media")
+    suspend fun createPhotosUri(@Path("name") photoName: String, @Query("maxHeightPx") maxHeight: Int = 2000, @Query("maxWidthPx") maxWidth: Int = 2000, @Query("key") key: String = "AIzaSyBpmAJRF6PsRJVNm6oq1qmfXbdaBjNA5mQ"): Response<ResponseBody>//cambiar import de response?
+}
+
+fun rawJSONUriFotos(
+    photoName: String,
+    recuperarResultados: MutableList<String>
+) {
+
+    // Crear Retrofit
+    val retrofit = Retrofit.Builder()
+        .baseUrl("https://places.googleapis.com")
+        .build()
+
+    // Crear Servicio
+    val service = retrofit.create(APIServiceUriFotos::class.java)
+
+    //recuperarResultados.clear()
+
+    CoroutineScope(Dispatchers.IO).launch {
+
+        //Hacer el request POST y obtener respuesta
+        val response = service.createPhotosUri(photoName)
+        withContext(Dispatchers.Main) {
+            if (response.isSuccessful) {
+
+                // Convertir raw JSON a pretty JSON usando la libreria GSON
+                val gson = GsonBuilder().setPrettyPrinting().create()
+                val prettyJson = gson.toJson(
+                    JsonParser.parseString(
+                        response.body()
+                            ?.string() // : https://github.com/square/retrofit/issues/3255
+                    )
+                )
+
+                Log.d("Pretty Printed JSON uris:", prettyJson)
+
+                /*val gson1 = Gson()
+                val mUser = gson1.fromJson(prettyJson, PhotoURI::class.java)
+
+                recuperarResultados.add(mUser.photoUri)
+                Log.d("Se pudo con las urifotos",recuperarResultados.first())*/
+            } else {
+                //TODO Error retrofit
+            }
+        }
+    }
+}
+
 //Recuperar LatLng para lugares cercanos------------------------------------------------------------
 interface APIServiceBuscarUbicacionesCercanas {
     @Headers(
