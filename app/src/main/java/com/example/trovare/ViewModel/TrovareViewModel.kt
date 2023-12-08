@@ -583,66 +583,6 @@ class TrovareViewModel : ViewModel() {
     }
 
 
-    //Funci[on para obtener detalles para lugares cercanos------------------------------------------
-
-    fun obtenerFotoLugarCercano(
-        placesClient: PlacesClient,
-        placesId: List<String>,
-    ){
-        val placeFields = listOf(
-            Place.Field.PHOTO_METADATAS
-        )//campos que se deben obtener de la API de places
-
-
-
-        placesId.forEachIndexed{ index, placeId ->
-
-            val request = FetchPlaceRequest.newInstance(placeId, placeFields)
-
-            placesClient.fetchPlace(request)
-                .addOnSuccessListener { response: FetchPlaceResponse ->
-                    val place = response.place
-
-                    // Obtener metadatos de la foto-----------------------------------------------------
-                    val metada = place.photoMetadatas
-                    if (metada != null) {
-
-                        val photoMetadata = metada.first()
-
-                        // Create a FetchPhotoRequest.
-                        val photoRequest = FetchPhotoRequest.builder(photoMetadata)
-                            .setMaxWidth(300) // Optional.
-                            .setMaxHeight(300) // Optional.
-                            .build()
-                        placesClient.fetchPhoto(photoRequest)
-                            .addOnSuccessListener { fetchPhotoResponse: FetchPhotoResponse ->
-                                val image = fetchPhotoResponse.bitmap
-                                val imagenBitmap: ImageBitmap = image.asImageBitmap()
-                                // Asegúrate de que la lista tenga un tamaño suficiente
-
-                                while (_imagenes.value.size <= index) {
-                                    _imagenes.value.add(null)
-                                }
-
-                                // Agregar la imagen a la lista
-                                _imagenes.value[index] = imagenBitmap
-
-                            }.addOnFailureListener { exception: Exception ->
-                                if (exception is ApiException) {
-                                    val statusCode = exception.statusCode
-                                    TODO("Handle error with given status code.")
-                                }
-                            }
-                    }
-                }.addOnFailureListener { exception: Exception ->
-                    if (exception is ApiException) {
-                        val statusCode = exception.statusCode
-                        TODO("Handle error with given status code")
-                    }
-                }
-        }
-    }
-
     //funci[on para obtener informacion para el mapa------------------------------------------------
     fun obtenerMarcador(
         placesClient: PlacesClient,

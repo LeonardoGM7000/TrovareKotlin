@@ -20,5 +20,4 @@ val categorias = listOf(
     Categoria(nombre = "Museos", icono = Icons.Rounded.Museum),
     Categoria(nombre = "Parques", icono = Icons.Rounded.Park),
     Categoria(nombre = "Hoteles", icono = Icons.Rounded.Hotel),
-    Categoria(nombre = "Favoritos", icono = Icons.Rounded.Favorite),
 )

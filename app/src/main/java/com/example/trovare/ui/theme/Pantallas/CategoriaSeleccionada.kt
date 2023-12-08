@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.trovare.Api.rawJSONLugarCercano
+//import com.example.trovare.Api.rawJSONLugarCercano
 import com.example.trovare.Data.NearbyPlaces
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Navegacion.Pantalla
@@ -62,18 +63,16 @@ fun CategoriaSeleccionada(
 
     //Rutina que se ejecuta al componer la página, recupera los lugares cercanos dependiendo del filtro
     LaunchedEffect(key1 = Unit){
+        //Funcion de API que permite recuperar lugares cercanos con base en un filtro-----------
         CoroutineScope(Dispatchers.Default).launch {
-            //Funcion de API que permite recuperar lugares cercanos con base en un filtro-----------
-            CoroutineScope(Dispatchers.Default).launch {
-                delay(200)
-                rawJSONLugarCercano(
-                    filtro = categoria,
-                    recuperarResultados = lugaresCercanos,
-                    recuperarId = lugaresId,
-                    ubicacion = estadoMapa.destino
-                )
-            }
-            viewModel.obtenerFotoLugarCercano(placesClient = placesClient, placesId = lista)
+            delay(200)
+
+            rawJSONLugarCercano(
+                filtro = categoria,
+                recuperarResultados = lugaresCercanos,
+                recuperarId = lugaresId,
+                ubicacion = estadoMapa.destino
+            )
         }
     }
     Scaffold(

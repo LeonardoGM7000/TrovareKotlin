@@ -115,8 +115,7 @@ interface APIServiceBuscarPorUbicacion {
     @Headers(
         "Content-Type: application/json",
         "X-Goog-Api-Key: AIzaSyBpmAJRF6PsRJVNm6oq1qmfXbdaBjNA5mQ",
-        "X-Goog-FieldMask: places.shortFormattedAddress,places.displayName,places.id",
-
+        "X-Goog-FieldMask: places.id,places.displayName,places.shortFormattedAddress",
     )
     @POST("/v1/places:searchNearby")
     suspend fun createPlaceNearby(@Body requestBody: RequestBody): Response<ResponseBody>//cambiar import de response?
@@ -141,15 +140,10 @@ fun rawJSONLugarCercano(
     }
 
     // Crear Retrofit
-    val retrofit = Retrofit.Builder()
-        .baseUrl("https://places.googleapis.com")
-        .build()
-
+    val retrofit = Retrofit.Builder().baseUrl("https://places.googleapis.com").build()
     // Crear Servicio
     val service = retrofit.create(APIServiceBuscarPorUbicacion::class.java)
-
     // Crear JSON usando JSONObject
-
     val jsonObject = JSONObject()
     jsonObject.put("includedTypes", JSONArray().put(traducirOpcion(filtro)))
     jsonObject.put("maxResultCount", 5)
@@ -161,23 +155,15 @@ fun rawJSONLugarCercano(
 
     center.put("latitude", ubicacion.latitude)
     center.put("longitude", ubicacion.longitude)
-
     circle.put("center", center)
     circle.put("radius", 5000.0)
-
     locationRestriction.put("circle", circle)
-
     jsonObject.put("locationRestriction", locationRestriction)
-
-
 
     // Convertir JSONObject a String
     val jsonObjectString = jsonObject.toString()
-
     // Crear RequestBody ()
     val requestBody = jsonObjectString.toRequestBody("application/json".toMediaTypeOrNull())
-
-    //recuperarResultados.clear()
 
     CoroutineScope(Dispatchers.IO).launch {
         //Hacer el request POST y obtener respuesta
@@ -212,6 +198,8 @@ fun rawJSONLugarCercano(
         }
     }
 }
+
+
 //Recuperar LatLng para lugares cercanos------------------------------------------------------------
 interface APIServiceBuscarUbicacionesCercanas {
     @Headers(
