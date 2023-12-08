@@ -200,13 +200,6 @@ fun RutasItinerario(
                 recuperarResultados = prediccionesBusquedaMapa
             )
 
-            viewModel.setImgsInicializadas(false)
-            val lugar = estadoMapaRuta.idLugarRuta
-            rawJSONVariasFotos(
-                placeid = lugar,
-                recuperarResultados = nombresFotos,
-                viewModel = viewModel
-            )
         }
     }
 
@@ -262,6 +255,13 @@ fun RutasItinerario(
 
 
     LaunchedEffect(key1 = Unit){
+
+        rawJSONVariasFotos(
+            placeid = estadoMapaRuta.idLugarRuta,
+            recuperarResultados = nombresFotos,
+            viewModel = viewModel
+        )
+
         viewModel.getLastLocation(fusedLocationProviderClient)
         if(estadoMapaRuta.polilineaCodRuta == ""){
             viewModel.setOrigenRuta(ubicacionActual)

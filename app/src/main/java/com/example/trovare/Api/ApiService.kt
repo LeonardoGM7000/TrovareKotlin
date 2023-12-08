@@ -271,8 +271,11 @@ fun rawJSONVariasFotos(
                 recuperarResultados.clear()
                 if(mUser.photoNames != null){
                     mUser.photoNames!!.forEach { foto ->
+                        val uriRecuperada: String = ""
+
                         if (foto != null) {
                             recuperarResultados.add(foto.photoName.toString())
+                            rawJSONUriFotos(photoName = foto.photoName.toString(), recuperarResultados = uriRecuperada)
                         } else {
                             //TODO No se encontraorn resultados
                         }
@@ -295,7 +298,7 @@ interface APIServiceUriFotos {
 
 fun rawJSONUriFotos(
     photoName: String,
-    recuperarResultados: MutableList<String>
+    recuperarResultados: String
 ) {
 
     // Crear Retrofit
