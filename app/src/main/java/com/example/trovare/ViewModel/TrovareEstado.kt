@@ -1,6 +1,7 @@
 package com.example.trovare.ViewModel
 
 import com.example.trovare.Data.ConfiguracionDataSource
+import com.example.trovare.Data.NearbyPlaces
 import com.example.trovare.Data.SoporteDatasource
 import com.google.android.gms.maps.model.LatLng
 
@@ -15,6 +16,15 @@ data class TrovareEstadoConfiguracion(
 
 //Configuración selecionadas------------------------------------------------------------------------
 val ubicacionEscom = LatLng(19.504507, -99.147314)
+
+data class TrovareEstadoInicio(
+
+    val lugaresCercanos: MutableList<NearbyPlaces?> = mutableListOf(NearbyPlaces(id = "", displayName = null, shortFormattedAddress = null, rating = null, primaryType = null)),//lista de lugares cercanos
+    val categoriaSeleccionada: String = "Atracciones",
+    val lugaresCercanosInicializado: Boolean = false
+
+)
+
 data class TrovareEstadoMapaPrincipal(
 
     val origen: LatLng = ubicacionEscom,//origen a marcar en el mapa
@@ -46,4 +56,6 @@ data class TrovareEstadoMapaRuta(
     val transporteRuta: String = "",
 
 )
+
+
 

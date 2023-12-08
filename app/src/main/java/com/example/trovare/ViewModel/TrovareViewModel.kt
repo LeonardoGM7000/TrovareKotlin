@@ -11,8 +11,10 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.trovare.Api.rawJSONLugarCercano
 import com.example.trovare.Data.Itinerario
 import com.example.trovare.Data.Lugar
+import com.example.trovare.Data.NearbyPlaces
 import com.example.trovare.Data.Usuario
 import com.example.trovare.Data.itinerarioPrueba
 import com.example.trovare.Data.usuarioPrueba
@@ -156,6 +158,38 @@ class TrovareViewModel : ViewModel() {
                 }
         } catch (e: SecurityException) {
             e.printStackTrace()
+        }
+    }
+
+
+    //--------------------------------------------------------------------------------------------//
+    //--------------------------------------INICIO------------------------------------------------//
+    //--------------------------------------------------------------------------------------------//
+
+    private val _estadoInicial = MutableStateFlow(TrovareEstadoInicio())
+    val estadoInicial: StateFlow<TrovareEstadoInicio> = _estadoInicial.asStateFlow()
+
+    fun setLugaresCercanos(nuevoValor: MutableList<NearbyPlaces?>) {
+        _estadoInicial.update { estadoActual ->
+            estadoActual.copy(
+                lugaresCercanos = nuevoValor,
+            )
+        }
+    }
+
+    fun setCategoriaSeleccionada(nuevoValor: String) {
+        _estadoInicial.update { estadoActual ->
+            estadoActual.copy(
+                categoriaSeleccionada = nuevoValor,
+            )
+        }
+    }
+
+    fun setlugaresCercanosInicializado(nuevoValor: Boolean) {
+        _estadoInicial.update { estadoActual ->
+            estadoActual.copy(
+                lugaresCercanosInicializado = nuevoValor,
+            )
         }
     }
 

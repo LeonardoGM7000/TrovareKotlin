@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
+import com.example.trovare.Api.rawJSONLugarCercano
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Navegacion.Trovare
@@ -59,8 +60,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
-
         /*colocar aqui API de google places*/
         Places.initialize(this, /*colocar aqui llave de API de google places*/"AIzaSyBpmAJRF6PsRJVNm6oq1qmfXbdaBjNA5mQ")//Inicializar API de Places
         val placesClient: PlacesClient = Places.createClient(this)//Crear cliente
@@ -76,7 +75,14 @@ class MainActivity : ComponentActivity() {
 
         //Recuperar ubicacion actual de usuario
 
+        //alIniciar
+        val ubicacionActual = viewModel.ubicacionActual.value
 
+        rawJSONLugarCercano(
+            filtro = "Atracciones",
+            ubicacion = ubicacionActual,
+            viewModel = viewModel
+        )
 
         // Variable que almacena la ruta de la pantalla
         var ruta = "Bienvenida"

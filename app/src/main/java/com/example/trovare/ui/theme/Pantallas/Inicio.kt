@@ -2,7 +2,6 @@ package com.example.trovare.ui.theme.Pantallas
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +27,7 @@ import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.TravelExplore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -38,28 +37,30 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
-import com.example.trovare.Api.rawJSONRutas
+import com.example.trovare.Api.rawJSONLugarCercano
 import com.example.trovare.Data.Categoria
+import com.example.trovare.Data.NearbyPlaces
 import com.example.trovare.Data.categorias
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.R
 import com.example.trovare.Data.listaDeExplorar
+import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
 import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
 import com.example.trovare.ui.theme.Trv1
@@ -67,7 +68,7 @@ import com.example.trovare.ui.theme.Trv10
 import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv3
 import com.example.trovare.ui.theme.Trv7
-import kotlinx.coroutines.launch
+import com.google.android.gms.location.FusedLocationProviderClient
 import kotlin.math.absoluteValue
 
 // Prueba
@@ -75,12 +76,23 @@ import kotlin.math.absoluteValue
 @Composable
 fun Inicio(
     modifier: Modifier = Modifier,
-    navController: NavController
+    viewModel: TrovareViewModel,
+    navController: NavController,
+    fusedLocationProviderClient: FusedLocationProviderClient
 ) {
     val pagerStatePopulares = rememberPagerState(initialPage = 0) { listaDeExplorar.size }
     val pagerStatePuntuados = rememberPagerState(initialPage = 0) { listaDeExplorar.size }
-    var categoriaSeleccionada by remember { mutableStateOf("Atracciones") }
+    val lugaresCercanos by remember { mutableStateOf(mutableStateListOf<NearbyPlaces>()) }
+    val ubicacionActual by viewModel.ubicacionActual.collectAsState()
+
+    val estadoInicio by viewModel.estadoInicial.collectAsState()
+
     //val paginaActualPopulares by remember { mutableStateOf(pagerStatePopulares.currentPage) }
+
+    LaunchedEffect(key1 = Unit){
+        //viewModel.getLastLocation(fusedLocationProviderClient = fusedLocationProviderClient)
+    }
+
 
     Scaffold(
         topBar = {
@@ -168,7 +180,7 @@ fun Inicio(
                         items(categorias){categoria ->
                             FilterChip(
                                 modifier = modifier.padding(horizontal = 5.dp),
-                                selected = (categoriaSeleccionada == categoria.nombre),
+                                selected = (estadoInicio.categoriaSeleccionada == categoria.nombre),
                                 leadingIcon = {
                                     Icon(
                                         imageVector = categoria.icono,
@@ -176,7 +188,13 @@ fun Inicio(
                                     )
                                 },
                                 onClick = {
-                                    categoriaSeleccionada = categoria.nombre
+                                    viewModel.setCategoriaSeleccionada(categoria.nombre)
+                                    viewModel.setlugaresCercanosInicializado(false)
+                                    rawJSONLugarCercano(
+                                        filtro = categoria.nombre,
+                                        ubicacion = ubicacionActual,
+                                        viewModel = viewModel
+                                    )
                                 },
                                 label = {
                                     Text(
@@ -199,18 +217,32 @@ fun Inicio(
                     Spacer(modifier = modifier.height(5.dp))
                 }
 
+                //Mostrar lugares por categorías----------------------------------------------------
+
                 item {
-                    LazyRow {
-                        item {
-                            TarjetaLugar()
+                    Box(
+                        modifier = modifier
+                            .height(250.dp)
+                            .fillMaxWidth()
+                    ){
+                        if(estadoInicio.lugaresCercanosInicializado){
+                            LazyRow{
+                                items(estadoInicio.lugaresCercanos){ lugar ->
+                                    TarjetaLugar(lugar = lugar!!, navController = navController)
+                                }
+                            }
                         }
-                        item {
-                            TarjetaLugar()
-                        }
-                        item {
-                            TarjetaLugar()
+                        else {
+                            CircularProgressIndicator(
+                                modifier = modifier.align(Alignment.Center),
+                                color = Color.White
+                            )
                         }
                     }
+                }
+
+                item {
+
                 }
 
                 item {
@@ -471,7 +503,6 @@ fun TarjetaCategorias(navController: NavController, modifier: Modifier = Modifie
     }
 }
 
-
 @Composable
 fun Categoria(categoria: Categoria, navContoller: NavController, modifier: Modifier = Modifier) {
     Card(
@@ -500,11 +531,16 @@ fun Categoria(categoria: Categoria, navContoller: NavController, modifier: Modif
 
 @Composable
 fun TarjetaLugar(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    lugar: NearbyPlaces,
+    navController: NavController
 ){
     Card(
         modifier = modifier
-            .size(width = 165.dp, height = 245.dp),
+            .size(width = 165.dp, height = 245.dp)
+            .clickable {
+                navController.navigate(Pantalla.Detalles.conArgs(lugar.id))
+            },
         colors = CardDefaults.cardColors(
             containerColor = Trv2,
             contentColor = Color.White
@@ -524,36 +560,43 @@ fun TarjetaLugar(
             }
             Text(
                 modifier = modifier.padding(vertical = 5.dp),
-                text = "nombre del lugar prueba",
+                text = lugar.displayName?.text?:"",
                 textAlign = TextAlign.Justify,
                 style = MaterialTheme.typography.labelSmall,
                 maxLines = 2
             )
-            Row(
-                modifier = modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Attractions,
-                    contentDescription = ""
-                )
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = Trv7)
+            //Tipo de lugar y calificacion del lugar------------------------------------------------
+            Box(
+                modifier = modifier.fillMaxSize(),
+                contentAlignment = Alignment.BottomCenter
+            ){
+                Row(
+                    modifier = modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
+                    Icon(
+                        imageVector = Icons.Rounded.Attractions,
+                        contentDescription = ""
+                    )
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = Trv7)
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Star,
-                            contentDescription = "",
-                            tint = Trv10
-                        )
-                        Text(
-                            modifier = modifier.padding(horizontal = 5.dp),
-                            text = "4.5",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Trv10
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Star,
+                                contentDescription = "",
+                                tint = Trv10
+                            )
+                            Text(
+                                modifier = modifier.padding(horizontal = 5.dp),
+                                text = lugar.rating.toString(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Trv10
+                            )
+                        }
                     }
                 }
             }
@@ -626,8 +669,3 @@ fun TarjetaLugarExtendida(
         }
     }
 }
-
-
-
-
-

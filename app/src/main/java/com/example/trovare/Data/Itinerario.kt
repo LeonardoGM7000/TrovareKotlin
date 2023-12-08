@@ -27,10 +27,6 @@ data class Lugar(
     var imagen: ImageBitmap?
 )
 
-data class Hora(
-    val hora: Int,
-    val minuto: Int,
-)
 
 val itinerarioPrueba: Itinerario = Itinerario(
     nombre = "Itinerario",
@@ -38,6 +34,3 @@ val itinerarioPrueba: Itinerario = Itinerario(
     lugares = null
 )
 
-data class Actividad(
-    val nombre: String
-)

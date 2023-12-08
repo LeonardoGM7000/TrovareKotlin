@@ -58,7 +58,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.trovare.Data.Hora
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.CalendarTheme
@@ -68,7 +67,6 @@ import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
-import com.example.trovare.ui.theme.Trv10
 import com.example.trovare.ui.theme.Trv11
 import com.example.trovare.ui.theme.Trv3
 import com.example.trovare.ui.theme.Trv6

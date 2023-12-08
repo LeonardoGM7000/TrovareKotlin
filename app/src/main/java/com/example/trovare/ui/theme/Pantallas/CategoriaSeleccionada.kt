@@ -52,16 +52,12 @@ fun CategoriaSeleccionada(
     modifier: Modifier = Modifier
 ){
 
-    val lista = listOf(
-        "ChIJt0aQMHL50YURmSGHZtqqYIs",
-        "ChIJFzoDI5X50YURKYeRnBn0AtU"
-        )
-
     val estadoMapa by viewModel.estadoMapa.collectAsState()
     val lugaresCercanos by remember { mutableStateOf(mutableStateListOf<NearbyPlaces>()) }
     val lugaresId by remember { mutableStateOf(mutableStateListOf<String>()) }
 
     //Rutina que se ejecuta al componer la página, recupera los lugares cercanos dependiendo del filtro
+    /*
     LaunchedEffect(key1 = Unit){
         //Funcion de API que permite recuperar lugares cercanos con base en un filtro-----------
         CoroutineScope(Dispatchers.Default).launch {
@@ -75,6 +71,8 @@ fun CategoriaSeleccionada(
             )
         }
     }
+
+     */
     Scaffold(
         topBar = {
             BarraSuperior(navController = navController)
