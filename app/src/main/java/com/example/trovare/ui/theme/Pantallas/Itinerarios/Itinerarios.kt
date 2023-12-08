@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -46,6 +47,9 @@ import com.example.trovare.ui.theme.Trv3
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.toObject
+import kotlinx.coroutines.tasks.await
+import java.lang.Exception
 
 @Composable
 fun Itinerarios(
@@ -56,6 +60,12 @@ fun Itinerarios(
 
     val usuario by viewModel.usuario.collectAsState()
     val itinerario by viewModel.itinerarioActual.collectAsState()
+    val lista_Itinerario by viewModel.listaIt.collectAsState()
+    var cambio = false
+
+    viewModel.obtenerItinerario()
+
+
 
     // Lo hacemos para actualizar cada pantalla
     //usuario.itinerarios.get(itinerario.id!!).nombre = itinerario.nombre
@@ -108,8 +118,8 @@ fun Itinerarios(
                             navController.navigate(Pantalla.EditarItinerario.ruta)//
                             usuario.itinerarios.add(nuevoItinerario)//
 
-                            guardarItinerario(usuario)
-
+                            guardarItinerario(nuevoItinerario)
+                            cambio = true
                             viewModel.setItinerarioActual(nuevoItinerario)//
                         },
                         containerColor = Color.White,
@@ -123,7 +133,7 @@ fun Itinerarios(
                     }
                 }
             }
-            items(usuario.itinerarios){itinerario ->
+            items(lista_Itinerario){itinerario ->
                 Card(
                     modifier = modifier
                         .fillMaxWidth()
@@ -208,7 +218,7 @@ fun Itinerarios(
 
 
 // Funciones axiliares
-private fun guardarItinerario(usuario: Usuario) {
+private fun guardarItinerario(itinerario: Itinerario) {
 
     // Creamos instancias para firebase
     val firestore = FirebaseFirestore.getInstance()
@@ -216,7 +226,7 @@ private fun guardarItinerario(usuario: Usuario) {
 
     Log.i("guardar_itinerario", "Guardando datos...")
 
-    firestore.collection("Usuario").document(auth.currentUser?.email.toString()).set(usuario, SetOptions.merge())
+    firestore.collection("Usuario").document(auth.currentUser?.email.toString()).collection("Itinerario").document().set(itinerario)
         .addOnSuccessListener {
             Log.i("guardar_itinerario", "Datos guardados")
         }
@@ -227,3 +237,5 @@ private fun guardarItinerario(usuario: Usuario) {
 
 
 }
+
+

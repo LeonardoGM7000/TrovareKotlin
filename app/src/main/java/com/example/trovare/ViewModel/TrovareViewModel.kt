@@ -229,6 +229,23 @@ class TrovareViewModel : ViewModel() {
 
     fun agregarLugarALItinerario(id: String, nombreLugar: String) {
         val lugarNuevo = Lugar(id, nombreLugar, fechaDeVisita = null, horaDeVisita = null, imagen=_imagen.value)
+
+
+        val firestore = FirebaseFirestore.getInstance()
+        val auth = FirebaseAuth.getInstance()
+
+        Log.i("guardar_itinerario", "Guardando datos...")
+
+        firestore.collection("Usuario").document(auth.currentUser?.email.toString()).collection("Itinerario").document().collection("Lugar").document().set(lugarNuevo)
+            .addOnSuccessListener {
+                Log.i("guardar_itinerario", "Datos guardados")
+            }
+            .addOnFailureListener{
+
+                Log.i("guardar_itinerario", "Datos no guardados")
+            }
+
+
         val itinerarioActualValor = _itinerarioActual.value
 
         // Verificar si la lista de lugares existe, si no, crearla
@@ -519,35 +536,6 @@ class TrovareViewModel : ViewModel() {
         _listaItinerario.value = nuevaLista
     }
 
-    fun obtenerItinerario() {
-        viewModelScope.launch{
-
-            Log.d("Itinerario_prueba", "Iniciando carga de datos")
-
-            try{
-
-                val auth = FirebaseAuth.getInstance()
-                val firestore = FirebaseFirestore.getInstance()
-
-                //Log.d("TTTT", firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().await().getString("nombre").toString())
-                //firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().result.id
-                val documento =  firestore.collection("Usuario").document(auth.currentUser?.email.toString()).collection("Itinerario").get().await()
-
-                //val tam = documento.toObjects(Iti)
-
-                Log.d("Itinerario_prueba", "Se obtuvieronitinerarios ")
-
-
-                //setlistaItinerario(lista_itinerario)
-
-
-            }catch(e: Exception){
-
-                Log.d("Itinerario_prueba", "Error al obtener itinerarios")
-
-            }
-        }
-    }
 
 
     private val _usuario = MutableStateFlow(usuarioPrueba)
@@ -566,9 +554,12 @@ class TrovareViewModel : ViewModel() {
                 val auth = FirebaseAuth.getInstance()
                 val firestore = FirebaseFirestore.getInstance()
 
+                val documento =  firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().await()
+                val documento_itinerario = firestore.collection("Usuario").document(auth.currentUser?.email.toString()).collection("Itinerario").get().await()
+
                 //Log.d("TTTT", firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().await().getString("nombre").toString())
                 //firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().result.id
-                val documento =  firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().await()
+                /*val documento =  firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().await()
                 val itinerarios_lista = mutableListOf<Itinerario>()
 
                 val itinerarioData = documento["itinerarios"] as? List<*>
@@ -592,7 +583,7 @@ class TrovareViewModel : ViewModel() {
                 for(datos in itinerarios_lista){
 
                     Log.d("Itinerario_datos", "$datos")
-                }
+                }*/
 
 
                 val usuario = Usuario(
@@ -602,7 +593,7 @@ class TrovareViewModel : ViewModel() {
                         descripcion = documento.getString("descripcion").toString(),
                         lugarDeOrigen = documento.getString("lugarDeOrigen").toString(),
                         comentarios = null,
-                        itinerarios = itinerarios_lista
+                        itinerarios = mutableListOf()
                 )
 
                 setUsuario(usuario)
@@ -613,6 +604,66 @@ class TrovareViewModel : ViewModel() {
                 setUsuario(usuarioPrueba)
             }
         }
+    }
+
+
+    private val _listaIt = MutableStateFlow(mutableListOf<Itinerario>())
+    val listaIt = _listaIt.asStateFlow()
+    fun setLista(nuevoLista: MutableList<Itinerario>) {
+        _listaIt.value = nuevoLista
+    }
+
+
+
+    fun obtenerItinerario(){
+
+        viewModelScope.launch{
+            val firestore = FirebaseFirestore.getInstance()
+            // Creamos instancias para firebase
+            val auth = FirebaseAuth.getInstance()
+
+            val lista_Itinerario: MutableList<Itinerario> = mutableListOf()
+
+            Log.i("obtener_itinerario", "Guardando datos...")
+            try{
+                val documentos = firestore.collection("Usuario").document(auth.currentUser?.email.toString()).collection("Itinerario").get().await()
+
+                if(!documentos.isEmpty || documentos != null){
+                    for (documento in documentos){
+
+                        val nombre = documento.getString("nombre").toString()
+                        //val temporal = documento.toObject(Itinerario::class.java)
+
+                        val itinerario = Itinerario(
+                            id = 0,
+                            nombre = documento.getString("nombre").toString(),
+                            autor = documento.getString("autor").toString(),
+                            lugares = null
+                        )
+
+                        lista_Itinerario.add(itinerario)
+
+                    }
+
+                }
+
+
+
+
+                Log.i("obtener_itinerario", "-ekdkkedde ---------------------------------")
+                Log.i("obtener_itinerario", "$lista_Itinerario")
+
+                setLista(lista_Itinerario)
+
+
+            }catch (e: java.lang.Exception){
+
+                Log.i("obtener_itinerario", "Error al entrar a la base: $e")
+            }
+
+
+        }
+
     }
 }
 

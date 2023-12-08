@@ -97,6 +97,7 @@ class MainActivity : ComponentActivity() {
         }
 
         viewModel.obtenerDato()
+        viewModel.obtenerItinerario()
 
         // SharedPreferences -> Configuración
         val sharedPreferences = getSharedPreferences(KEY_PREFERENCES, MODE_PRIVATE)
