@@ -15,7 +15,6 @@ data class Categoria(
 )
 
 val categorias = listOf(
-    Categoria(nombre = "Atracciones", icono = Icons.Rounded.Attractions),
     Categoria(nombre = "Restaurantes", icono = Icons.Rounded.Restaurant),
     Categoria(nombre = "Museos", icono = Icons.Rounded.Museum),
     Categoria(nombre = "Parques", icono = Icons.Rounded.Park),

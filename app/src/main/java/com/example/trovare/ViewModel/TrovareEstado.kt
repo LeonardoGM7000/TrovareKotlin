@@ -1,8 +1,12 @@
 package com.example.trovare.ViewModel
 
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.res.painterResource
 import com.example.trovare.Data.ConfiguracionDataSource
 import com.example.trovare.Data.NearbyPlaces
 import com.example.trovare.Data.SoporteDatasource
+import com.example.trovare.R
 import com.google.android.gms.maps.model.LatLng
 
 //Configuración selecionadas------------------------------------------------------------------------
@@ -19,10 +23,14 @@ val ubicacionEscom = LatLng(19.504507, -99.147314)
 
 data class TrovareEstadoInicio(
 
-    val lugaresCercanos: MutableList<NearbyPlaces?> = mutableListOf(NearbyPlaces(id = "", displayName = null, shortFormattedAddress = null, rating = null, primaryType = null)),//lista de lugares cercanos
-    val categoriaSeleccionada: String = "Atracciones",
-    val lugaresCercanosInicializado: Boolean = false
-
+    val categoriaSeleccionada: String = "Restaurantes",
+    val lugaresCercanos: MutableList<NearbyPlaces?> = mutableListOf(null),//lista de lugares cercanos
+    val lugaresPopulares: MutableList<NearbyPlaces?> = mutableListOf(null),//lista de lugares cercanos
+    val lugaresPuntosDeInteres: MutableList<NearbyPlaces?> = mutableListOf(null),//lista de lugares cercanos
+    val lugaresCercanosInicializado: Boolean = false,
+    val lugaresPopularesInicializado: Boolean = false,
+    val lugaresPuntosDeInteresInicializado: Boolean = false,
+    val imagenTemporal: ImageBitmap? = null
 )
 
 data class TrovareEstadoMapaPrincipal(

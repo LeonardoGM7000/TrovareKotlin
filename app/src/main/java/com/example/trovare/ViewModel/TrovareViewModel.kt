@@ -4,14 +4,11 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.trovare.Api.rawJSONLugarCercano
 import com.example.trovare.Data.Itinerario
 import com.example.trovare.Data.Lugar
 import com.example.trovare.Data.NearbyPlaces
@@ -177,6 +174,22 @@ class TrovareViewModel : ViewModel() {
         }
     }
 
+    fun setLugaresPopulares(nuevoValor: MutableList<NearbyPlaces?>) {
+        _estadoInicial.update { estadoActual ->
+            estadoActual.copy(
+                lugaresPopulares = nuevoValor,
+            )
+        }
+    }
+
+    fun setLugaresPuntosDeInteres(nuevoValor: MutableList<NearbyPlaces?>) {
+        _estadoInicial.update { estadoActual ->
+            estadoActual.copy(
+                lugaresPuntosDeInteres = nuevoValor,
+            )
+        }
+    }
+
     fun setCategoriaSeleccionada(nuevoValor: String) {
         _estadoInicial.update { estadoActual ->
             estadoActual.copy(
@@ -185,10 +198,34 @@ class TrovareViewModel : ViewModel() {
         }
     }
 
-    fun setlugaresCercanosInicializado(nuevoValor: Boolean) {
+    fun setLugaresCercanosInicializado(nuevoValor: Boolean) {
         _estadoInicial.update { estadoActual ->
             estadoActual.copy(
                 lugaresCercanosInicializado = nuevoValor,
+            )
+        }
+    }
+
+    fun setLugaresPopularesInicializado(nuevoValor: Boolean) {
+        _estadoInicial.update { estadoActual ->
+            estadoActual.copy(
+                lugaresPopularesInicializado = nuevoValor,
+            )
+        }
+    }
+
+    fun setLugaresPuntosDeInteresInicializado(nuevoValor: Boolean) {
+        _estadoInicial.update { estadoActual ->
+            estadoActual.copy(
+                lugaresPuntosDeInteresInicializado = nuevoValor,
+            )
+        }
+    }
+
+    fun setImagenTemporal(nuevoValor: ImageBitmap) {
+        _estadoInicial.update { estadoActual ->
+            estadoActual.copy(
+                imagenTemporal = nuevoValor,
             )
         }
     }
@@ -811,5 +848,70 @@ class TrovareViewModel : ViewModel() {
             }
         }
     }
+    //nuevo VIEWMODEL
+    fun obtenerImagenLugar(
+        placesClient: PlacesClient,
+        placeId: String,
+        viewModel: TrovareViewModel
+    ){
+        val placeFields = listOf(
+            Place.Field.PHOTO_METADATAS
+        )//campos que se deben obtener de la API de places
+        val request = FetchPlaceRequest.newInstance(placeId, placeFields)
+
+        Log.d("testImpresion","primero")
+        placesClient.fetchPlace(request)
+            .addOnSuccessListener { response: FetchPlaceResponse ->
+                Log.d("testImpresion","segundo")
+                val place = response.place
+
+                // Obtener metadatos de la foto-----------------------------------------------------
+                val metada = place.photoMetadatas
+                if (metada != null) {
+
+                    val photoMetadata = metada.first()
+                    Log.d("testImpresion","tercero")
+
+                    // Create a FetchPhotoRequest.
+                    val photoRequest = FetchPhotoRequest.builder(photoMetadata)
+                        .setMaxWidth(500) // Optional.
+                        .setMaxHeight(500) // Optional.
+                        .build()
+                    placesClient.fetchPhoto(photoRequest)
+                        .addOnSuccessListener { fetchPhotoResponse: FetchPhotoResponse ->
+                            Log.d("testImpresion","cuarto")
+
+                            val image = fetchPhotoResponse.bitmap
+                            val imagenBitmap: ImageBitmap = image.asImageBitmap()
+
+                            Log.d("testImpresion","${imagenBitmap}")
+
+                            viewModel.setImagenTemporal(imagenBitmap)
+                            _imagen.value = imagenBitmap
+
+
+                        }.addOnFailureListener { exception: Exception ->
+                            if (exception is ApiException) {
+                                val statusCode = exception.statusCode
+                                TODO("Handle error with given status code.")
+                            }
+                        }
+
+                }
+                Log.d("testImpresion","quinto")
+
+            }.addOnFailureListener { exception: Exception ->
+                if (exception is ApiException) {
+                    val statusCode = exception.statusCode
+                    TODO("Handle error with given status code")
+                }
+            }
+        Log.d("testImpresion","sexto")
+
+    }
 }
+
+
+
+
 

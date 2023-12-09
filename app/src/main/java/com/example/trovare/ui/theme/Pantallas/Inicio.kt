@@ -1,5 +1,6 @@
 package com.example.trovare.ui.theme.Pantallas
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -40,26 +41,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.navigation.NavController
-import com.example.trovare.Api.rawJSONLugarCercano
+import com.example.trovare.Api.apiBuscarPorCategorias
 import com.example.trovare.Data.Categoria
 import com.example.trovare.Data.NearbyPlaces
 import com.example.trovare.Data.categorias
+import com.example.trovare.Data.lugarTemporal
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.R
-import com.example.trovare.Data.listaDeExplorar
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
 import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
@@ -69,6 +68,7 @@ import com.example.trovare.ui.theme.Trv2
 import com.example.trovare.ui.theme.Trv3
 import com.example.trovare.ui.theme.Trv7
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.libraries.places.api.net.PlacesClient
 import kotlin.math.absoluteValue
 
 // Prueba
@@ -78,14 +78,15 @@ fun Inicio(
     modifier: Modifier = Modifier,
     viewModel: TrovareViewModel,
     navController: NavController,
-    fusedLocationProviderClient: FusedLocationProviderClient
+    fusedLocationProviderClient: FusedLocationProviderClient,
+    placesClient: PlacesClient
 ) {
-    val pagerStatePopulares = rememberPagerState(initialPage = 0) { listaDeExplorar.size }
-    val pagerStatePuntuados = rememberPagerState(initialPage = 0) { listaDeExplorar.size }
-    val lugaresCercanos by remember { mutableStateOf(mutableStateListOf<NearbyPlaces>()) }
+    val estadoInicio by viewModel.estadoInicial.collectAsState()
+
+    val pagerStatePopulares = rememberPagerState(initialPage = 0) { estadoInicio.lugaresPopulares.size }
+    val pagerStatePuntuados = rememberPagerState(initialPage = 0) { estadoInicio.lugaresPuntosDeInteres.size }
     val ubicacionActual by viewModel.ubicacionActual.collectAsState()
 
-    val estadoInicio by viewModel.estadoInicial.collectAsState()
 
     //val paginaActualPopulares by remember { mutableStateOf(pagerStatePopulares.currentPage) }
 
@@ -189,11 +190,12 @@ fun Inicio(
                                 },
                                 onClick = {
                                     viewModel.setCategoriaSeleccionada(categoria.nombre)
-                                    viewModel.setlugaresCercanosInicializado(false)
-                                    rawJSONLugarCercano(
+                                    viewModel.setLugaresCercanosInicializado(false)
+                                    apiBuscarPorCategorias(
                                         filtro = categoria.nombre,
                                         ubicacion = ubicacionActual,
-                                        viewModel = viewModel
+                                        viewModel = viewModel,
+                                        placesClient = placesClient
                                     )
                                 },
                                 label = {
@@ -228,6 +230,7 @@ fun Inicio(
                         if(estadoInicio.lugaresCercanosInicializado){
                             LazyRow{
                                 items(estadoInicio.lugaresCercanos){ lugar ->
+                                    Log.d("testNoche","${lugar!!.imagen}")
                                     TarjetaLugar(lugar = lugar!!, navController = navController)
                                 }
                             }
@@ -268,46 +271,61 @@ fun Inicio(
                 }
 
                 item {
-                    HorizontalPager(
-                        state = pagerStatePopulares,
-                        //contentPadding = PaddingValues(horizontal = 10.dp)
-                    ) { pagina ->
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Box(
-                                modifier = modifier
-                                    .graphicsLayer {
-                                        val pageOffset = (
-                                                (pagerStatePopulares.currentPage - pagina) + pagerStatePopulares
-                                                    .currentPageOffsetFraction
-                                                ).absoluteValue
-
-                                        alpha = lerp(
-                                            start = 0.9f,
-                                            stop = 1f,
-                                            fraction = 1f - pageOffset.coerceIn(0.0f, 1f)
-                                        )
-                                            .also { scale ->
-                                                scaleX = scale
-                                                scaleY = scale
-                                            }
-                                    }
-                            ){
+                    Box(
+                        modifier = modifier
+                            .height(130.dp)
+                            .fillMaxWidth()
+                    ) {
+                        if(estadoInicio.lugaresPopularesInicializado){
+                            HorizontalPager(
+                                state = pagerStatePopulares,
+                                //contentPadding = PaddingValues(horizontal = 10.dp)
+                            ) { pagina ->
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    TarjetaLugarExtendida()
+                                    Box(
+                                        modifier = modifier
+                                            .graphicsLayer {
+                                                val pageOffset = (
+                                                        (pagerStatePopulares.currentPage - pagina) + pagerStatePopulares
+                                                            .currentPageOffsetFraction
+                                                        ).absoluteValue
+
+                                                alpha = lerp(
+                                                    start = 0.9f,
+                                                    stop = 1f,
+                                                    fraction = 1f - pageOffset.coerceIn(0.0f, 1f)
+                                                )
+                                                    .also { scale ->
+                                                        scaleX = scale
+                                                        scaleY = scale
+                                                    }
+                                            }
+                                    ){
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            TarjetaLugarExtendida(lugar = estadoInicio.lugaresPopulares[pagina]?:lugarTemporal, navController = navController)
+                                        }
+                                    }
                                 }
                             }
                         }
+                        else {
+                            CircularProgressIndicator(
+                                modifier = modifier.align(Alignment.Center),
+                                color = Color.White
+                            )
+                        }
+
                     }
                 }
 
                 item {
                     Spacer(modifier = modifier.height(5.dp))
                 }
-
+                //mostrar el estado actual del pager state------------------------------------------
                 item {
                     Card(
                         modifier = modifier.wrapContentSize(),
@@ -348,10 +366,22 @@ fun Inicio(
                                 contentDescription = "",
                                 tint = if(pagerStatePopulares.currentPage == 3) Trv10 else Trv3
                             )
+                            Icon(
+                                modifier = modifier
+                                    .size(10.dp)
+                                    .padding(3.dp),
+                                imageVector = Icons.Rounded.Circle,
+                                contentDescription = "",
+                                tint = if(pagerStatePopulares.currentPage == 4) Trv10 else Trv3
+                            )
                         }
                     }
                 }
-                //Mejor Puntuado--------------------------------------------------------------------
+
+                item {
+                    Spacer(modifier = modifier.height(5.dp))
+                }
+                //Puntos de Interés--------------------------------------------------------------------
 
                 item {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -360,7 +390,7 @@ fun Inicio(
                                 .fillMaxWidth(),
                             textAlign = TextAlign.Left,
                             color = Color.White,
-                            text = "Mejor puntuados",
+                            text = "Puntos de interés",
                             style = MaterialTheme.typography.headlineSmall
                         )
                     }
@@ -371,39 +401,54 @@ fun Inicio(
                 }
 
                 item {
-                    HorizontalPager(
-                        state = pagerStatePuntuados,
-                        //contentPadding = PaddingValues(horizontal = 10.dp)
-                    ) { pagina ->
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Box(
-                                modifier = modifier
-                                    .graphicsLayer {
-                                        val pageOffset = (
-                                                (pagerStatePuntuados.currentPage - pagina) + pagerStatePuntuados
-                                                    .currentPageOffsetFraction
-                                                ).absoluteValue
-
-                                        alpha = lerp(
-                                            start = 0.9f,
-                                            stop = 1f,
-                                            fraction = 1f - pageOffset.coerceIn(0.0f, 1f)
-                                        )
-                                            .also { scale ->
-                                                scaleX = scale
-                                                scaleY = scale
-                                            }
-                                    }
-                            ){
+                    Box(
+                        modifier = modifier
+                            .height(130.dp)
+                            .fillMaxWidth()
+                    ) {
+                        if(estadoInicio.lugaresPuntosDeInteresInicializado){
+                            HorizontalPager(
+                                state = pagerStatePuntuados,
+                                //contentPadding = PaddingValues(horizontal = 10.dp)
+                            ) { pagina ->
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    TarjetaLugarExtendida()
+                                    Box(
+                                        modifier = modifier
+                                            .graphicsLayer {
+                                                val pageOffset = (
+                                                        (pagerStatePuntuados.currentPage - pagina) + pagerStatePuntuados
+                                                            .currentPageOffsetFraction
+                                                        ).absoluteValue
+
+                                                alpha = lerp(
+                                                    start = 0.9f,
+                                                    stop = 1f,
+                                                    fraction = 1f - pageOffset.coerceIn(0.0f, 1f)
+                                                )
+                                                    .also { scale ->
+                                                        scaleX = scale
+                                                        scaleY = scale
+                                                    }
+                                            }
+                                    ){
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            TarjetaLugarExtendida(lugar = estadoInicio.lugaresPuntosDeInteres[pagina]?:lugarTemporal, navController = navController)
+                                        }
+                                    }
                                 }
                             }
                         }
+                        else {
+                            CircularProgressIndicator(
+                                modifier = modifier.align(Alignment.Center),
+                                color = Color.White
+                            )
+                        }
+
                     }
                 }
 
@@ -451,83 +496,22 @@ fun Inicio(
                                 contentDescription = "",
                                 tint = if(pagerStatePuntuados.currentPage == 3) Trv10 else Trv3
                             )
+                            Icon(
+                                modifier = modifier
+                                    .size(10.dp)
+                                    .padding(3.dp),
+                                imageVector = Icons.Rounded.Circle,
+                                contentDescription = "",
+                                tint = if(pagerStatePuntuados.currentPage == 4) Trv10 else Trv3
+                            )
                         }
                     }
                 }
-
-                item {
-                    TarjetaCategorias(navController = navController)
-                }
             }
         }
     }
 }
 
-//Tarjeta para mostrar categorías-------------------------------------------------------------------
-@Composable
-fun TarjetaCategorias(navController: NavController, modifier: Modifier = Modifier){
-    LazyRow (
-        modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 25.dp)
-    ){
-        item {
-            Column(
-                modifier = modifier.
-                padding(top = 15.dp, bottom = 15.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Categoria(categoria = categorias[0], navContoller = navController)
-                Categoria(categoria = categorias[1], navContoller = navController)
-            }
-        }
-        item {
-            Column(
-                modifier = modifier.
-                padding(top = 15.dp, bottom = 15.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Categoria(categoria = categorias[2], navContoller = navController)
-                Categoria(categoria = categorias[3], navContoller = navController)
-            }
-        }
-        item {
-            Column(
-                modifier = modifier.
-                padding(top = 15.dp, bottom = 15.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Categoria(categoria = categorias[4], navContoller = navController)
-                Categoria(categoria = categorias[5], navContoller = navController)
-            }
-        }
-    }
-}
-
-@Composable
-fun Categoria(categoria: Categoria, navContoller: NavController, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier
-            .size(width = 300.dp, height = 70.dp)
-            .padding(5.dp)
-            .clickable {
-                navContoller.navigate(Pantalla.CategoriaSeleccionada.conArgs(categoria.nombre))
-            },
-        colors = CardDefaults.cardColors(
-            containerColor = Trv2,
-            contentColor = Color.White
-        )
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                modifier = modifier.padding(15.dp),
-                imageVector = categoria.icono,
-                contentDescription = "")
-            Text(text = categoria.nombre)
-        }
-    }
-}
 
 @Composable
 fun TarjetaLugar(
@@ -549,14 +533,24 @@ fun TarjetaLugar(
         Column(
             modifier = modifier.padding(5.dp)
         ) {
-            //imagen del lugar
+            //imagen del lugar----------------------------------------------------------------------
             Card{
-                Image(
-                    modifier = modifier
-                        .fillMaxWidth(),
-                    painter = painterResource(id = R.drawable.image_placeholder),
-                    contentDescription = ""
-                )
+                if (lugar.imagen != null) {
+                    Image(
+                        bitmap = lugar.imagen!!,
+                        contentDescription = "",
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        contentScale = ContentScale.FillBounds
+                    )
+                } else {
+                    Image(
+                        modifier = modifier
+                            .fillMaxWidth(),
+                        painter = painterResource(id = R.drawable.image_placeholder),
+                        contentDescription = ""
+                    )
+                }
             }
             Text(
                 modifier = modifier.padding(vertical = 5.dp),
@@ -592,7 +586,7 @@ fun TarjetaLugar(
                             )
                             Text(
                                 modifier = modifier.padding(horizontal = 5.dp),
-                                text = lugar.rating.toString(),
+                                text = if(lugar.rating == null) "---" else lugar.rating.toString(),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Trv10
                             )
@@ -607,9 +601,18 @@ fun TarjetaLugar(
 
 @Composable
 fun TarjetaLugarExtendida(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    lugar: NearbyPlaces,
+    navController: NavController
 ){
     Row(
+
+
+        modifier = modifier
+            .clickable(
+                indication = null,
+                interactionSource = NoRippleInteractionSource()
+            ) { navController.navigate(Pantalla.Detalles.conArgs(lugar.id)) },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Card{
@@ -622,20 +625,14 @@ fun TarjetaLugarExtendida(
         Column(
             modifier = modifier.padding(start = 5.dp)
         ) {
+            //Nombre del lugar----------------------------------------------------------------------
             Text(
-                text = "nombre del lugar prueba",
+                text = lugar.displayName?.text?:"",
                 textAlign = TextAlign.Justify,
                 style = MaterialTheme.typography.labelMedium,
                 maxLines = 2
             )
-            Text(
-                text = "Ubicación del lugar, Prueba",
-                textAlign = TextAlign.Justify,
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.Gray,
-                maxLines = 2
-            )
-
+            //Icono y calificación del lugar--------------------------------------------------------
             Row(
                 modifier = modifier
                     .fillMaxWidth()
@@ -659,7 +656,7 @@ fun TarjetaLugarExtendida(
                         )
                         Text(
                             modifier = modifier.padding(horizontal = 5.dp),
-                            text = "4.5",
+                            text = if(lugar.rating == null) "---" else lugar.rating.toString(),
                             style = MaterialTheme.typography.labelSmall,
                             color = Trv10
                         )

@@ -18,19 +18,6 @@ data class DisplayName(
     @SerializedName("languageCode" ) var languageCode : String?
 )
 
-//Lugares cercanos----------------------------------------------------------------------------------
-data class NearbyPlacesClass (
-    @SerializedName("places" ) var placesNearby : List<NearbyPlaces?> = arrayListOf()
-)
-
-data class NearbyPlaces(
-    @SerializedName("id" ) var id : String,
-    @SerializedName("displayName" ) var displayName : DisplayName?,
-    @SerializedName("shortFormattedAddress" ) var shortFormattedAddress : String?,
-    @SerializedName("rating") var rating: Float?,
-    @SerializedName("primaryType") var primaryType: String?
-)
-
 data class NearbyLocationsClass (
     @SerializedName("places" ) var nearbyLocations : List<NearbyLocations?> = arrayListOf()
 )

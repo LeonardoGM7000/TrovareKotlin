@@ -87,6 +87,7 @@ fun NavegacionSecundaria(
                     navController = navController,
                     viewModel = viewModel,
                     fusedLocationProviderClient = fusedLocationProviderClient,
+                    placesClient = placesClient
                 )
             }
             composable(route = Pantalla.PerfilInicio.ruta){

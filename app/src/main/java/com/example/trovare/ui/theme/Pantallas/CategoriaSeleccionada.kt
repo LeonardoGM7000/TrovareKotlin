@@ -15,7 +15,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -27,8 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.trovare.Api.rawJSONLugarCercano
-//import com.example.trovare.Api.rawJSONLugarCercano
 import com.example.trovare.Data.NearbyPlaces
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Navegacion.Pantalla
@@ -36,10 +33,6 @@ import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
 import com.google.android.libraries.places.api.net.PlacesClient
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -121,7 +114,8 @@ fun CategoriaSeleccionada(
                             )
                             Text(
                                 modifier = modifier.padding(3.dp),
-                                text = lugar.shortFormattedAddress?: "",
+                                text = /*lugar.shortFormattedAddress?:*/  "",
+
                                 style = MaterialTheme.typography.labelSmall,
                                 textAlign = TextAlign.Justify,
                                 color = Color.White

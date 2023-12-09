@@ -9,7 +9,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
-import com.example.trovare.Api.rawJSONLugarCercano
+import com.example.trovare.Api.apiBuscarPorCategorias
+import com.example.trovare.Api.apiBuscarPorPopularidad
+import com.example.trovare.Api.apiBuscarPuntosDeInteres
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Navegacion.Trovare
@@ -75,11 +77,23 @@ class MainActivity : ComponentActivity() {
 
         //Recuperar ubicacion actual de usuario
 
-        //alIniciar
+        //alIniciar---------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------------------
         val ubicacionActual = viewModel.ubicacionActual.value
 
-        rawJSONLugarCercano(
-            filtro = "Atracciones",
+        apiBuscarPorCategorias(
+            filtro = "Restaurantes",
+            ubicacion = ubicacionActual,
+            viewModel = viewModel,
+            placesClient = placesClient
+        )
+
+        apiBuscarPorPopularidad(
+            ubicacion = ubicacionActual,
+            viewModel = viewModel
+        )
+
+        apiBuscarPuntosDeInteres(
             ubicacion = ubicacionActual,
             viewModel = viewModel
         )
