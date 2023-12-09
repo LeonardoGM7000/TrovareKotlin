@@ -1,16 +1,7 @@
 package com.example.trovare.ui.theme.Pantallas.Itinerarios
 
-import com.example.trovare.ui.theme.Pantallas.Mapa.MapState
-import com.example.trovare.ui.theme.Pantallas.Mapa.MapStyle
 import android.annotation.SuppressLint
-import android.content.ContentResolver
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +9,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import com.google.maps.android.compose.GoogleMap
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,20 +17,17 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBackIos
 import androidx.compose.material.icons.rounded.DirectionsBus
 import androidx.compose.material.icons.rounded.DirectionsCar
 import androidx.compose.material.icons.rounded.DirectionsWalk
-import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.MyLocation
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.Web
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -49,12 +36,9 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -64,11 +48,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -81,36 +63,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.drawable.toBitmap
 import androidx.navigation.NavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.RequestOptions
-import com.example.trovare.Api.obtenerResenas
+import com.bumptech.glide.integration.compose.placeholder
 import com.example.trovare.Api.rawJSON
 import com.example.trovare.Api.rawJSONRutas
-import com.example.trovare.Api.rawJSONUriFotos
 import com.example.trovare.Api.rawJSONVariasFotos
 import com.example.trovare.Data.Places
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
-import com.example.trovare.ui.theme.Pantallas.Resena
-import com.example.trovare.ui.theme.Recursos.Divisor
+import com.example.trovare.ui.theme.Pantallas.Mapa.MapState
+import com.example.trovare.ui.theme.Pantallas.Mapa.MapStyle
 import com.example.trovare.ui.theme.Recursos.Divisor2
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv10
-import com.example.trovare.ui.theme.Trv6
-import com.example.trovare.ui.theme.Trv8
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -118,10 +92,10 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.maps.android.PolyUtil
+import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapEffect
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.MarkerInfoWindow
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -133,10 +107,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.pow
 
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
 @SuppressLint("MutableCollectionMutableState")
-@OptIn(ExperimentalMaterial3Api::class, MapsComposeExperimentalApi::class,
-    ExperimentalGlideComposeApi::class
-)
 @Composable
 fun RutasItinerario(
     modifier: Modifier = Modifier,
@@ -643,67 +616,29 @@ fun RutasItinerario(
                 //Mostrar imágenes del lugar
                 if(estadoMapaRuta.imgsInicializadas){
                     Log.d("Names regresados", "primer nombre: " + nombresFotos.first())
-
+                    //val bitmap = getBitmapFromURL(nombresFotos.first())
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 5.dp)
                     ){
-                        item{
-                            Card(
-                                modifier = modifier
-                                    .padding(end = 5.dp)
-                                    .size(150.dp)
-                                    .aspectRatio(1F),
-                            ){
-                                Box(
-                                    modifier = modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.BottomEnd
+                        nombresFotos.forEach { url ->
+                            item{
+                                Card(
+                                    modifier = modifier
+                                        .padding(end = 5.dp)
+                                        .size(150.dp)
+                                        .aspectRatio(1F),
                                 ){
-                                    /*Image(
-                                        modifier = modifier
-                                            .fillMaxSize(),
-                                        painter = painterResource(id = R.drawable.image_placeholder),
-                                        contentDescription = ""
-                                    )*/
-                                }
-                            }
-                        }
-                        item{
-                            Card(
-                                modifier = modifier
-                                    .padding(end = 5.dp)
-                                    .size(150.dp)
-                                    .aspectRatio(1F),
-                            ){
-                                Box(
-                                    modifier = modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.BottomEnd
-                                ){
-                                    Image(
-                                        modifier = modifier
-                                            .fillMaxSize(),
-                                        painter = painterResource(id = R.drawable.image_placeholder),
-                                        contentDescription = ""
-                                    )
-                                }
-                            }
-                        }
-                        item{
-                            Card(
-                                modifier = modifier
-                                    .padding(end = 5.dp)
-                                    .size(150.dp)
-                                    .aspectRatio(1F),
-                            ){
-                                Box(
-                                    modifier = modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.BottomEnd
-                                ){
-                                    Image(
-                                        modifier = modifier
-                                            .fillMaxSize(),
-                                        painter = painterResource(id = R.drawable.image_placeholder),
-                                        contentDescription = ""
-                                    )
+                                    Box(
+                                        modifier = modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.BottomEnd
+                                    ){
+                                        GlideImage(
+                                            model = url,
+                                            failure = placeholder(R.drawable.image_placeholder),
+                                            contentScale = ContentScale.FillBounds,
+                                            contentDescription = ""
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -950,78 +885,33 @@ fun RutasItinerario(
     }
 }
 
-/*@Composable
-fun ImageCardFromUri(uri: Uri, modifier: Modifier = Modifier) {
-    val bitmap = rememberImageBitmap(uri, LocalContext.current.contentResolver)
-
-    Card(
-        modifier = modifier
-            .padding(end = 5.dp)
-            .size(150.dp)
-            .aspectRatio(1F),
-    ) {
-        Box(
-            modifier = modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomEnd
-        ) {
-            if (bitmap != null) {
-                Image(
-                    modifier = modifier.fillMaxSize(),
-                    bitmap = bitmap.asImageBitmap(),
-                    contentDescription = ""
-                )
-            } else {
-                Image(
-                    modifier = modifier.fillMaxSize(),
-                    painter = painterResource(id = R.drawable.image_placeholder),
-                    contentDescription = ""
-                )
-            }
-        }
+/*fun getBitmapFromURL(src: String?): Bitmap? {
+    if (src != null) {
+        Log.d("vk21", src)
     }
-}
-
-@Composable
-fun ImageList(nombresFotos: List<String>) {
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 5.dp)
-    ) {
-        items(nombresFotos) { nombreFoto ->
-            val uri = Uri.parse(nombreFoto)
-            ImageCardFromUri(uri)
-        }
-    }
-}
-
-@Composable
-fun rememberImageBitmap(uri: Uri, contentResolver: ContentResolver): Bitmap? {
-    val context = LocalContext.current
-    return remember(uri) {
-        loadBitmapFromUri(uri, contentResolver, context)
-    }
-}
-
-fun loadBitmapFromUri(uri: Uri, contentResolver: ContentResolver, context: Context): Bitmap? {
-    val myDrawable: Drawable
-    val bitmap = myDrawable.toBitmap()
     return try {
-        // Si la URI es de tipo web, utiliza Glide para cargar la imagen desde la URL
-        if (uri.scheme?.startsWith("http") == true || uri.scheme?.startsWith("https") == true) {
-            return Glide.with(context)
-                .asBitmap()
-                .load(uri)
-                .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.NONE))
-                .submit()
-                .get()
-        } else {
-            // Si es una URI local, utiliza el método anterior
-            contentResolver.openInputStream(uri)?.use { stream ->
-                BitmapFactory.decodeStream(stream)
-            }
-        }
-    } catch (e: Exception) {
-        e.printStackTrace()
+
+        //uncomment below line in image name have spaces.
+        //src = src.replaceAll(" ", "%20");
+        val url = URL(src)
+        val connection = url
+            .openConnection() as HttpURLConnection
+        connection.doInput = true
+        connection.connect()
+        val input = connection.inputStream
+        BitmapFactory.decodeStream(input)
+    } catch (e: java.lang.Exception) {
+        Log.d("vk21", e.toString())
         null
     }
 }*/
 
+
+/*@RequiresApi(Build.VERSION_CODES.P)
+fun <ImageBitmap> LoadImageFromUrl(url: String, context: Context): ImageBitmap {
+    var myImage: ImageView
+
+    Glide.with(context)
+        .load(url)
+        .into(myImage)
+}*/
