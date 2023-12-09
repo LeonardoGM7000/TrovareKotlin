@@ -3,7 +3,11 @@ package com.example.trovare.ui.theme.Pantallas.Itinerarios
 import com.example.trovare.ui.theme.Pantallas.Mapa.MapState
 import com.example.trovare.ui.theme.Pantallas.Mapa.MapStyle
 import android.annotation.SuppressLint
+import android.content.ContentResolver
+import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -77,13 +81,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toBitmap
 import androidx.navigation.NavController
+import com.bumptech.glide.Glide
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
 import com.example.trovare.Api.obtenerResenas
 import com.example.trovare.Api.rawJSON
 import com.example.trovare.Api.rawJSONRutas
@@ -122,7 +134,9 @@ import kotlinx.coroutines.launch
 import kotlin.math.pow
 
 @SuppressLint("MutableCollectionMutableState")
-@OptIn(ExperimentalMaterial3Api::class, MapsComposeExperimentalApi::class)
+@OptIn(ExperimentalMaterial3Api::class, MapsComposeExperimentalApi::class,
+    ExperimentalGlideComposeApi::class
+)
 @Composable
 fun RutasItinerario(
     modifier: Modifier = Modifier,
@@ -255,7 +269,7 @@ fun RutasItinerario(
 
 
     LaunchedEffect(key1 = Unit){
-
+        viewModel.setImgsInicializadas(false)
         rawJSONVariasFotos(
             placeid = estadoMapaRuta.idLugarRuta,
             recuperarResultados = nombresFotos,
@@ -627,81 +641,74 @@ fun RutasItinerario(
                     color = Color.White
                 )
                 //Mostrar imágenes del lugar
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 5.dp)
-                ){
+                if(estadoMapaRuta.imgsInicializadas){
+                    Log.d("Names regresados", "primer nombre: " + nombresFotos.first())
 
-                    if(estadoMapaRuta.imgsInicializadas /*&& estadoMapaRuta.marcadorInicializadoRuta*/){
-                        Log.d("¿Hay nombre?", nombresFotos.toString())
-                    }
-                    //viewModel.setImgsInicializadas(false)
-                    /*val fotoUri = mutableListOf<String>()
-                    rawJSONUriFotos(
-                        photoName = nombresFotos.first(),
-                        recuperarResultados = fotoUri
-                    )*/
-
-
-                    item{
-                        Card(
-                            modifier = modifier
-                                .padding(end = 5.dp)
-                                .size(150.dp)
-                                .aspectRatio(1F),
-                        ){
-                            Box(
-                                modifier = modifier.fillMaxSize(),
-                                contentAlignment = Alignment.BottomEnd
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 5.dp)
+                    ){
+                        item{
+                            Card(
+                                modifier = modifier
+                                    .padding(end = 5.dp)
+                                    .size(150.dp)
+                                    .aspectRatio(1F),
                             ){
-                                Image(
-                                    modifier = modifier
-                                        .fillMaxSize(),
-                                    painter = painterResource(id = R.drawable.image_placeholder),
-                                    contentDescription = ""
-                                )
+                                Box(
+                                    modifier = modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.BottomEnd
+                                ){
+                                    /*Image(
+                                        modifier = modifier
+                                            .fillMaxSize(),
+                                        painter = painterResource(id = R.drawable.image_placeholder),
+                                        contentDescription = ""
+                                    )*/
+                                }
+                            }
+                        }
+                        item{
+                            Card(
+                                modifier = modifier
+                                    .padding(end = 5.dp)
+                                    .size(150.dp)
+                                    .aspectRatio(1F),
+                            ){
+                                Box(
+                                    modifier = modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.BottomEnd
+                                ){
+                                    Image(
+                                        modifier = modifier
+                                            .fillMaxSize(),
+                                        painter = painterResource(id = R.drawable.image_placeholder),
+                                        contentDescription = ""
+                                    )
+                                }
+                            }
+                        }
+                        item{
+                            Card(
+                                modifier = modifier
+                                    .padding(end = 5.dp)
+                                    .size(150.dp)
+                                    .aspectRatio(1F),
+                            ){
+                                Box(
+                                    modifier = modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.BottomEnd
+                                ){
+                                    Image(
+                                        modifier = modifier
+                                            .fillMaxSize(),
+                                        painter = painterResource(id = R.drawable.image_placeholder),
+                                        contentDescription = ""
+                                    )
+                                }
                             }
                         }
                     }
-                    item{
-                        Card(
-                            modifier = modifier
-                                .padding(end = 5.dp)
-                                .size(150.dp)
-                                .aspectRatio(1F),
-                        ){
-                            Box(
-                                modifier = modifier.fillMaxSize(),
-                                contentAlignment = Alignment.BottomEnd
-                            ){
-                                Image(
-                                    modifier = modifier
-                                        .fillMaxSize(),
-                                    painter = painterResource(id = R.drawable.image_placeholder),
-                                    contentDescription = ""
-                                )
-                            }
-                        }
-                    }
-                    item{
-                        Card(
-                            modifier = modifier
-                                .padding(end = 5.dp)
-                                .size(150.dp)
-                                .aspectRatio(1F),
-                        ){
-                            Box(
-                                modifier = modifier.fillMaxSize(),
-                                contentAlignment = Alignment.BottomEnd
-                            ){
-                                Image(
-                                    modifier = modifier
-                                        .fillMaxSize(),
-                                    painter = painterResource(id = R.drawable.image_placeholder),
-                                    contentDescription = ""
-                                )
-                            }
-                        }
-                    }
+
                 }
                 Row(
                     modifier = modifier.padding(vertical = 10.dp),
@@ -942,4 +949,79 @@ fun RutasItinerario(
         }
     }
 }
+
+/*@Composable
+fun ImageCardFromUri(uri: Uri, modifier: Modifier = Modifier) {
+    val bitmap = rememberImageBitmap(uri, LocalContext.current.contentResolver)
+
+    Card(
+        modifier = modifier
+            .padding(end = 5.dp)
+            .size(150.dp)
+            .aspectRatio(1F),
+    ) {
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomEnd
+        ) {
+            if (bitmap != null) {
+                Image(
+                    modifier = modifier.fillMaxSize(),
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = ""
+                )
+            } else {
+                Image(
+                    modifier = modifier.fillMaxSize(),
+                    painter = painterResource(id = R.drawable.image_placeholder),
+                    contentDescription = ""
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ImageList(nombresFotos: List<String>) {
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 5.dp)
+    ) {
+        items(nombresFotos) { nombreFoto ->
+            val uri = Uri.parse(nombreFoto)
+            ImageCardFromUri(uri)
+        }
+    }
+}
+
+@Composable
+fun rememberImageBitmap(uri: Uri, contentResolver: ContentResolver): Bitmap? {
+    val context = LocalContext.current
+    return remember(uri) {
+        loadBitmapFromUri(uri, contentResolver, context)
+    }
+}
+
+fun loadBitmapFromUri(uri: Uri, contentResolver: ContentResolver, context: Context): Bitmap? {
+    val myDrawable: Drawable
+    val bitmap = myDrawable.toBitmap()
+    return try {
+        // Si la URI es de tipo web, utiliza Glide para cargar la imagen desde la URL
+        if (uri.scheme?.startsWith("http") == true || uri.scheme?.startsWith("https") == true) {
+            return Glide.with(context)
+                .asBitmap()
+                .load(uri)
+                .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.NONE))
+                .submit()
+                .get()
+        } else {
+            // Si es una URI local, utiliza el método anterior
+            contentResolver.openInputStream(uri)?.use { stream ->
+                BitmapFactory.decodeStream(stream)
+            }
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}*/
 

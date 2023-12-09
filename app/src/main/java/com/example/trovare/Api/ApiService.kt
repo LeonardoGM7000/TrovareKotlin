@@ -2,6 +2,7 @@ package com.example.trovare.Api
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.trovare.Data.NearbyLocationsClass
 import com.example.trovare.Data.NearbyPlaces
@@ -271,19 +272,18 @@ fun rawJSONVariasFotos(
                 recuperarResultados.clear()
                 if(mUser.photoNames != null){
                     mUser.photoNames!!.forEach { foto ->
-                        val uriRecuperada: String = ""
-
                         if (foto != null) {
-                            recuperarResultados.add(foto.photoName.toString())
-                            rawJSONUriFotos(photoName = foto.photoName.toString(), recuperarResultados = uriRecuperada)
+                            val uriRecuperada = rawJSONUriFotos(photoName = foto.photoName.toString())
+                            Log.d("UriRegreso", "foto: $uriRecuperada")
+                            recuperarResultados.add(uriRecuperada)
                         } else {
                             //TODO No se encontraorn resultados
                         }
 
                     }
+                    viewModel.setImgsInicializadas(true)
                 }
-                Log.d("Se pudo con las fotos",recuperarResultados.first())
-                viewModel.setImgsInicializadas(true)
+                Log.d("UriRegreso", "Primera foto: " + recuperarResultados.first())
             } else {
                 //TODO Error retrofit
             }
@@ -293,52 +293,48 @@ fun rawJSONVariasFotos(
 
 interface APIServiceUriFotos {
     @GET("/v1/{name}/media")
-    suspend fun createPhotosUri(@Path("name") photoName: String, @Query("maxHeightPx") maxHeight: Int = 2000, @Query("maxWidthPx") maxWidth: Int = 2000, @Query("key") key: String = "AIzaSyBpmAJRF6PsRJVNm6oq1qmfXbdaBjNA5mQ"): Response<ResponseBody>//cambiar import de response?
+    suspend fun createPhotosUri(@Path(value="name",encoded = true) photoName: String, @Query("maxHeightPx") maxHeight: Int = 2000, @Query("maxWidthPx") maxWidth: Int = 2000, @Query("skipHttpRedirect") skip: Boolean = true, @Query("key") key: String = "AIzaSyBpmAJRF6PsRJVNm6oq1qmfXbdaBjNA5mQ"): Response<ResponseBody>//cambiar import de response?
 }
 
-fun rawJSONUriFotos(
-    photoName: String,
-    recuperarResultados: String
-) {
+suspend fun rawJSONUriFotos(photoName: String): String {
 
     // Crear Retrofit
     val retrofit = Retrofit.Builder()
         .baseUrl("https://places.googleapis.com")
         .build()
-
     // Crear Servicio
     val service = retrofit.create(APIServiceUriFotos::class.java)
+    Log.d("Uris", "Consultando uri $photoName")
 
     //recuperarResultados.clear()
+    var uriADevolver: String = ""
+    val response = service.createPhotosUri(photoName)
 
-    CoroutineScope(Dispatchers.IO).launch {
+    Log.d("Uris", "Consultando uri $response")
+    if (response.isSuccessful) {
+        // Convertir raw JSON a pretty JSON usando la libreria GSON
+        val gson = GsonBuilder().setPrettyPrinting().create()
+        val prettyJson = gson.toJson(
+            JsonParser.parseString(
+                response.body()
+                    ?.string() // : https://github.com/square/retrofit/issues/3255
+            )
+        )
 
-        //Hacer el request POST y obtener respuesta
-        val response = service.createPhotosUri(photoName)
-        withContext(Dispatchers.Main) {
-            if (response.isSuccessful) {
+        //Log.d("Pretty Printed JSON uris:", prettyJson)
 
-                // Convertir raw JSON a pretty JSON usando la libreria GSON
-                val gson = GsonBuilder().setPrettyPrinting().create()
-                val prettyJson = gson.toJson(
-                    JsonParser.parseString(
-                        response.body()
-                            ?.string() // : https://github.com/square/retrofit/issues/3255
-                    )
-                )
+        val gson1 = Gson()
+        val mUser = gson1.fromJson(prettyJson, PhotoURI::class.java)
 
-                Log.d("Pretty Printed JSON uris:", prettyJson)
-
-                /*val gson1 = Gson()
-                val mUser = gson1.fromJson(prettyJson, PhotoURI::class.java)
-
-                recuperarResultados.add(mUser.photoUri)
-                Log.d("Se pudo con las urifotos",recuperarResultados.first())*/
-            } else {
-                //TODO Error retrofit
-            }
-        }
+        uriADevolver = mUser.photoUri
+    } else {
+        Log.d("Uris", "fallo: $response")
+        uriADevolver = ""
+        //TODO Error retrofit
     }
+
+    Log.d("Uris", "Valor a mandar = $uriADevolver")
+    return uriADevolver
 }
 
 //Recuperar LatLng para lugares cercanos------------------------------------------------------------
