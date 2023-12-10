@@ -23,7 +23,6 @@ import com.example.trovare.ui.theme.Pantallas.Itinerarios.EditarItinerario
 import com.example.trovare.ui.theme.Pantallas.Perfil.PerfilConfiguracion
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Pantallas.Administrador
-import com.example.trovare.ui.theme.Pantallas.CategoriaSeleccionada
 import com.example.trovare.ui.theme.Pantallas.CrearCuenta
 import com.example.trovare.ui.theme.Pantallas.EditarPreguntas
 import com.example.trovare.ui.theme.Pantallas.EliminarComentarios
@@ -49,6 +48,7 @@ sealed class Pantalla(val ruta: String) {
     object Soporte : Pantalla("Soporte")
     object PerfilInicio : Pantalla("PerfilInicio")
     object PerfilConfiguracion : Pantalla("PerfilConfiguracion")
+    object Favoritos : Pantalla("Favoritos")
     object Buscar : Pantalla("Buscar")
     object Detalles : Pantalla("Detalles")
     object EditarPerfil : Pantalla("EditarPerfil")
@@ -65,7 +65,7 @@ sealed class Pantalla(val ruta: String) {
     object RecuperarContrasena : Pantalla("RecuperarContrasena")
     object TokenRecuperarContrasena : Pantalla("TokenRecuperarContrasena")
     object ActualizarContrasena : Pantalla("ActualizarContrasena")
-    object CategoriaSeleccionada : Pantalla("CategoriaSeleccionada")
+
 
     fun conArgs(vararg args: String): String {
         return buildString {
@@ -259,24 +259,6 @@ fun Trovare(
         //ActualizarContrasena----------------------------------------------------------------------
         composable(route = Pantalla.ActualizarContrasena.ruta) {
             ActualizarContrasena(
-                navController = navController
-            )
-        }
-        //CategoriaSeleccionada---------------------------------------------------------------------
-        composable(
-            route = Pantalla.CategoriaSeleccionada.ruta + "/{categoria}",
-            arguments = listOf(
-                navArgument("categoria") {
-                    type = NavType.StringType
-                    defaultValue = "Atracciones"
-                    nullable = true
-                }
-            )
-        ) {
-            CategoriaSeleccionada(
-                categoria = it.arguments?.getString("categoria") ?: "Atracciones",
-                viewModel = viewModel,
-                placesClient = placesClient,
                 navController = navController
             )
         }

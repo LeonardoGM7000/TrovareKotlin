@@ -2,20 +2,27 @@ package com.example.trovare.Api
 
 import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import com.example.trovare.Data.NearbyPlaces
 import com.example.trovare.Data.NearbyPlacesClass
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.net.FetchPhotoRequest
+import com.google.android.libraries.places.api.net.FetchPhotoResponse
+import com.google.android.libraries.places.api.net.FetchPlaceRequest
+import com.google.android.libraries.places.api.net.FetchPlaceResponse
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
@@ -28,7 +35,8 @@ import retrofit2.Retrofit
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
-
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 
 //API BUSCAR POR CATEGORIAS-------------------------------------------------------------------------
@@ -41,6 +49,9 @@ private interface ApiBuscarPorCategorias {
     @POST("/v1/places:searchNearby")
     suspend fun createPlaceNearby(@Body requestBody: RequestBody): Response<ResponseBody>//cambiar import de response?
 }
+
+
+
 //Buscar por la categoria del lugar-----------------------------------------------------------------
 fun apiBuscarPorCategorias(
     filtro: String,
@@ -58,8 +69,6 @@ fun apiBuscarPorCategorias(
             else -> "tourist_attraction"
         }
     }
-
-
 
     // Crear Retrofit
     val retrofit = Retrofit.Builder().baseUrl("https://places.googleapis.com").build()
@@ -111,16 +120,13 @@ fun apiBuscarPorCategorias(
                 val mUser = gson1.fromJson(prettyJson, NearbyPlacesClass::class.java)
                 mUser.placesNearby.forEach { lugar ->
 
-
-
-                    viewModel.obtenerImagenLugar(placeId = lugar!!.id, placesClient = placesClient, viewModel = viewModel)
-                    //TODO HACERLA S[INCRONA
-                    Log.d("terminar","ultimo")
-                    val imagen = viewModel.imagen.value
-                    listaLugaresCercanos.add(NearbyPlaces(id = lugar.id, displayName  = lugar.displayName, rating = lugar.rating, primaryType = lugar.primaryType, imagen = imagen))
-
-
-
+                    coroutineScope {
+                        Log.d("testImagenes","primero")
+                        obtenerImagenCategoria(placeId = lugar!!.id, placesClient = placesClient, viewModel = viewModel)
+                        Log.d("testImagenes","ultimo")
+                        val imagen = viewModel.estadoInicial.value.imagenTemporalCategoria
+                        listaLugaresCercanos.add(NearbyPlaces(id = lugar.id, displayName  = lugar.displayName, rating = lugar.rating, primaryType = lugar.primaryType, imagen = imagen))
+                    }
                 }
                 viewModel.setLugaresCercanos(listaLugaresCercanos)//agregar a la lista de lugares cercanos
                 viewModel.setLugaresCercanosInicializado(true)
@@ -137,7 +143,8 @@ fun apiBuscarPorCategorias(
 //--------------------------------------------------------------------------------------------------
 fun apiBuscarPorPopularidad(
     ubicacion: LatLng,
-    viewModel: TrovareViewModel
+    viewModel: TrovareViewModel,
+    placesClient: PlacesClient
 ) {
 
     // Crear Retrofit
@@ -164,13 +171,13 @@ fun apiBuscarPorPopularidad(
     // Crear RequestBody ()
     val requestBody = jsonObjectString.toRequestBody("application/json".toMediaTypeOrNull())
 
-    CoroutineScope(Dispatchers.IO).launch {
+    CoroutineScope(IO).launch {
         //Hacer el request POST y obtener respuesta
 
         //TODO AGREGAR VERIFICAR LA CONEXION CON INTERNET
 
         val response = service.createPlaceNearby(requestBody)
-        withContext(Dispatchers.Main) {
+        withContext(Main) {
             if (response.isSuccessful) {
 
                 val listaLugaresPopulares: MutableList<NearbyPlaces?> = mutableListOf()
@@ -189,10 +196,14 @@ fun apiBuscarPorPopularidad(
                 val gson1 = Gson()
                 val mUser = gson1.fromJson(prettyJson, NearbyPlacesClass::class.java)
                 mUser.placesNearby.forEach { lugar ->
-                    if (lugar != null) {
-                        //listaLugaresPopulares.add(NearbyPlaces(id = lugar.id, displayName  = lugar.displayName, rating = lugar.rating, primaryType = lugar.primaryType))
-                    } else {
-                        //manejar error no se eonctraron resultados
+
+                    coroutineScope {
+                        Log.d("testImagenes","primero")
+                        obtenerImagenPopulares(placeId = lugar!!.id, placesClient = placesClient, viewModel = viewModel)
+                        Log.d("testImagenes","ultimo")
+                        val imagen = viewModel.estadoInicial.value.imagenTemporalPopulares
+                        listaLugaresPopulares.add(NearbyPlaces(id = lugar.id, displayName  = lugar.displayName, rating = lugar.rating, primaryType = lugar.primaryType, imagen = imagen))
+                        viewModel.setImagenTemporalPopulares(null)
                     }
                 }
                 viewModel.setLugaresPopulares(listaLugaresPopulares)//agregar a la lista de lugares cercanos
@@ -210,7 +221,8 @@ fun apiBuscarPorPopularidad(
 //--------------------------------------------------------------------------------------------------
 fun apiBuscarPuntosDeInteres(
     ubicacion: LatLng,
-    viewModel: TrovareViewModel
+    viewModel: TrovareViewModel,
+    placesClient: PlacesClient
 ) {
 
     // Crear Retrofit
@@ -263,10 +275,14 @@ fun apiBuscarPuntosDeInteres(
                 val gson1 = Gson()
                 val mUser = gson1.fromJson(prettyJson, NearbyPlacesClass::class.java)
                 mUser.placesNearby.forEach { lugar ->
-                    if (lugar != null) {
-                        //listaPuntosDeInteres.add(NearbyPlaces(id = lugar.id, displayName  = lugar.displayName, rating = lugar.rating, primaryType = lugar.primaryType))
-                    } else {
-                        //manejar error no se eonctraron resultados
+
+                    coroutineScope {
+                        Log.d("testImagenes","primero")
+                        obtenerImagenPuntosDeInteres(placeId = lugar!!.id, placesClient = placesClient, viewModel = viewModel)
+                        Log.d("testImagenes","ultimo")
+                        val imagen = viewModel.estadoInicial.value.imagenTemporalPuntosDeInteres
+                        listaPuntosDeInteres.add(NearbyPlaces(id = lugar.id, displayName  = lugar.displayName, rating = lugar.rating, primaryType = lugar.primaryType, imagen = imagen))
+                        viewModel.setImagenTemporalPopulares(null)
                     }
                 }
                 viewModel.setLugaresPuntosDeInteres(listaPuntosDeInteres)//agregar a la lista de lugares cercanos
@@ -277,5 +293,164 @@ fun apiBuscarPuntosDeInteres(
                 //TODO MANEJAR ERROR DE RETROFIT
             }
         }
+    }
+}
+
+
+suspend fun obtenerImagenCategoria(
+    placesClient: PlacesClient,
+    placeId: String,
+    viewModel: TrovareViewModel,
+) {
+    val placeFields = listOf(Place.Field.PHOTO_METADATAS)
+    val request = FetchPlaceRequest.newInstance(placeId, placeFields)
+
+    try {
+        val response = withContext(Dispatchers.IO) {
+            suspendCancellableCoroutine<FetchPlaceResponse> { continuation ->
+                placesClient.fetchPlace(request)
+                    .addOnSuccessListener { response ->
+                        continuation.resume(response)
+                    }
+                    .addOnFailureListener { exception ->
+                        continuation.resumeWithException(exception)
+                    }
+            }
+        }
+        val place = response.place
+        val metada = place.photoMetadatas
+        if (metada != null) {
+            val photoMetadata = metada.first()
+
+            val photoRequest = FetchPhotoRequest.builder(photoMetadata)
+                .setMaxWidth(500)
+                .setMaxHeight(500)
+                .build()
+
+            val fetchPhotoResponse = withContext(Dispatchers.IO) {
+                suspendCancellableCoroutine<FetchPhotoResponse> { continuation ->
+                    placesClient.fetchPhoto(photoRequest)
+                        .addOnSuccessListener { response ->
+                            continuation.resume(response)
+                        }
+                        .addOnFailureListener { exception ->
+                            continuation.resumeWithException(exception)
+                        }
+                }
+            }
+            val image = fetchPhotoResponse.bitmap
+            val imagenBitmap: ImageBitmap = image.asImageBitmap()
+            viewModel.setImagenTemporalCategoria(imagenBitmap)
+        }
+
+    } catch (exception: Exception) {
+        // Manejar cualquier excepción aquí
+    }
+}
+
+suspend fun obtenerImagenPopulares(
+    placesClient: PlacesClient,
+    placeId: String,
+    viewModel: TrovareViewModel,
+) {
+    val placeFields = listOf(Place.Field.PHOTO_METADATAS)
+    val request = FetchPlaceRequest.newInstance(placeId, placeFields)
+
+    try {
+        val response = withContext(Dispatchers.IO) {
+            suspendCancellableCoroutine<FetchPlaceResponse> { continuation ->
+                placesClient.fetchPlace(request)
+                    .addOnSuccessListener { response ->
+                        continuation.resume(response)
+                    }
+                    .addOnFailureListener { exception ->
+                        continuation.resumeWithException(exception)
+                    }
+            }
+        }
+        val place = response.place
+        val metada = place.photoMetadatas
+        if (metada != null) {
+            val photoMetadata = metada.first()
+
+            val photoRequest = FetchPhotoRequest.builder(photoMetadata)
+                .setMaxWidth(500)
+                .setMaxHeight(500)
+                .build()
+
+            val fetchPhotoResponse = withContext(Dispatchers.IO) {
+                suspendCancellableCoroutine<FetchPhotoResponse> { continuation ->
+                    placesClient.fetchPhoto(photoRequest)
+                        .addOnSuccessListener { response ->
+                            continuation.resume(response)
+                        }
+                        .addOnFailureListener { exception ->
+                            continuation.resumeWithException(exception)
+                        }
+                }
+            }
+
+            val image = fetchPhotoResponse.bitmap
+            val imagenBitmap: ImageBitmap = image.asImageBitmap()
+
+            viewModel.setImagenTemporalPopulares(imagenBitmap)
+        }
+    } catch (exception: Exception) {
+        // Manejar cualquier excepción aquí
+    }
+}
+
+
+suspend fun obtenerImagenPuntosDeInteres(
+    placesClient: PlacesClient,
+    placeId: String,
+    viewModel: TrovareViewModel,
+) {
+    val placeFields = listOf(Place.Field.PHOTO_METADATAS)
+    val request = FetchPlaceRequest.newInstance(placeId, placeFields)
+
+    try {
+        val response = withContext(Dispatchers.IO) {
+            suspendCancellableCoroutine<FetchPlaceResponse> { continuation ->
+                placesClient.fetchPlace(request)
+                    .addOnSuccessListener { response ->
+                        continuation.resume(response)
+                    }
+                    .addOnFailureListener { exception ->
+                        continuation.resumeWithException(exception)
+                    }
+            }
+        }
+
+        val place = response.place
+
+        val metada = place.photoMetadatas
+        if (metada != null) {
+            val photoMetadata = metada.first()
+
+            val photoRequest = FetchPhotoRequest.builder(photoMetadata)
+                .setMaxWidth(500)
+                .setMaxHeight(500)
+                .build()
+
+            val fetchPhotoResponse = withContext(Dispatchers.IO) {
+                suspendCancellableCoroutine<FetchPhotoResponse> { continuation ->
+                    placesClient.fetchPhoto(photoRequest)
+                        .addOnSuccessListener { response ->
+                            continuation.resume(response)
+                        }
+                        .addOnFailureListener { exception ->
+                            continuation.resumeWithException(exception)
+                        }
+                }
+            }
+
+            val image = fetchPhotoResponse.bitmap
+            val imagenBitmap: ImageBitmap = image.asImageBitmap()
+
+            viewModel.setImagenTemporalPuntosDeInteres(imagenBitmap)
+        }
+    } catch (exception: Exception) {
+        // Manejar cualquier excepción aquí
     }
 }

@@ -23,14 +23,9 @@ object ConfiguracionDataSource {
         "mi/ft"
     )
 
-    val Monedas = listOf(
-        "MXN",
-        "USD"
-    )
 }
 
 val listaDeConfiguracion = listOf(
     Configuracion(nombreDeConfig = "Idioma", icono = Icons.Filled.Language, opciones = ConfiguracionDataSource.Idiomas),
     Configuracion(nombreDeConfig = "Unidades", icono = Icons.Filled.SocialDistance, opciones = ConfiguracionDataSource.Unidades),
-    Configuracion(nombreDeConfig = "Moneda", icono = Icons.Filled.AttachMoney, opciones = ConfiguracionDataSource.Monedas)
 )

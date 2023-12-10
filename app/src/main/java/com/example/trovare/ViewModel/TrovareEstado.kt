@@ -1,12 +1,9 @@
 package com.example.trovare.ViewModel
 
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.res.painterResource
 import com.example.trovare.Data.ConfiguracionDataSource
 import com.example.trovare.Data.NearbyPlaces
 import com.example.trovare.Data.SoporteDatasource
-import com.example.trovare.R
 import com.google.android.gms.maps.model.LatLng
 
 //Configuración selecionadas------------------------------------------------------------------------
@@ -14,7 +11,6 @@ data class TrovareEstadoConfiguracion(
 
     val idioma: String = ConfiguracionDataSource.Idiomas[0],
     val unidad: String = ConfiguracionDataSource.Unidades[0],
-    val moneda: String = ConfiguracionDataSource.Monedas[0],
     val resultoUtil: String = SoporteDatasource.ResultoUtil[0],
 )
 
@@ -30,7 +26,9 @@ data class TrovareEstadoInicio(
     val lugaresCercanosInicializado: Boolean = false,
     val lugaresPopularesInicializado: Boolean = false,
     val lugaresPuntosDeInteresInicializado: Boolean = false,
-    val imagenTemporal: ImageBitmap? = null
+    val imagenTemporalCategoria: ImageBitmap? = null,
+    val imagenTemporalPopulares: ImageBitmap? = null,
+    val imagenTemporalPuntosDeInteres: ImageBitmap? = null
 )
 
 data class TrovareEstadoMapaPrincipal(

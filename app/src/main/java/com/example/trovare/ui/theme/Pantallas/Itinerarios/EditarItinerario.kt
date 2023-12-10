@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,6 +34,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -41,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +53,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -66,8 +70,11 @@ import com.example.trovare.ui.theme.JosefinSans
 import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.BarraSuperior
 import com.example.trovare.ui.theme.Recursos.Divisor
+import com.example.trovare.ui.theme.Recursos.Divisor2
 import com.example.trovare.ui.theme.Trv1
+import com.example.trovare.ui.theme.Trv10
 import com.example.trovare.ui.theme.Trv11
+import com.example.trovare.ui.theme.Trv13
 import com.example.trovare.ui.theme.Trv3
 import com.example.trovare.ui.theme.Trv6
 import com.google.android.gms.maps.model.LatLng
@@ -101,8 +108,8 @@ fun EditarItinerario(
     var listaVisible by remember{ mutableStateOf(true) }
     val origen = LatLng(19.504507, -99.147314)
 
-
     var mostrarBorrarDeItinerario by rememberSaveable { mutableStateOf(false) }
+
 
     CalendarTheme {
         CalendarDialog(
@@ -151,9 +158,7 @@ fun EditarItinerario(
                 .fillMaxSize(),
             color = Trv1
         ) {
-            LazyColumn(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ){
+            LazyColumn(modifier = modifier.padding(horizontal = 25.dp)){
                 item {
                     Text(
                         modifier = modifier
@@ -165,108 +170,115 @@ fun EditarItinerario(
                     )
                 }
                 item {
-                    Divisor()
+                    Divisor2()
                 }
+
                 item {
-                    TextField(
-                        modifier = modifier
-                            .padding(horizontal = 25.dp),
-                        value = nombreItinerario,
-                        onValueChange = {nuevoNombre->
-                            nombreItinerario = nuevoNombre
-                            viewModel.setNombreItinerario(nuevoNombre)
-                        },
-                        textStyle = TextStyle(
-                            textAlign = TextAlign.Center,
-                            fontFamily = JosefinSans,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 26.sp
-                        ),
-                        singleLine = true,
-                        colors = TextFieldDefaults.colors(
-                            unfocusedContainerColor = Trv1,
-                            focusedContainerColor = Trv1,
-                            focusedIndicatorColor = Trv1,
-                            unfocusedIndicatorColor = Trv1,
-                            cursorColor = Color.White,
-                        ),
-                    )
-                }
-                item{
-                    Card(
-                        modifier = modifier
-                            .padding(vertical = 10.dp)
-                            .size(200.dp)
-                            .aspectRatio(1F),
-                    ){
-                        Box(
-                            modifier = modifier.fillMaxSize(),
-                            contentAlignment = Alignment.BottomEnd
+                    Row {
+                        //imagen del itinerario-----------------------------------------------------
+                        Card(
+                            modifier = modifier
+                                .padding(vertical = 10.dp)
+                                .size(125.dp)
+                                .aspectRatio(1F),
                         ){
+                            /*
+                            if(itinerario.lugares?.get(0)?.imagen != null){
+                                Log.d("testError","error")
+                                Image(
+                                    bitmap = itinerario.lugares!![0].imagen!!,
+                                    contentDescription = "",
+                                    modifier = Modifier
+                                        .fillMaxSize(),
+                                    contentScale = ContentScale.FillBounds
+                                )
+                            } else {
+                                Image(
+                                    modifier = modifier
+                                        .fillMaxSize(),
+                                    painter = painterResource(id = R.drawable.image_placeholder),
+                                    contentDescription = ""
+                                )
+                            }
+
+                             */
+
                             Image(
                                 modifier = modifier
                                     .fillMaxSize(),
                                 painter = painterResource(id = R.drawable.image_placeholder),
                                 contentDescription = ""
                             )
-                            FloatingActionButton(
+                        }
+                        Column {
+                            OutlinedTextField(
                                 modifier = modifier
-                                    .padding(5.dp)
-                                    .size(30.dp),
-                                onClick = { /*navController.popBackStack()*/ },
-                                containerColor = Color.White,
-                                shape = CircleShape
-                            ){
-                                Icon(
-                                    imageVector = Icons.Rounded.Edit,
-                                    contentDescription = "",
-                                    tint = Color.Black
+                                    .padding(start = 5.dp, top = 10.dp, bottom = 10.dp)
+                                    .height(60.dp),
+                                value = nombreItinerario,
+                                onValueChange = {nuevoNombre->
+                                    nombreItinerario = nuevoNombre
+                                    viewModel.setNombreItinerario(nuevoNombre)
+                                },
+                                textStyle = TextStyle(
+                                    textAlign = TextAlign.Center,
+                                    fontFamily = JosefinSans,
+                                    fontSize = 20.sp
+                                ),
+                                singleLine = true,
+                                colors = TextFieldDefaults.colors(
+                                    unfocusedContainerColor = Trv1,
+                                    focusedContainerColor = Trv1,
+                                    focusedIndicatorColor = Color.White,
+                                    unfocusedIndicatorColor = Color.White,
+                                    cursorColor = Color.White,
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White
+                                ),
+                            )
+                            Row(
+                                modifier = modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 5.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Público",
+                                    textAlign = TextAlign.Left,
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Switch(
+
+                                    checked = publico,
+                                    onCheckedChange = { publico = !publico },
+                                    thumbContent = {
+                                        if (publico){
+                                            Icon(
+                                                imageVector = Icons.Rounded.Check,
+                                                contentDescription = ""
+                                            )
+                                        }
+                                    },
+                                    colors = SwitchDefaults.colors(
+                                        checkedTrackColor = Trv11,
+                                        checkedThumbColor = Trv6,
+                                        checkedIconColor = Color.Black
+                                    )
                                 )
                             }
                         }
                     }
                 }
                 item {
-                    Row(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 25.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Público",
-                            textAlign = TextAlign.Left,
-                            color = Color.White,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Switch(
-                            checked = publico,
-                            onCheckedChange = { publico = !publico },
-                            thumbContent = {
-                                if (publico){
-                                    Icon(
-                                        imageVector = Icons.Rounded.Check,
-                                        contentDescription = ""
-                                    )
-                                }
-                            },
-                            colors = SwitchDefaults.colors(
-                                checkedTrackColor = Trv11,
-                                checkedThumbColor = Trv6,
-                                checkedIconColor = Color.Black
-                            )
-                        )
-                    }
-                }
-                item {
-                    Divisor()
+                    Divisor2()
                 }
                 item {
                     Card(
                         modifier = modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 25.dp)
+                            .padding(vertical = 10.dp)
                             .clickable {
                                 //calendar State.show()
                                 navController.navigate(Pantalla.AgregarLugarItinerario.ruta)
@@ -297,17 +309,18 @@ fun EditarItinerario(
                     }
                 }
                 item {
-                    Divisor()
+                    Divisor2()
                 }
                 //Lista de lugares agregados al itinerario------------------------------------------
                 if(lugares == null){
                     item {
                         Box(modifier = modifier
                             .fillMaxSize()
-                            .padding(horizontal = 25.dp)
                         ){
                             Text(
-                                modifier = modifier.fillMaxSize(),
+                                modifier = modifier
+                                    .fillMaxSize()
+                                    .align(Alignment.Center),
                                 text = "No hay actividades en tu itinerario",
                                 style = MaterialTheme.typography.bodyMedium,
                                 textAlign = TextAlign.Left,
@@ -322,7 +335,7 @@ fun EditarItinerario(
                                 Card(
                                     modifier = modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 25.dp, vertical = 5.dp)
+                                        .padding(vertical = 5.dp)
                                         .size(100.dp)
                                         .clickable {
                                             navController.navigate(Pantalla.Detalles.conArgs(lugar.id))
@@ -437,9 +450,6 @@ fun EditarItinerario(
 
                                             }
                                             IconButton(
-
-
-
                                                 onClick = {
                                                     viewModel.setIndiceActual(index)//actualiza el indice para saber a que lugar guardar los cambios una vez que nos encontremos en la pantalla de RutasItienrario
                                                     viewModel.setPolilineaCodRuta(lugar.ruta?:"")//polilinea que se debe mostrar en la ruta
@@ -454,25 +464,23 @@ fun EditarItinerario(
                                             ) {
                                                 Icon(
                                                     imageVector =
-                                                        when {
-                                                            lugar.transporte == "" -> {
-                                                                Icons.Rounded.Route
-                                                            }
-
-                                                            lugar.transporte == "auto" -> {
-                                                                Icons.Rounded.DirectionsCar
-                                                            }
-
-                                                            lugar.transporte == "transporte" -> {
-                                                                Icons.Rounded.DirectionsTransit
-                                                            }
-                                                            else -> {Icons.Rounded.DirectionsWalk}
-                                                        },
+                                                    when (lugar.transporte) {
+                                                        "" -> {
+                                                            Icons.Rounded.Route
+                                                        }
+                                                        "auto" -> {
+                                                            Icons.Rounded.DirectionsCar
+                                                        }
+                                                        "transporte" -> {
+                                                            Icons.Rounded.DirectionsTransit
+                                                        }
+                                                        else -> {Icons.Rounded.DirectionsWalk}
+                                                    },
                                                     contentDescription = "",
                                                     tint = if(lugar.ruta == null){
                                                         Color.Black
                                                     } else {
-                                                        Trv6
+                                                        Trv13
                                                     },
                                                 )
                                             }
@@ -484,6 +492,13 @@ fun EditarItinerario(
                     }
                 }
             }
+        }
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            //if(itinerario.lugares?.get(0)?.imagen != null){
+                //itinerario.lugares!!.get(0).imagen?.let { viewModel.setImagenItinerario(it) }
+            //}
         }
     }
 }

@@ -5,6 +5,7 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarToday
+import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material.icons.rounded.Person
@@ -19,6 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.trovare.ViewModel.TrovareViewModel
+import com.example.trovare.ui.theme.Pantallas.Favoritos
 import com.example.trovare.ui.theme.Pantallas.Inicio
 import com.example.trovare.ui.theme.Pantallas.Itinerarios.Itinerarios
 import com.example.trovare.ui.theme.Pantallas.Mapa.MapaPrincipal
@@ -38,17 +40,21 @@ val DestinosNavegacionSecundaria = listOf(
         iconoSeleccionado = Icons.Rounded.Home,
     ),
     NavegacionSecundaria2(
-        ruta = Pantalla.PerfilInicio.ruta,
-        iconoSeleccionado = Icons.Rounded.Person
-    ),
-    NavegacionSecundaria2(
         ruta = Pantalla.Mapa.ruta,
         iconoSeleccionado = Icons.Rounded.Map
     ),
     NavegacionSecundaria2(
         ruta = Pantalla.Itinerarios.ruta,
         iconoSeleccionado = Icons.Rounded.CalendarToday
-    )
+    ),
+    NavegacionSecundaria2(
+        ruta = Pantalla.Favoritos.ruta,
+        iconoSeleccionado = Icons.Rounded.Favorite
+    ),
+    NavegacionSecundaria2(
+        ruta = Pantalla.PerfilInicio.ruta,
+        iconoSeleccionado = Icons.Rounded.Person
+    ),
 )
 
 //Verificar la ruta actual del navHost
@@ -90,12 +96,6 @@ fun NavegacionSecundaria(
                     placesClient = placesClient
                 )
             }
-            composable(route = Pantalla.PerfilInicio.ruta){
-                PerfilInicio(
-                    navController = navController,
-                    viewModel = viewModel
-                )
-            }
             composable(route = Pantalla.Mapa.ruta){
                 MapaPrincipal(
                     state = viewModel.state.value,
@@ -107,6 +107,17 @@ fun NavegacionSecundaria(
             }
             composable(route = Pantalla.Itinerarios.ruta){
                 Itinerarios(
+                    navController = navController,
+                    viewModel = viewModel
+                )
+            }
+            composable(route = Pantalla.Favoritos.ruta){
+                Favoritos(
+
+                )
+            }
+            composable(route = Pantalla.PerfilInicio.ruta){
+                PerfilInicio(
                     navController = navController,
                     viewModel = viewModel
                 )

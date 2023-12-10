@@ -25,16 +25,28 @@ import com.google.android.libraries.places.api.net.FetchPhotoResponse
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FetchPlaceResponse
 import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.android.libraries.places.ktx.api.net.awaitFetchPhoto
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.LocalTime
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * [TrovareViewModel] guarda información de la aplicación dentro del ciclo de vida.
@@ -56,6 +68,10 @@ class TrovareViewModel : ViewModel() {
 
     fun reiniciarImagen() {
         _imagen.value = null
+    }
+
+    fun setImagen(nuevoValor: ImageBitmap) {
+        _imagen.value = nuevoValor
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -83,13 +99,6 @@ class TrovareViewModel : ViewModel() {
         }
     }
 
-    fun setMonedas(nuevaMoneda: String) {
-        _estadoUi.update { estadoActual ->
-            estadoActual.copy(
-                moneda = nuevaMoneda,
-            )
-        }
-    }
 
     fun setResultoUtil(nuevaSeleccion: String){
         _estadoUi.update { estadoActual ->
@@ -222,10 +231,26 @@ class TrovareViewModel : ViewModel() {
         }
     }
 
-    fun setImagenTemporal(nuevoValor: ImageBitmap) {
+    fun setImagenTemporalCategoria(nuevoValor: ImageBitmap?) {
         _estadoInicial.update { estadoActual ->
             estadoActual.copy(
-                imagenTemporal = nuevoValor,
+                imagenTemporalCategoria = nuevoValor,
+            )
+        }
+    }
+
+    fun setImagenTemporalPopulares(nuevoValor: ImageBitmap?) {
+        _estadoInicial.update { estadoActual ->
+            estadoActual.copy(
+                imagenTemporalPopulares = nuevoValor,
+            )
+        }
+    }
+
+    fun setImagenTemporalPuntosDeInteres(nuevoValor: ImageBitmap?) {
+        _estadoInicial.update { estadoActual ->
+            estadoActual.copy(
+                imagenTemporalPuntosDeInteres = nuevoValor,
             )
         }
     }
@@ -473,6 +498,10 @@ class TrovareViewModel : ViewModel() {
         _itinerarioActual.value.nombre = nuevoNombre
     }
 
+    fun setImagenItinerario(nuevaImagen: ImageBitmap){
+        _itinerarioActual.value.imagen = nuevaImagen
+    }
+
     fun agregarLugarALItinerario(id: String, nombreLugar: String, ubicacion: LatLng) {
         val lugarNuevo = Lugar(
             id = id,
@@ -509,6 +538,10 @@ class TrovareViewModel : ViewModel() {
 
     fun borrarLugarActual(lugar: Lugar) {
         _itinerarioActual.value.lugares?.remove(lugar)
+    }
+
+    fun borrarItinerarioActual(itinerario: Itinerario) {
+        _usuario.value.itinerarios.remove(itinerario)
     }
 
     //--------------------------------------------------------------------------------------------//
@@ -561,8 +594,8 @@ class TrovareViewModel : ViewModel() {
 
                     // Create a FetchPhotoRequest.
                     val photoRequest = FetchPhotoRequest.builder(photoMetadata)
-                        .setMaxWidth(500) // Optional.
-                        .setMaxHeight(500) // Optional.
+                        .setMaxWidth(1000) // Optional.
+                        .setMaxHeight(1000) // Optional.
                         .build()
                     placesClient.fetchPhoto(photoRequest)
                         .addOnSuccessListener { fetchPhotoResponse: FetchPhotoResponse ->
@@ -585,74 +618,6 @@ class TrovareViewModel : ViewModel() {
                 }
             }
     }
-
-    //Obtener info para las rutas
-    fun obtenerLugarRuta(
-        placesClient: PlacesClient,
-        placeId: String,
-        nombre: (String?) -> Unit,
-        direccion: (String?) -> Unit,
-        rating: (Double?) -> Unit,
-        numeroTelefono: (String?) -> Unit,
-        paginaWeb: (String?) -> Unit,
-    ){
-        val placeFields = listOf(
-            Place.Field.NAME,
-            Place.Field.ADDRESS,
-            Place.Field.RATING,
-            Place.Field.PHONE_NUMBER,
-            Place.Field.WEBSITE_URI,
-            Place.Field.PHOTO_METADATAS
-        )//campos que se deben obtener de la API de places
-        val request = FetchPlaceRequest.newInstance(placeId, placeFields)
-
-        placesClient.fetchPlace(request)
-            .addOnSuccessListener { response: FetchPlaceResponse ->
-                val place = response.place
-
-
-                nombre(place.name)
-                direccion(place.address)
-                rating(place.rating)
-                numeroTelefono(place.phoneNumber)
-
-                if(place.websiteUri != null){
-                    paginaWeb(place.websiteUri?.toString())
-                }
-
-                // Obtener metadatos de la foto-----------------------------------------------------
-                val metada = place.photoMetadatas
-                if (metada != null) {
-
-                    val photoMetadata = metada.first()
-
-                    // Create a FetchPhotoRequest.
-                    val photoRequest = FetchPhotoRequest.builder(photoMetadata)
-                        .setMaxWidth(500) // Optional.
-                        .setMaxHeight(500) // Optional.
-                        .build()
-                    placesClient.fetchPhoto(photoRequest)
-                        .addOnSuccessListener { fetchPhotoResponse: FetchPhotoResponse ->
-
-                            val image = fetchPhotoResponse.bitmap
-                            val imagenBitmap: ImageBitmap = image.asImageBitmap()
-                            _imagen.value = imagenBitmap
-                        }.addOnFailureListener { exception: Exception ->
-                            if (exception is ApiException) {
-                                val statusCode = exception.statusCode
-                                TODO("Handle error with given status code.")
-                            }
-                        }
-                }
-
-            }.addOnFailureListener { exception: Exception ->
-                if (exception is ApiException) {
-                    val statusCode = exception.statusCode
-                    TODO("Handle error with given status code")
-                }
-            }
-    }
-
 
     //funci[on para obtener informacion para el mapa------------------------------------------------
     fun obtenerMarcador(
@@ -718,34 +683,7 @@ class TrovareViewModel : ViewModel() {
     }
 
     //Funcion para obtener el marcador del origen
-    fun obtenerMarcadorOrigen(
-        placesClient: PlacesClient,
-        placeId: String,
-    ){
-        val placeFields = listOf(
-            Place.Field.LAT_LNG,
-        )//campos que se deben obtener de la API de places
 
-        val request = FetchPlaceRequest.newInstance(placeId, placeFields)
-
-        placesClient.fetchPlace(request)
-            .addOnSuccessListener { response: FetchPlaceResponse ->
-                val place = response.place
-
-                setOrigenRuta(place.latLng?:LatLng(estadoMapa.value.destino.latitude, estadoMapa.value.destino.longitude))
-                //setNombreLugar(place.name?:"")
-                //setIdLugar(place.id?:"")
-
-                setMarcadorInicializadoRuta(true)
-
-            }.addOnFailureListener { exception: Exception ->
-                if (exception is ApiException) {
-                    Log.e("testLugar", "Place not found: ${exception.message}")
-                    val statusCode = exception.statusCode
-                    TODO("Handle error with given status code")
-                }
-            }
-    }
 
     fun obtenerMarcadorEntreMuchos(
         placesClient: PlacesClient,
@@ -848,70 +786,4 @@ class TrovareViewModel : ViewModel() {
             }
         }
     }
-    //nuevo VIEWMODEL
-    fun obtenerImagenLugar(
-        placesClient: PlacesClient,
-        placeId: String,
-        viewModel: TrovareViewModel
-    ){
-        val placeFields = listOf(
-            Place.Field.PHOTO_METADATAS
-        )//campos que se deben obtener de la API de places
-        val request = FetchPlaceRequest.newInstance(placeId, placeFields)
-
-        Log.d("testImpresion","primero")
-        placesClient.fetchPlace(request)
-            .addOnSuccessListener { response: FetchPlaceResponse ->
-                Log.d("testImpresion","segundo")
-                val place = response.place
-
-                // Obtener metadatos de la foto-----------------------------------------------------
-                val metada = place.photoMetadatas
-                if (metada != null) {
-
-                    val photoMetadata = metada.first()
-                    Log.d("testImpresion","tercero")
-
-                    // Create a FetchPhotoRequest.
-                    val photoRequest = FetchPhotoRequest.builder(photoMetadata)
-                        .setMaxWidth(500) // Optional.
-                        .setMaxHeight(500) // Optional.
-                        .build()
-                    placesClient.fetchPhoto(photoRequest)
-                        .addOnSuccessListener { fetchPhotoResponse: FetchPhotoResponse ->
-                            Log.d("testImpresion","cuarto")
-
-                            val image = fetchPhotoResponse.bitmap
-                            val imagenBitmap: ImageBitmap = image.asImageBitmap()
-
-                            Log.d("testImpresion","${imagenBitmap}")
-
-                            viewModel.setImagenTemporal(imagenBitmap)
-                            _imagen.value = imagenBitmap
-
-
-                        }.addOnFailureListener { exception: Exception ->
-                            if (exception is ApiException) {
-                                val statusCode = exception.statusCode
-                                TODO("Handle error with given status code.")
-                            }
-                        }
-
-                }
-                Log.d("testImpresion","quinto")
-
-            }.addOnFailureListener { exception: Exception ->
-                if (exception is ApiException) {
-                    val statusCode = exception.statusCode
-                    TODO("Handle error with given status code")
-                }
-            }
-        Log.d("testImpresion","sexto")
-
-    }
 }
-
-
-
-
-

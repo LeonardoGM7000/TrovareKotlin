@@ -41,7 +41,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -59,8 +58,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.trovare.Api.apiRutasMapaPrincipal
 import com.example.trovare.Api.rawJSON
-import com.example.trovare.Api.rawJSONRutas
 import com.example.trovare.Api.rawJSONUbicacionesCercanas
 import com.example.trovare.Data.Places
 import com.example.trovare.Data.categorias
@@ -532,7 +531,7 @@ fun MapaPrincipal(
                                         val origen = state.lastKnownLocation?.latitude?.let { state.lastKnownLocation?.longitude?.let { it1 -> LatLng(it, it1) } }
                                         calcularZoom(origen!!, destino)
                                         if (origen != null) {
-                                            rawJSONRutas(
+                                            apiRutasMapaPrincipal(
                                                 destino = destino,
                                                 origen = origen,
                                                 viewModel = viewModel,

@@ -90,12 +90,14 @@ class MainActivity : ComponentActivity() {
 
         apiBuscarPorPopularidad(
             ubicacion = ubicacionActual,
-            viewModel = viewModel
+            viewModel = viewModel,
+            placesClient = placesClient,
         )
 
         apiBuscarPuntosDeInteres(
             ubicacion = ubicacionActual,
-            viewModel = viewModel
+            viewModel = viewModel,
+            placesClient = placesClient
         )
 
         // Variable que almacena la ruta de la pantalla
@@ -124,7 +126,6 @@ class MainActivity : ComponentActivity() {
 
         viewModel.setIdioma(sharedPreferences.getString(KEY_IDIOMA,"Español").toString())
         viewModel.setUnidades(sharedPreferences.getString(KEY_UNIDADES, "Km/m").toString())
-        viewModel.setMonedas(sharedPreferences.getString(KEY_MONEDA, "MXN").toString())
 
         setContent {
             TrovareTheme {

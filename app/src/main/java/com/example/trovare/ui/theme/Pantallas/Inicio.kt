@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -390,7 +391,7 @@ fun Inicio(
                                 .fillMaxWidth(),
                             textAlign = TextAlign.Left,
                             color = Color.White,
-                            text = "Puntos de interés",
+                            text = "Cercanos a ti",
                             style = MaterialTheme.typography.headlineSmall
                         )
                     }
@@ -534,19 +535,23 @@ fun TarjetaLugar(
             modifier = modifier.padding(5.dp)
         ) {
             //imagen del lugar----------------------------------------------------------------------
-            Card{
+            Card(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+            ){
                 if (lugar.imagen != null) {
                     Image(
                         bitmap = lugar.imagen!!,
                         contentDescription = "",
                         modifier = Modifier
-                            .fillMaxWidth(),
+                            .fillMaxSize(),
                         contentScale = ContentScale.FillBounds
                     )
                 } else {
                     Image(
                         modifier = modifier
-                            .fillMaxWidth(),
+                            .fillMaxSize(),
                         painter = painterResource(id = R.drawable.image_placeholder),
                         contentDescription = ""
                     )
@@ -615,13 +620,30 @@ fun TarjetaLugarExtendida(
             ) { navController.navigate(Pantalla.Detalles.conArgs(lugar.id)) },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Card{
-            Image(
-                modifier = modifier.size(120.dp),
-                painter = painterResource(id = R.drawable.image_placeholder),
-                contentDescription = ""
-            )
+
+        Card(
+            modifier = modifier
+                .size(120.dp)
+                .aspectRatio(1f)
+        ){
+            if (lugar.imagen != null) {
+                Image(
+                    bitmap = lugar.imagen!!,
+                    contentDescription = "",
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentScale = ContentScale.FillBounds
+                )
+            } else {
+                Image(
+                    modifier = modifier
+                        .fillMaxSize(),
+                    painter = painterResource(id = R.drawable.image_placeholder),
+                    contentDescription = ""
+                )
+            }
         }
+
         Column(
             modifier = modifier.padding(start = 5.dp)
         ) {

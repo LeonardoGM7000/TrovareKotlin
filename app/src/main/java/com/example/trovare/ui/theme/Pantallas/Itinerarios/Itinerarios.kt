@@ -1,6 +1,5 @@
 package com.example.trovare.ui.theme.Pantallas.Itinerarios
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -20,7 +19,6 @@ import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,12 +28,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -48,10 +47,6 @@ import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv3
-import com.maxkeppeker.sheets.core.models.base.rememberSheetState
-import com.maxkeppeler.sheets.calendar.CalendarDialog
-import com.maxkeppeler.sheets.calendar.models.CalendarSelection
-import java.time.LocalDate
 
 @Composable
 fun Itinerarios(
@@ -61,6 +56,7 @@ fun Itinerarios(
 ){
 
     val usuario by viewModel.usuario.collectAsState()
+    var listaVisible by remember { mutableStateOf(true) }
 
     Surface(
         modifier = modifier
@@ -102,6 +98,7 @@ fun Itinerarios(
                                 nombre = "nuevo Itinerario",
                                 autor = usuario.nombre,
                                 lugares = null,
+                                imagen = null
                             )
                             navController.navigate(Pantalla.EditarItinerario.ruta)//
                             usuario.itinerarios.add(nuevoItinerario)//
@@ -118,68 +115,97 @@ fun Itinerarios(
                     }
                 }
             }
-            items(usuario.itinerarios){itinerario ->
-                Card(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 25.dp, vertical = 5.dp)
-                        .size(100.dp)
-                        .clickable {
-                            navController.navigate(Pantalla.EditarItinerario.ruta)
-                            viewModel.setItinerarioActual(itinerario)
-                        },
-                    colors = CardDefaults.cardColors(
-                        containerColor = Trv3
-                    )
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
+            if(listaVisible){
+                items(usuario.itinerarios){itinerario ->
+                    Card(
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 25.dp, vertical = 5.dp)
+                            .size(100.dp)
+                            .clickable {
+                                navController.navigate(Pantalla.EditarItinerario.ruta)
+                                viewModel.setItinerarioActual(itinerario)
+                            },
+                        colors = CardDefaults.cardColors(
+                            containerColor = Trv3
+                        )
                     ) {
-                        Card(
-                            modifier = modifier
-                                .padding(5.dp)
-                                .aspectRatio(1f),
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Image(
+                            Card(
                                 modifier = modifier
-                                    .fillMaxSize(),
-                                painter = painterResource(id = R.drawable.image_placeholder),
-                                contentDescription = ""
-                            )
-                        }
-                        Column {
-                            Text(
-                                text = itinerario.nombre,
-                                color = Color.Black,
-                                maxLines = 1
-                            )
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
+                                    .padding(5.dp)
+                                    .aspectRatio(1f),
+                            ) {
+                                if (itinerario.imagen != null) {
+                                    Image(
+                                        bitmap = itinerario.imagen!!,
+                                        contentDescription = "",
+                                        modifier = Modifier
+                                            .fillMaxSize(),
+                                        contentScale = ContentScale.FillBounds
+                                    )
+                                } else {
+                                    Image(
+                                        modifier = modifier
+                                            .fillMaxSize(),
+                                        painter = painterResource(id = R.drawable.image_placeholder),
+                                        contentDescription = ""
+                                    )
+                                }
+                            }
+                            Column(
+                                modifier = modifier.fillMaxWidth(0.8f)
+                            ) {
+                                Text(
+                                    text = itinerario.nombre,
+                                    color = Color.Black,
+                                    maxLines = 1
+                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Public,
+                                        contentDescription = "",
+                                        tint = Color.Black
+                                    )
+                                    Text(
+                                        text = "lugar",
+                                        color = Color.Black,
+                                        fontSize = 20.sp
+                                    )
+                                }
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ){
+                                    Icon(
+                                        imageVector = Icons.Rounded.Person,
+                                        contentDescription = "",
+                                        tint = Color.Black
+                                    )
+                                    Text(
+                                        text = itinerario.autor,
+                                        color = Color.Black,
+                                        fontSize = 20.sp
+                                    )
+                                }
+                            }
+                            IconButton(
+                                onClick = {
+                                    listaVisible = false
+                                    viewModel.borrarItinerarioActual(itinerario)
+                                    listaVisible = true
+
+                                }
                             ) {
                                 Icon(
-                                    imageVector = Icons.Rounded.Public,
+                                    imageVector = Icons.Rounded.DeleteForever,
                                     contentDescription = "",
-                                    tint = Color.Black
+                                    tint = Color.Black,
                                 )
-                                Text(
-                                    text = "lugar",
-                                    color = Color.Black,
-                                    fontSize = 20.sp
-                                )
-                            }
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ){
-                                Icon(
-                                    imageVector = Icons.Rounded.Person,
-                                    contentDescription = "",
-                                    tint = Color.Black
-                                )
-                                Text(
-                                    text = itinerario.autor,
-                                    color = Color.Black,
-                                    fontSize = 20.sp
-                                )
+
                             }
                         }
                     }

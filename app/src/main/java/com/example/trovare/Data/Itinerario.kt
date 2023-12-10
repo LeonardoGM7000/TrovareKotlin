@@ -8,7 +8,8 @@ import java.time.LocalTime
 data class Itinerario(
     var nombre: String,
     var autor: String,
-    var lugares: MutableList<Lugar>?
+    var lugares: MutableList<Lugar>?,
+    var imagen: ImageBitmap?
 )
 
 data class Lugar(
@@ -27,10 +28,10 @@ data class Lugar(
     var imagen: ImageBitmap?
 )
 
-
 val itinerarioPrueba: Itinerario = Itinerario(
     nombre = "Itinerario",
     autor = "",
-    lugares = null
+    lugares = null,
+    imagen = null
 )
 

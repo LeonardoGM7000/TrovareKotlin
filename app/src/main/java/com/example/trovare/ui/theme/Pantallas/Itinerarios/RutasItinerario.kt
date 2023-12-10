@@ -81,19 +81,14 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.trovare.Api.obtenerResenas
+import com.example.trovare.Api.apiRutasItinerario
 import com.example.trovare.Api.rawJSON
-import com.example.trovare.Api.rawJSONRutas
 import com.example.trovare.Data.Places
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
-import com.example.trovare.ui.theme.Pantallas.Resena
-import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Recursos.Divisor2
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv10
-import com.example.trovare.ui.theme.Trv6
-import com.example.trovare.ui.theme.Trv8
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -155,8 +150,6 @@ fun RutasItinerario(
 
 
     val estadoMapaRuta by viewModel.estadoMapaRuta.collectAsState()
-
-
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.zoomRuta)
@@ -253,7 +246,7 @@ fun RutasItinerario(
             viewModel.setOrigenRuta(ubicacionActual)
         }
 
-        viewModel.obtenerLugarRuta(
+        obtenerLugarRuta(
             placesClient = placesClient,
             placeId = estadoMapaRuta.idLugarRuta,
             nombre = { nombre = it?:"" },
@@ -261,6 +254,7 @@ fun RutasItinerario(
             rating =  { calificacion = it?: -1.0},
             numeroTelefono = {numeroTelefono = it?: ""},
             paginaWeb = {paginaWeb = it?: ""},
+            viewModel = viewModel
         )
         calcularZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.destinoRuta)
         when {
@@ -270,7 +264,7 @@ fun RutasItinerario(
                 }
                 viewModel.setTransporteRuta("auto")
                 calcularZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.destinoRuta)
-                rawJSONRutas(
+                apiRutasItinerario(
                     origen = estadoMapaRuta.origenRuta,
                     destino = estadoMapaRuta.destinoRuta,
                     viewModel = viewModel,
@@ -282,7 +276,7 @@ fun RutasItinerario(
                     peekHeight = 100.dp
                 }
                 calcularZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.destinoRuta)
-                rawJSONRutas(
+                apiRutasItinerario(
                     origen = estadoMapaRuta.origenRuta,
                     destino = estadoMapaRuta.destinoRuta,
                     viewModel = viewModel,
@@ -295,7 +289,7 @@ fun RutasItinerario(
                     peekHeight = 100.dp
                 }
                 calcularZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.destinoRuta)
-                rawJSONRutas(
+                apiRutasItinerario(
                     origen = estadoMapaRuta.origenRuta,
                     destino = estadoMapaRuta.destinoRuta,
                     viewModel = viewModel,
@@ -455,7 +449,7 @@ fun RutasItinerario(
                                 }
                                 viewModel.setTransporteRuta("auto")
                                 calcularZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.destinoRuta)
-                                rawJSONRutas(
+                                apiRutasItinerario(
                                     origen = estadoMapaRuta.origenRuta,
                                     destino = estadoMapaRuta.destinoRuta,
                                     viewModel = viewModel,
@@ -482,7 +476,7 @@ fun RutasItinerario(
                                 }
                                 viewModel.setTransporteRuta("transporte")
                                 calcularZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.destinoRuta)
-                                rawJSONRutas(
+                                apiRutasItinerario(
                                     origen = estadoMapaRuta.origenRuta,
                                     destino = estadoMapaRuta.destinoRuta,
                                     viewModel = viewModel,
@@ -510,7 +504,7 @@ fun RutasItinerario(
                                 }
                                 viewModel.setTransporteRuta("caminando")
                                 calcularZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.destinoRuta)
-                                rawJSONRutas(
+                                apiRutasItinerario(
                                     origen = estadoMapaRuta.origenRuta,
                                     destino = estadoMapaRuta.destinoRuta,
                                     viewModel = viewModel,
@@ -874,9 +868,10 @@ fun RutasItinerario(
                                                 viewModel.setPolilineaInicializadaRuta(false)
                                                 viewModel.setMarcadorInicializadoRuta(false)
                                                 viewModel.setTransporteRuta("")
-                                                viewModel.obtenerMarcadorOrigen(
+                                                obtenerMarcadorOrigen(
                                                     placesClient = placesClient,
                                                     placeId = lugar.id,
+                                                    viewModel = viewModel
                                                 )
                                                 textoBuscar = TextFieldValue("")
                                             }

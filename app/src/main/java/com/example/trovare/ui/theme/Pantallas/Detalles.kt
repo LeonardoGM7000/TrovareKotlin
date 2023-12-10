@@ -8,6 +8,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -118,90 +119,80 @@ fun Detalles(
         LazyColumn(){
             //Tarjeta que muestra la imagen, botón de regreso y botón de agregar a favoritos--------
             item {
-                Card(
-                    modifier = modifier
-                        .wrapContentSize()
+                Box(
+                    modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 45.dp, top = 25.dp, end = 45.dp)
                         .aspectRatio(1F),
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ) {
-                        val imagen = viewModel.imagen.value
+                    val imagen = viewModel.imagen.value
 
-                        if (imagen != null) {
-                            Image(
-                                bitmap = imagen,
+                    if (imagen != null) {
+                        Image(
+                            bitmap = imagen,
+                            contentDescription = "",
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentScale = ContentScale.FillBounds
+                        )
+                    } else {
+                        Image(
+                            modifier = modifier
+                                .fillMaxSize(),
+                            painter = painterResource(id = R.drawable.image_placeholder),
+                            contentDescription = ""
+                        )
+                    }
+                    Row(
+                        modifier = modifier
+                            .padding(10.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        FloatingActionButton(
+                            modifier = modifier
+                                .size(35.dp),
+                            onClick = { navController.popBackStack() },
+                            containerColor = Color.White,
+                            shape = CircleShape
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.KeyboardArrowLeft,
                                 contentDescription = "",
-                                modifier = Modifier
-                                    .fillMaxSize(),
-                                contentScale = ContentScale.FillBounds
-                            )
-                        } else {
-                            Image(
-                                modifier = modifier
-                                    .fillMaxSize(),
-                                painter = painterResource(id = R.drawable.image_placeholder),
-                                contentDescription = ""
+                                tint = Color.Black
                             )
                         }
-                        Row(
+                        FloatingActionButton(
                             modifier = modifier
-                                .padding(5.dp)
-                                .fillMaxWidth()
+                                .size(35.dp),
+                            onClick = { /*TODO*/ },
+                            containerColor = Color.White,
+                            shape = CircleShape
                         ) {
-                            FloatingActionButton(
-                                modifier = modifier
-                                    .size(35.dp),
-                                onClick = { navController.popBackStack() },
-                                containerColor = Color.White,
-                                shape = CircleShape
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.KeyboardArrowLeft,
-                                    contentDescription = "",
-                                    tint = Color.Black
+                            IconToggleButton(
+                                checked = favorito,
+                                onCheckedChange = { checked -> favorito = checked },
+                                colors = IconButtonDefaults.iconToggleButtonColors(
+                                    containerColor = Color.White,
+                                    checkedContainerColor = Color.White,
+                                    contentColor = Color.Black,
+                                    checkedContentColor = Color.Red
                                 )
-                            }
-                            Spacer(modifier = modifier.fillMaxWidth(0.86f))
-                            FloatingActionButton(
-                                modifier = modifier
-                                    .size(35.dp),
-                                onClick = { /*TODO*/ },
-                                containerColor = Color.White,
-                                shape = CircleShape
                             ) {
-                                IconToggleButton(
-                                    checked = favorito,
-                                    onCheckedChange = { checked -> favorito = checked },
-                                    colors = IconButtonDefaults.iconToggleButtonColors(
-                                        containerColor = Color.White,
-                                        checkedContainerColor = Color.White,
-                                        contentColor = Color.Black,
-                                        checkedContentColor = Color.Red
+                                if (favorito) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Favorite,
+                                        contentDescription = ""
                                     )
-                                ) {
-                                    if (favorito) {
-                                        Icon(
-                                            imageVector = Icons.Rounded.Favorite,
-                                            contentDescription = ""
-                                        )
-                                    } else {
-                                        Icon(
-                                            imageVector = Icons.Rounded.FavoriteBorder,
-                                            contentDescription = ""
-                                        )
-                                    }
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Rounded.FavoriteBorder,
+                                        contentDescription = ""
+                                    )
                                 }
                             }
                         }
                     }
                 }
-            }
-            item {
-                Divisor()
             }
             //Nombre del lugar y Rating del lugar---------------------------------------------------
             if(nombre != ""){

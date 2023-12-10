@@ -151,16 +151,6 @@ fun Configuracion(
                         // Modificamos Shared Preferences
                         editor.putString(KEY_UNIDADES, it).apply()
                     }
-                    //Configuración-Moneda----------------------------------------------------------
-                    TarjetaConfiguracion(
-                        configuracion = listaDeConfiguracion[2],
-                        configuracionActual = uiState.moneda
-                    ) {
-                        viewModel.setMonedas(it)
-
-                        // Modificamos Shared Preferences
-                        editor.putString(KEY_MONEDA, it).apply()
-                    }
                 }
                 item {
                     TarjetaNormal(

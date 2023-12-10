@@ -236,7 +236,8 @@ fun Soporte(
                             focusedContainerColor = Trv1,
                             cursorColor = Color.White,
                             focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White
+                            unfocusedIndicatorColor = Color.White,
+                            unfocusedContainerColor = Trv1
                         ),
                         maxLines = 5,
                         keyboardOptions = keyboardOptions
@@ -278,14 +279,3 @@ fun Soporte(
         }
     }
 }
-/*
-@Preview
-@Composable
-fun SoportePreview(){
-    TrovareTheme {
-        Soporte()
-    }
-
-}
-
- */
