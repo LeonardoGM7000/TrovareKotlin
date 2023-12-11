@@ -40,7 +40,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.trovare.Api.obtenerResenas
+import com.example.trovare.Data.LugarFavorito
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Recursos.Divisor
@@ -74,6 +77,7 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
+import kotlinx.coroutines.coroutineScope
 import java.util.concurrent.TimeUnit
 
 data class Resena(val usuario: String, val puntuacion: Int, val texto: String, val tiempo: Int, val fotoPerfil: String)
@@ -87,7 +91,10 @@ fun Detalles(
     navController: NavController
 ){
 
+    val usuario by viewModel.usuario.collectAsState()
+
     var favorito by rememberSaveable { mutableStateOf(false) }
+    var eraFavoritoBand = false
     var nombre by rememberSaveable { mutableStateOf("") }
     var direccion by rememberSaveable { mutableStateOf("") }
     var numeroTelefono by rememberSaveable { mutableStateOf("") }
@@ -97,6 +104,25 @@ fun Detalles(
     var resenasList by remember { mutableStateOf(mutableListOf<Resena>()) }
 
     LaunchedEffect(key1 = Unit){
+        eraFavoritoBand = false
+        coroutineScope {
+            //checar si es lugar favorito
+            if(usuario.favoritos.isNotEmpty()){
+                val hayCoincidencia = usuario.favoritos!!.any { lugar -> lugar.id == placeId }
+                if(hayCoincidencia){
+                    favorito = true
+                    eraFavoritoBand = true
+                    Log.d("testFavorito","es lugar favorito")
+                } else {
+                    Log.d("testFavorito","no es lugar favorito")
+                }
+            } else {
+                Log.d("testFavorito","no hay lugares favoritos agregados")
+            }
+
+        }
+
+
         viewModel.reiniciarImagen()
         viewModel.obtenerLugar(
             placesClient = placesClient,
@@ -161,6 +187,7 @@ fun Detalles(
                                 tint = Color.Black
                             )
                         }
+                        //boton de favoritos
                         FloatingActionButton(
                             modifier = modifier
                                 .size(35.dp),
@@ -361,7 +388,22 @@ fun Detalles(
             }
         }
     }
+    DisposableEffect(Unit) {
+        onDispose {
+
+            if(eraFavoritoBand){
+                if(!favorito){
+                    usuario.favoritos.remove(LugarFavorito(id = placeId!!, nombre = nombre))//
+                }
+            } else {
+                if(favorito){
+                    usuario.favoritos?.add(LugarFavorito(id = placeId!!, nombre = nombre))//
+                }
+            }
+        }
+    }
 }
+//usuario.itinerarios.add(nuevoItinerario)//
 
 @Composable
 fun TarjetaReseña(
@@ -404,10 +446,10 @@ fun TarjetaReseña(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable (
+                    .clickable(
                         indication = null,
                         interactionSource = NoRippleInteractionSource()
-                    ){ expanded = !expanded },
+                    ) { expanded = !expanded },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 fotoDePerfilUsuario(url = resena.fotoPerfil)
@@ -458,6 +500,9 @@ fun fotoDePerfilUsuario(url: String) {
     AsyncImage(
         model = url,
         contentDescription = null,
-        modifier = Modifier.size(80.dp, 80.dp).clip(CircleShape).padding(13.dp)
+        modifier = Modifier
+            .size(80.dp, 80.dp)
+            .clip(CircleShape)
+            .padding(13.dp)
     )
 }

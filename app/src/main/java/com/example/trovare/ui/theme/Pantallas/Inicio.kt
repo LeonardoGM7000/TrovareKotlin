@@ -88,14 +88,6 @@ fun Inicio(
     val pagerStatePuntuados = rememberPagerState(initialPage = 0) { estadoInicio.lugaresPuntosDeInteres.size }
     val ubicacionActual by viewModel.ubicacionActual.collectAsState()
 
-
-    //val paginaActualPopulares by remember { mutableStateOf(pagerStatePopulares.currentPage) }
-
-    LaunchedEffect(key1 = Unit){
-        //viewModel.getLastLocation(fusedLocationProviderClient = fusedLocationProviderClient)
-    }
-
-
     Scaffold(
         topBar = {
             BarraSuperiorConfig(navController)
@@ -141,18 +133,6 @@ fun Inicio(
                     }
                 }
                 item { 
-                    Spacer(modifier = modifier.height(10.dp))
-                }
-                //Tarjeta principal inicio----------------------------------------------------------
-                item {
-                    Card(
-                        modifier = modifier
-                            .fillMaxWidth()
-                    ) {
-                        Text(text = "test")
-                    }
-                }
-                item {
                     Spacer(modifier = modifier.height(10.dp))
                 }
                 //Categorías------------------------------------------------------------------------
@@ -611,8 +591,6 @@ fun TarjetaLugarExtendida(
     navController: NavController
 ){
     Row(
-
-
         modifier = modifier
             .clickable(
                 indication = null,

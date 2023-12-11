@@ -99,8 +99,8 @@ fun EditarItinerario(
 ){
 
     val itinerario by viewModel.itinerarioActual.collectAsState()
+    var publico by remember { mutableStateOf(itinerario.publico) }
     var nombreItinerario by remember { mutableStateOf(itinerario.nombre) }
-    var publico by rememberSaveable { mutableStateOf(false) }
     var lugares by remember { mutableStateOf(itinerario.lugares) }
     val calendarState = rememberSheetState()
     val clockState = rememberSheetState()
@@ -252,7 +252,10 @@ fun EditarItinerario(
                                 Switch(
 
                                     checked = publico,
-                                    onCheckedChange = { publico = !publico },
+                                    onCheckedChange = {
+                                        viewModel.setPublicoItinerario(!(itinerario.publico))
+                                        publico = !publico
+                                    },
                                     thumbContent = {
                                         if (publico){
                                             Icon(

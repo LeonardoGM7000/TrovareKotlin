@@ -17,3 +17,13 @@ data class NearbyPlaces(
 )
 
 val lugarTemporal = NearbyPlaces(id = "", displayName = null, rating = null, primaryType = null, imagen = null)
+
+data class LugarFavorito(
+    var id : String,
+    var nombre : String,
+)
+
+val lugarFavoritoPrueba: LugarFavorito = LugarFavorito(
+    id = "",
+    nombre = "",
+)

@@ -114,8 +114,8 @@ fun apiRutasItinerario(
                 )
 
                 viewModel.setPolilineaCodRuta(rutaInfo.polilinea)
-                viewModel.setTiempoDeViaje(rutaInfo.duracion)
-                viewModel.setDistanciaEntrePuntos(rutaInfo.distancia)
+                viewModel.setTiempoDeViajeRuta(rutaInfo.duracion)
+                viewModel.setDistanciaEntrePuntosRuta(rutaInfo.distancia)
                 viewModel.setPolilineaInicializadaRuta(true)
 
             } else {

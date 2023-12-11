@@ -4,9 +4,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,6 +25,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,6 +47,7 @@ import com.example.trovare.Data.Itinerario
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Navegacion.Pantalla
+import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv3
@@ -58,170 +62,185 @@ fun Itinerarios(
     val usuario by viewModel.usuario.collectAsState()
     var listaVisible by remember { mutableStateOf(true) }
 
-    Surface(
-        modifier = modifier
-            .fillMaxSize(),
-        color = Trv1
-    ) {
-        LazyColumn(){
-            item {
-                Text(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 15.dp),
-                    textAlign = TextAlign.Center,
-                    color = Color.White,
-                    text = "Itinerarios",
-                    style = MaterialTheme.typography.displayMedium
-                )
-            }
-            item {
-                Divisor()
-            }
-            item {
-                Row (
-                    verticalAlignment = Alignment.CenterVertically
-                ){
+    Scaffold(
+        topBar = {
+            BarraSuperiorConfig(navController = navController)
+        },
+    ) { it ->
+        Surface(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(it),
+            color = Trv1
+        ) {
+            LazyColumn(){
+                item {
                     Text(
                         modifier = modifier
-                            .padding(start = 25.dp, end = 10.dp),
-                        text = "Tus itinerarios",
-                        style = MaterialTheme.typography.displaySmall,
-                        color = Color.White
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        color = Color.White,
+                        text = "Itinerarios",
+                        style = MaterialTheme.typography.displayMedium
                     )
-                    FloatingActionButton(
-                        modifier = modifier
-                            .size(20.dp),
-                        onClick = {
-                            //Crear nuevo itinerario
-                            val nuevoItinerario = Itinerario(
-                                nombre = "nuevo Itinerario",
-                                autor = usuario.nombre,
-                                lugares = null,
-                                imagen = null
-                            )
-                            navController.navigate(Pantalla.EditarItinerario.ruta)//
-                            usuario.itinerarios.add(nuevoItinerario)//
-                            viewModel.setItinerarioActual(nuevoItinerario)//
-                        },
-                        containerColor = Color.White,
-                        shape = CircleShape
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Add,
-                            contentDescription = "",
-                            tint = Color.Black
+                }
+                item {
+                    Divisor()
+                }
+                item {
+                    Row (
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Text(
+                            modifier = modifier
+                                .padding(start = 25.dp, end = 10.dp),
+                            text = "Tus itinerarios",
+                            style = MaterialTheme.typography.displaySmall,
+                            color = Color.White
                         )
+                        FloatingActionButton(
+                            modifier = modifier
+                                .size(20.dp),
+                            onClick = {
+                                //Crear nuevo itinerario
+                                val nuevoItinerario = Itinerario(
+                                    nombre = "nuevo Itinerario",
+                                    autor = usuario.nombre,
+                                    lugares = null,
+                                    imagen = null,
+                                    publico = false
+                                )
+                                navController.navigate(Pantalla.EditarItinerario.ruta)//
+                                usuario.itinerarios.add(nuevoItinerario)//
+                                viewModel.setItinerarioActual(nuevoItinerario)//
+                            },
+                            containerColor = Color.White,
+                            shape = CircleShape
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Add,
+                                contentDescription = "",
+                                tint = Color.Black
+                            )
+                        }
                     }
                 }
-            }
-            if(listaVisible){
-                items(usuario.itinerarios){itinerario ->
-                    Card(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 25.dp, vertical = 5.dp)
-                            .size(100.dp)
-                            .clickable {
-                                navController.navigate(Pantalla.EditarItinerario.ruta)
-                                viewModel.setItinerarioActual(itinerario)
-                            },
-                        colors = CardDefaults.cardColors(
-                            containerColor = Trv3
-                        )
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
+                if(listaVisible){
+                    items(usuario.itinerarios){itinerario ->
+                        Card(
+                            modifier = modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 25.dp, vertical = 5.dp)
+                                .size(100.dp)
+                                .clickable {
+                                    navController.navigate(Pantalla.EditarItinerario.ruta)
+                                    viewModel.setItinerarioActual(itinerario)
+                                },
+                            colors = CardDefaults.cardColors(
+                                containerColor = Trv3
+                            )
                         ) {
-                            Card(
-                                modifier = modifier
-                                    .padding(5.dp)
-                                    .aspectRatio(1f),
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                if (itinerario.imagen != null) {
-                                    Image(
-                                        bitmap = itinerario.imagen!!,
-                                        contentDescription = "",
-                                        modifier = Modifier
-                                            .fillMaxSize(),
-                                        contentScale = ContentScale.FillBounds
-                                    )
-                                } else {
-                                    Image(
-                                        modifier = modifier
-                                            .fillMaxSize(),
-                                        painter = painterResource(id = R.drawable.image_placeholder),
-                                        contentDescription = ""
-                                    )
+                                Card(
+                                    modifier = modifier
+                                        .padding(5.dp)
+                                        .aspectRatio(1f),
+                                ) {
+                                    if (itinerario.imagen != null) {
+                                        Image(
+                                            bitmap = itinerario.imagen!!,
+                                            contentDescription = "",
+                                            modifier = Modifier
+                                                .fillMaxSize(),
+                                            contentScale = ContentScale.FillBounds
+                                        )
+                                    } else {
+                                        Image(
+                                            modifier = modifier
+                                                .fillMaxSize(),
+                                            painter = painterResource(id = R.drawable.image_placeholder),
+                                            contentDescription = ""
+                                        )
+                                    }
                                 }
-                            }
-                            Column(
-                                modifier = modifier.fillMaxWidth(0.8f)
-                            ) {
-                                Text(
-                                    text = itinerario.nombre,
-                                    color = Color.Black,
-                                    maxLines = 1
-                                )
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically
+                                Column(
+                                    modifier = modifier.fillMaxWidth(0.8f)
+                                ) {
+                                    Text(
+                                        text = itinerario.nombre,
+                                        color = Color.Black,
+                                        maxLines = 1
+                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Public,
+                                            contentDescription = "",
+                                            tint = Color.Black
+                                        )
+                                        if(itinerario.publico){
+                                            Text(
+                                                text = "público",
+                                                color = Color.Black,
+                                                fontSize = 20.sp
+                                            )
+                                        } else {
+                                            Text(
+                                                text = "privado",
+                                                color = Color.Black,
+                                                fontSize = 20.sp
+                                            )
+                                        }
+                                    }
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ){
+                                        Icon(
+                                            imageVector = Icons.Rounded.Person,
+                                            contentDescription = "",
+                                            tint = Color.Black
+                                        )
+                                        Text(
+                                            text = itinerario.autor,
+                                            color = Color.Black,
+                                            fontSize = 20.sp
+                                        )
+                                    }
+                                }
+                                IconButton(
+                                    onClick = {
+                                        listaVisible = false
+                                        viewModel.borrarItinerarioActual(itinerario)
+                                        listaVisible = true
+
+                                    }
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Rounded.Public,
+                                        imageVector = Icons.Rounded.DeleteForever,
                                         contentDescription = "",
-                                        tint = Color.Black
+                                        tint = Color.Black,
                                     )
-                                    Text(
-                                        text = "lugar",
-                                        color = Color.Black,
-                                        fontSize = 20.sp
-                                    )
-                                }
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically
-                                ){
-                                    Icon(
-                                        imageVector = Icons.Rounded.Person,
-                                        contentDescription = "",
-                                        tint = Color.Black
-                                    )
-                                    Text(
-                                        text = itinerario.autor,
-                                        color = Color.Black,
-                                        fontSize = 20.sp
-                                    )
-                                }
-                            }
-                            IconButton(
-                                onClick = {
-                                    listaVisible = false
-                                    viewModel.borrarItinerarioActual(itinerario)
-                                    listaVisible = true
 
                                 }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.DeleteForever,
-                                    contentDescription = "",
-                                    tint = Color.Black,
-                                )
-
                             }
                         }
                     }
                 }
-            }
-            item {
-                Divisor()
-            }
-            item {
-                Text(
-                    modifier = modifier
-                        .padding(start = 25.dp, end = 10.dp),
-                    text = "Comunidad",
-                    style = MaterialTheme.typography.displaySmall,
-                    color = Color.White
-                )
+                item {
+                    Divisor()
+                }
+                item {
+                    Text(
+                        modifier = modifier
+                            .padding(start = 25.dp, end = 10.dp),
+                        text = "Comunidad",
+                        style = MaterialTheme.typography.displaySmall,
+                        color = Color.White
+                    )
+                }
             }
         }
     }

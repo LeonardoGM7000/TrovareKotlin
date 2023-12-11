@@ -126,7 +126,7 @@ fun PerfilPrincipal(
                 )
             }
             item {
-                Spacer(modifier = modifier.height(10.dp))
+                Spacer(modifier = modifier.height(15.dp))
             }
             item {
                 //Tarjeta con la informacion del usuario--------------------------------------------

@@ -502,7 +502,7 @@ private fun saveUserData(
     firestore: FirebaseFirestore
 ) {
     // Crear un objeto para representar la información del usuario
-    val userData = Usuario(textoNombre, null, obtenerFecha(), "", "México", null, mutableListOf(itinerarioPrueba))
+    val userData = Usuario(textoNombre, null, obtenerFecha(), "", "México", null, mutableListOf(), mutableListOf())
     Log.i("cuenta", "Punto")
     firestore.collection("Usuario").document(textoCorreo).set(userData).addOnSuccessListener {
         Log.i("cuenta", "Datos guardados")

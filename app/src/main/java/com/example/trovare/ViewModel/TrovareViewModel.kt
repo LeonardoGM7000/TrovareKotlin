@@ -74,6 +74,8 @@ class TrovareViewModel : ViewModel() {
         _imagen.value = nuevoValor
     }
 
+
+
     //--------------------------------------------------------------------------------------------//
     //------------------------------ESTADO DE LA UI-----------------------------------------------//
     //--------------------------------------------------------------------------------------------//
@@ -255,6 +257,8 @@ class TrovareViewModel : ViewModel() {
         }
     }
 
+
+
     //--------------------------------------------------------------------------------------------//
     //---------------------------------MAPA PRINCIPAL---------------------------------------------//
     //--------------------------------------------------------------------------------------------//
@@ -336,7 +340,7 @@ class TrovareViewModel : ViewModel() {
         }
     }
 
-    fun setRatingLugar(nuevoValor: Double) {
+    fun setRatingLugar(nuevoValor: Double?) {
         _estadoMapa.update { estadoActual ->
             estadoActual.copy(
                 ratingLugar = nuevoValor,
@@ -359,6 +363,146 @@ class TrovareViewModel : ViewModel() {
             )
         }
     }
+
+    fun setImagenLugar(nuevoValor: ImageBitmap) {
+        _estadoMapa.update { estadoActual ->
+            estadoActual.copy(
+                imagen = nuevoValor,
+            )
+        }
+    }
+
+    fun setDistanciaEntrePuntos(nuevoValor: Float) {
+        _estadoMapa.update { estadoActual ->
+            estadoActual.copy(
+                distanciaEntrePuntos = nuevoValor,
+            )
+        }
+    }
+
+    fun setTiempoDeViaje(nuevoValor: String) {
+        _estadoMapa.update { estadoActual ->
+            estadoActual.copy(
+                tiempoDeViaje = nuevoValor,
+            )
+        }
+    }
+
+    fun reiniciarImagenMapaPrincipal() {
+        _estadoMapa.update { estadoActual ->
+            estadoActual.copy(
+                imagen = null,
+            )
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------//
+    //---------------------------------MAPA ITINERARIO--------------------------------------------//
+    //--------------------------------------------------------------------------------------------//
+
+    //MAPA PRINCIPAL -------------------------------------------------------------------------------
+
+    private val _estadoMapaItinerario = MutableStateFlow(TrovareEstadoMapaItinerario())
+    val estadoMapaItinerario: StateFlow<TrovareEstadoMapaItinerario> = _estadoMapaItinerario.asStateFlow()
+
+    fun setOrigenItinerario(nuevoValor: LatLng) {
+        _estadoMapaItinerario.update { estadoActual ->
+            estadoActual.copy(
+                origen = nuevoValor,
+            )
+        }
+    }
+
+    fun setDestinoItinerario(nuevoValor: LatLng) {
+        _estadoMapaItinerario.update { estadoActual ->
+            estadoActual.copy(
+                destino = nuevoValor,
+            )
+        }
+    }
+
+
+    fun setZoomItinerario(nuevoValor: Float) {
+        _estadoMapaItinerario.update { estadoActual ->
+            estadoActual.copy(
+                zoom = nuevoValor,
+            )
+        }
+    }
+
+    fun setMarcadorInicializadoItinerario(nuevoValor: Boolean) {
+        _estadoMapaItinerario.update { estadoActual ->
+            estadoActual.copy(
+                marcadorInicializado = nuevoValor,
+            )
+        }
+    }
+
+    fun setMarcadoresInicializadoItinerario(nuevoValor: Boolean) {
+        _estadoMapaItinerario.update { estadoActual ->
+            estadoActual.copy(
+                marcadoresInicializado = nuevoValor,
+            )
+        }
+    }
+
+    fun setInformacionInicializadaItinerario(nuevoValor: Boolean) {
+        _estadoMapaItinerario.update { estadoActual ->
+            estadoActual.copy(
+                informacionInicializada = nuevoValor,
+            )
+        }
+    }
+
+    fun setNombreMapaItinerario(nuevoValor: String) {
+        _estadoMapaItinerario.update { estadoActual ->
+            estadoActual.copy(
+                nombreLugar = nuevoValor,
+            )
+        }
+    }
+
+    fun setRatingMapaItinerario(nuevoValor: Double?) {
+        _estadoMapaItinerario.update { estadoActual ->
+            estadoActual.copy(
+                ratingLugar = nuevoValor,
+            )
+        }
+    }
+
+    fun setIdMapaItinerario(nuevoValor: String) {
+        _estadoMapaItinerario.update { estadoActual ->
+            estadoActual.copy(
+                idLugar = nuevoValor,
+            )
+        }
+    }
+
+    fun setUbicacionMapaItinerario(nuevoValor: LatLng) {
+        _estadoMapaItinerario.update { estadoActual ->
+            estadoActual.copy(
+                ubicacionLugar = nuevoValor,
+            )
+        }
+    }
+
+    fun setImagenMapaItinerario(nuevoValor: ImageBitmap) {
+        _estadoMapaItinerario.update { estadoActual ->
+            estadoActual.copy(
+                imagen = nuevoValor,
+            )
+        }
+    }
+
+    fun reiniciarImagenMapaItinerario() {
+        _estadoMapaItinerario.update { estadoActual ->
+            estadoActual.copy(
+                imagen = null,
+            )
+        }
+    }
+
+
 
     //--------------------------------------------------------------------------------------------//
     //------------------------------MAPA DE RUTAS ITINERARIO--------------------------------------//
@@ -433,7 +577,7 @@ class TrovareViewModel : ViewModel() {
         }
     }
 
-    fun setDistanciaEntrePuntos(nuevoValor: Float) {
+    fun setDistanciaEntrePuntosRuta(nuevoValor: Float) {
         _estadoMapaRuta.update { estadoActual ->
             estadoActual.copy(
                 distanciaEntrePuntos = nuevoValor,
@@ -441,7 +585,7 @@ class TrovareViewModel : ViewModel() {
         }
     }
 
-    fun setTiempoDeViaje(nuevoValor: String) {
+    fun setTiempoDeViajeRuta(nuevoValor: String) {
         _estadoMapaRuta.update { estadoActual ->
             estadoActual.copy(
                 tiempoDeViaje = nuevoValor,
@@ -502,32 +646,14 @@ class TrovareViewModel : ViewModel() {
         _itinerarioActual.value.imagen = nuevaImagen
     }
 
-    fun agregarLugarALItinerario(id: String, nombreLugar: String, ubicacion: LatLng) {
-        val lugarNuevo = Lugar(
-            id = id,
-            nombreLugar =  nombreLugar,
-            fechaDeVisita = null,
-            horaDeVisita = null,
-            origen = null,
-            ubicacion = ubicacion,
-            ruta = null,
-            zoom = 15f,
-            imagen=_imagen.value
-        )
-        val itinerarioActualValor = _itinerarioActual.value
 
-        // Verificar si la lista de lugares existe, si no, crearla
-        if (itinerarioActualValor.lugares == null) {
-            itinerarioActualValor.lugares = mutableListOf()
-        }
-        // Agregar el nuevo lugar a la lista de lugares del itinerario actual
-        itinerarioActualValor.lugares?.add(lugarNuevo)
-        // Actualizar el valor del itinerario actual en MutableStateFlow
-        _itinerarioActual.value = itinerarioActualValor
-    }
     fun setFechaDeVisita(indiceActual: Int, fechaNueva: LocalDate) {
             val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
             lugarActual?.fechaDeVisita = fechaNueva
+    }
+
+    fun setPublicoItinerario(nuevoValor: Boolean) {
+        _itinerarioActual.value.publico = nuevoValor
     }
 
     fun setHoraDeVisita(indiceActual: Int, horaNueva: LocalTime) {
@@ -620,7 +746,7 @@ class TrovareViewModel : ViewModel() {
     }
 
     //funci[on para obtener informacion para el mapa------------------------------------------------
-    fun obtenerMarcador(
+    fun obtenerMarcador1(
         placesClient: PlacesClient,
         placeId: String,
     ){
@@ -685,61 +811,6 @@ class TrovareViewModel : ViewModel() {
     //Funcion para obtener el marcador del origen
 
 
-    fun obtenerMarcadorEntreMuchos(
-        placesClient: PlacesClient,
-        placeId: String,
-    ){
-        val placeFields = listOf(
-            Place.Field.ID,
-            Place.Field.NAME,
-            Place.Field.RATING,
-            Place.Field.PHOTO_METADATAS
-        )//campos que se deben obtener de la API de places
-
-        val request = FetchPlaceRequest.newInstance(placeId, placeFields)
-
-        placesClient.fetchPlace(request)
-            .addOnSuccessListener { response: FetchPlaceResponse ->
-                val place = response.place
-
-                setNombreLugar(place.name?:"")
-                setRatingLugar(place.rating?:-1.0)
-                setIdLugar(place.id?:"")
-
-                val metada = place.photoMetadatas
-                if (metada != null) {
-
-                    val photoMetadata = metada.first()
-
-                    // Create a FetchPhotoRequest.
-                    val photoRequest = FetchPhotoRequest.builder(photoMetadata)
-                        .setMaxWidth(200) // Optional.
-                        .setMaxHeight(200) // Optional.
-                        .build()
-                    placesClient.fetchPhoto(photoRequest)
-                        .addOnSuccessListener { fetchPhotoResponse: FetchPhotoResponse ->
-
-                            val image = fetchPhotoResponse.bitmap
-                            val imagenBitmap: ImageBitmap = image.asImageBitmap()
-                            _imagen.value = imagenBitmap
-                        }.addOnFailureListener { exception: Exception ->
-                            if (exception is ApiException) {
-                                val statusCode = exception.statusCode
-                                TODO("Handle error with given status code.")
-                            }
-                        }
-                }
-
-                setInformacionInicializada(true)
-
-            }.addOnFailureListener { exception: Exception ->
-                if (exception is ApiException) {
-                    Log.e("testLugar", "Place not found: ${exception.message}")
-                    val statusCode = exception.statusCode
-                    TODO("Handle error with given status code")
-                }
-            }
-    }
     //--------------------------------------------------------------------------------------------//
     //-------------------------------------FIREBASE-----------------------------------------------//
     //--------------------------------------------------------------------------------------------//
@@ -769,13 +840,14 @@ class TrovareViewModel : ViewModel() {
                 //firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().result.id
                 val documento =  firestore.collection("Usuario").document(auth.currentUser?.email.toString()).get().await()
                 val usuario = Usuario(
-                        nombre = documento.getString("nombre").toString(),
-                        foto_perfil = documento.getString("foto_perfil").toString(),
-                        fechaDeRegistro = documento.getString("fechaDeRegistro").toString(),
-                        descripcion = documento.getString("descripcion").toString(),
-                        lugarDeOrigen = documento.getString("lugarDeOrigen").toString(),
-                        comentarios = null,
-                        itinerarios = mutableListOf()
+                    nombre = documento.getString("nombre").toString(),
+                    foto_perfil = documento.getString("foto_perfil").toString(),
+                    fechaDeRegistro = documento.getString("fechaDeRegistro").toString(),
+                    descripcion = documento.getString("descripcion").toString(),
+                    lugarDeOrigen = documento.getString("lugarDeOrigen").toString(),
+                    comentarios = null,
+                    itinerarios = mutableListOf(),
+                    favoritos = mutableListOf()
                 )
 
                 setUsuario(usuario)

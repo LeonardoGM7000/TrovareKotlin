@@ -51,7 +51,7 @@ fun Divisor(modifier: Modifier = Modifier){
 fun Divisor2(modifier: Modifier = Modifier){
     Divider(
         modifier = modifier
-            .padding(horizontal = 5.dp, vertical = 5.dp),
+            .padding( vertical = 15.dp),
         color = Color.White
     )
 }

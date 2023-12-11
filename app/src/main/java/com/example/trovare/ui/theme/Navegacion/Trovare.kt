@@ -30,8 +30,8 @@ import com.example.trovare.ui.theme.Pantallas.EliminarCuentas
 import com.example.trovare.ui.theme.Pantallas.Ingreso.ActualizarContrasena
 import com.example.trovare.ui.theme.Pantallas.Ingreso.RecuperarContrasena
 import com.example.trovare.ui.theme.Pantallas.Ingreso.TokenRecuperarContrasena
-import com.example.trovare.ui.theme.Pantallas.Itinerarios.AgregarLugarItinerario
 import com.example.trovare.ui.theme.Pantallas.Itinerarios.RutasItinerario
+import com.example.trovare.ui.theme.Pantallas.Mapa.AgregarLugarItinerario
 import com.example.trovare.ui.theme.Pantallas.PreguntasAdmin
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.libraries.places.api.net.PlacesClient

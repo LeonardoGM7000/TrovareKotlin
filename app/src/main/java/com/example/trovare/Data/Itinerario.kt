@@ -9,7 +9,8 @@ data class Itinerario(
     var nombre: String,
     var autor: String,
     var lugares: MutableList<Lugar>?,
-    var imagen: ImageBitmap?
+    var imagen: ImageBitmap?,
+    var publico: Boolean
 )
 
 data class Lugar(
@@ -32,6 +33,7 @@ val itinerarioPrueba: Itinerario = Itinerario(
     nombre = "Itinerario",
     autor = "",
     lugares = null,
-    imagen = null
+    imagen = null,
+    publico = false
 )
 

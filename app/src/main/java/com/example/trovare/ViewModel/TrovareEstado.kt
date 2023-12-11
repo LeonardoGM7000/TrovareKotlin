@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import com.example.trovare.Data.ConfiguracionDataSource
 import com.example.trovare.Data.NearbyPlaces
 import com.example.trovare.Data.SoporteDatasource
+import com.example.trovare.ui.theme.Pantallas.Mapa.Marcador
 import com.google.android.gms.maps.model.LatLng
 
 //Configuración selecionadas------------------------------------------------------------------------
@@ -12,6 +13,7 @@ data class TrovareEstadoConfiguracion(
     val idioma: String = ConfiguracionDataSource.Idiomas[0],
     val unidad: String = ConfiguracionDataSource.Unidades[0],
     val resultoUtil: String = SoporteDatasource.ResultoUtil[0],
+
 )
 
 //Configuración selecionadas------------------------------------------------------------------------
@@ -29,22 +31,48 @@ data class TrovareEstadoInicio(
     val imagenTemporalCategoria: ImageBitmap? = null,
     val imagenTemporalPopulares: ImageBitmap? = null,
     val imagenTemporalPuntosDeInteres: ImageBitmap? = null
+
 )
 
 data class TrovareEstadoMapaPrincipal(
 
     val origen: LatLng = ubicacionEscom,//origen a marcar en el mapa
     val destino: LatLng = ubicacionEscom,//destino a marcar en el mapa
-    val polilineaCod: String = "",
-    val polilineaInicializada: Boolean = false,
-    val zoom: Float = 15f,
-    val marcadorInicializado: Boolean = false,
-    val marcadoresInicializado: Boolean = false,
-    val informacionInicializada: Boolean = false,
+    val polilineaCod: String = "",//polilinea codificada(como la devuelve la api)
+    val polilineaInicializada: Boolean = false,//permite saber si la polilinea se mostrara en el mapa
+    val zoom: Float = 15f,//zoom que se hace en el mapa
+    val marcadorInicializado: Boolean = false,//permite saber si el marcador se muestra en el mapa
+    val marcadores: MutableList<Marcador> = mutableListOf(),
+    val marcadoresInicializado: Boolean = false,//permite saber si varios marcadores se muestran en el mapa
+    val informacionInicializada: Boolean = false,//permite saber si se despliega la BottomSheet con info del lugar
     val nombreLugar: String = "",
-    val ratingLugar: Double = -1.0,
+    val ratingLugar: Double? = null,
     val idLugar: String = "",
-    val ubicacionLugar: LatLng = ubicacionEscom
+    val ubicacionLugar: LatLng = ubicacionEscom,
+    val imagen: ImageBitmap? = null,
+    val distanciaEntrePuntos: Float = 0.0f,//distancia devuelta por la api de rutas
+    val tiempoDeViaje: String = "",//tiempo estimado devuelto por la api de rutas
+
+)
+
+
+data class TrovareEstadoMapaItinerario(
+
+    val origen: LatLng = ubicacionEscom,//origen a marcar en el mapa
+    val destino: LatLng = ubicacionEscom,//destino a marcar en el mapa
+    val zoom: Float = 15f,//zoom que se hace en el mapa
+    val marcadorInicializado: Boolean = false,//permite saber si el marcador se muestra en el mapa
+    val marcadores: MutableList<Marcador> = mutableListOf(),
+    val marcadoresInicializado: Boolean = false,//permite saber si varios marcadores se muestran en el mapa
+    val informacionInicializada: Boolean = false,//permite saber si se despliega la BottomSheet con info del lugar
+    val nombreLugar: String = "",
+    val ratingLugar: Double? = null,
+    val idLugar: String = "",
+    val ubicacionLugar: LatLng = ubicacionEscom,
+    val imagen: ImageBitmap? = null,
+    val distanciaEntrePuntos: Float = 0.0f,//distancia devuelta por la api de rutas
+    val tiempoDeViaje: String = "",//tiempo estimado devuelto por la api de rutas
+
 )
 
 data class TrovareEstadoMapaRuta(
