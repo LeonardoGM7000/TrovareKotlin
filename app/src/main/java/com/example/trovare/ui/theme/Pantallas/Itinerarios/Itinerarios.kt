@@ -59,9 +59,8 @@ fun Itinerarios(
 ) {
 
     val usuario by viewModel.usuario.collectAsState()
-    val itinerario by viewModel.itinerarioActual.collectAsState()
     val lista_Itinerario by viewModel.listaIt.collectAsState()
-    var cambio = false
+
 
     viewModel.obtenerItinerario()
 
@@ -108,7 +107,7 @@ fun Itinerarios(
                         onClick = {
                             //Crear nuevo itinerario
                             val nuevoItinerario = Itinerario(
-                                id = usuario.itinerarios.size,
+                                id = "",
                                 nombre = "nuevo Itinerario",
                                 autor = usuario.nombre,
                                 lugares = null,
@@ -119,7 +118,6 @@ fun Itinerarios(
                             usuario.itinerarios.add(nuevoItinerario)//
 
                             guardarItinerario(nuevoItinerario)
-                            cambio = true
                             viewModel.setItinerarioActual(nuevoItinerario)//
                         },
                         containerColor = Color.White,
@@ -226,16 +224,28 @@ private fun guardarItinerario(itinerario: Itinerario) {
 
     Log.i("guardar_itinerario", "Guardando datos...")
 
-    firestore.collection("Usuario").document(auth.currentUser?.email.toString()).collection("Itinerario").document().set(itinerario)
-        .addOnSuccessListener {
-            Log.i("guardar_itinerario", "Datos guardados")
-        }
-        .addOnFailureListener{
+    val it = firestore.collection("Usuario").document(auth.currentUser?.email.toString()).collection("Itinerario")
+    it.get().addOnSuccessListener { documento->
 
-            Log.i("guardar_itinerario", "Datos no guardados")
+            Log.d("contar_documentos", "${documento.size()}")
+        itinerario.id = documento.size().toString()
+
+        it.document(itinerario.id!!).set(itinerario)
+            .addOnSuccessListener {
+                Log.i("guardar_itinerario", "Datos guardados")
+            }
+            .addOnFailureListener{
+
+                Log.i("guardar_itinerario", "Datos no guardados")
+            }
         }
+
 
 
 }
+
+
+
+
 
 

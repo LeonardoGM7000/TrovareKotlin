@@ -114,12 +114,17 @@ fun EditarItinerario(
     val itinerario by viewModel.itinerarioActual.collectAsState()
     var nombreItinerario by remember { mutableStateOf(itinerario.nombre) }
     var publico by rememberSaveable { mutableStateOf(false) }
-    var lugares by remember { mutableStateOf(itinerario.lugares) }
+    //var lugares by remember { mutableStateOf(itinerario.lugares) }
+    val lista_lugares by viewModel.listaLugares.collectAsState()
+    var lugares = lista_lugares
     val calendarState = rememberSheetState()
     val clockState = rememberSheetState()
     var indiceActual by remember{ mutableStateOf(0) }
     var listaVisible by remember{ mutableStateOf(true) }
     var mostrarBorrarDeItinerario by rememberSaveable { mutableStateOf(false) }
+
+    viewModel.cargarLugar()
+
 
     
 
@@ -131,7 +136,7 @@ fun EditarItinerario(
                     listaVisible = false
                     viewModel.modificarFechaDeVisita(indiceActual = indiceActual, fechaNueva = fecha)
                     itinerario.lugares = lugares?.sortedBy { it.fechaDeVisita }?.toMutableList()
-                    lugares = itinerario.lugares
+                    lugares = itinerario.lugares!!
                     listaVisible = true
                 }
             },
@@ -150,7 +155,7 @@ fun EditarItinerario(
                     listaVisible = false
                     viewModel.modificarHoraDeVisita(indiceActual = indiceActual, horaNueva = Hora(hora = hours, minuto = minutes))
                     //itinerario.lugares = lugares?.sortedBy { it.fechaDeVisita }?.toMutableList()
-                    lugares = itinerario.lugares
+                    lugares = itinerario.lugares!!
                     listaVisible = true
                 }
                 //Log.d("testReloj", "${hours}:${minutes}")
@@ -441,7 +446,7 @@ fun EditarItinerario(
                                                     mostrarBorrarDeItinerario = true
                                                     listaVisible = false
                                                     viewModel.borrarLugarActual(lugar)
-                                                    lugares = itinerario.lugares
+                                                    lugares = itinerario.lugares!!
                                                     listaVisible = true
 
 

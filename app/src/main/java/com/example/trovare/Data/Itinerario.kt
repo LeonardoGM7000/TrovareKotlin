@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import java.time.LocalDate
 
 data class Itinerario(
-    var id: Int?,
+    var id: String?,
     var nombre: String,
     var autor: String,
     var lugares: MutableList<Lugar>?
@@ -24,7 +24,7 @@ data class Hora(
 )
 
 val itinerarioPrueba: Itinerario = Itinerario(
-    id = 0,
+    id = "",
     nombre = "Itinerario",
     autor = "",
     lugares = null

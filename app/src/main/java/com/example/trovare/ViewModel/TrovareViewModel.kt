@@ -228,23 +228,37 @@ class TrovareViewModel : ViewModel() {
     }
 
     fun agregarLugarALItinerario(id: String, nombreLugar: String) {
-        val lugarNuevo = Lugar(id, nombreLugar, fechaDeVisita = null, horaDeVisita = null, imagen=_imagen.value)
 
+        val lugarNuevo = Lugar(id, nombreLugar, fechaDeVisita = null, horaDeVisita = null, imagen=null)
+        Log.d("guardar_lugar", itinerarioActual.value.id.toString())
 
-        val firestore = FirebaseFirestore.getInstance()
-        val auth = FirebaseAuth.getInstance()
+        try {
 
-        Log.i("guardar_itinerario", "Guardando datos...")
+            val firestore = FirebaseFirestore.getInstance()
+            val auth = FirebaseAuth.getInstance()
 
-        firestore.collection("Usuario").document(auth.currentUser?.email.toString()).collection("Itinerario").document().collection("Lugar").document().set(lugarNuevo)
-            .addOnSuccessListener {
-                Log.i("guardar_itinerario", "Datos guardados")
-            }
-            .addOnFailureListener{
+            Log.i("guardar_lugar", "Guardando datos...")
 
-                Log.i("guardar_itinerario", "Datos no guardados")
-            }
+            val documento_lugar = firestore.collection("Usuario").document(auth.currentUser?.email.toString())
+                .collection("Itinerario").document(itinerarioActual.value.id.toString()).collection("Lugar")
 
+            documento_lugar.get().addOnSuccessListener{ documento->
+
+                    Log.d("guardar_lugar", "Datos guardados")
+                    Log.d("guardar_lugar", itinerarioActual.value.id.toString())
+
+                    documento_lugar.document(documento.size().toString()).set(lugarNuevo)
+                    cargarLugar()
+
+                }
+                .addOnFailureListener {
+
+                    Log.i("guardar_lugar", "Datos no guardados")
+                }
+
+        }catch(e: Exception){
+            Log.i("guardar_lugar", "Error al conectar con la base de datosmsfnfsks")
+        }
 
         val itinerarioActualValor = _itinerarioActual.value
 
@@ -258,6 +272,8 @@ class TrovareViewModel : ViewModel() {
 
         // Actualizar el valor del itinerario actual en MutableStateFlow
         _itinerarioActual.value = itinerarioActualValor
+
+
     }
     fun modificarFechaDeVisita(indiceActual: Int, fechaNueva: LocalDate) {
             val lugarActual = _itinerarioActual.value.lugares?.get(indiceActual)
@@ -607,13 +623,13 @@ class TrovareViewModel : ViewModel() {
     }
 
 
+    // Logica para obtener itinerarios
+
     private val _listaIt = MutableStateFlow(mutableListOf<Itinerario>())
     val listaIt = _listaIt.asStateFlow()
     fun setLista(nuevoLista: MutableList<Itinerario>) {
         _listaIt.value = nuevoLista
     }
-
-
 
     fun obtenerItinerario(){
 
@@ -635,7 +651,7 @@ class TrovareViewModel : ViewModel() {
                         //val temporal = documento.toObject(Itinerario::class.java)
 
                         val itinerario = Itinerario(
-                            id = 0,
+                            id = documento.getString("id").toString(),
                             nombre = documento.getString("nombre").toString(),
                             autor = documento.getString("autor").toString(),
                             lugares = null
@@ -647,13 +663,11 @@ class TrovareViewModel : ViewModel() {
 
                 }
 
-
-
-
                 Log.i("obtener_itinerario", "-ekdkkedde ---------------------------------")
                 Log.i("obtener_itinerario", "$lista_Itinerario")
 
                 setLista(lista_Itinerario)
+                cargarLugar()
 
 
             }catch (e: java.lang.Exception){
@@ -665,5 +679,64 @@ class TrovareViewModel : ViewModel() {
         }
 
     }
+
+    // Lógica para obtener lugares
+    // Función para obtener Lugares
+
+    private val _listaLugares = MutableStateFlow(mutableListOf<Lugar>())
+    val listaLugares = _listaLugares.asStateFlow()
+    fun setListaLugar(nuevoLista: MutableList<Lugar>) {
+        _listaLugares.value = nuevoLista
+    }
+    fun cargarLugar(){
+
+        viewModelScope.launch{
+            val firestore = FirebaseFirestore.getInstance()
+            // Creamos instancias para firebase
+            val auth = FirebaseAuth.getInstance()
+
+            val lista_Lugar: MutableList<Lugar> = mutableListOf()
+
+            Log.i("obtener_lugar", "Guardando datos...")
+
+            val id = itinerarioActual.value.id.toString()
+
+            try{
+                val documentos = firestore.collection("Usuario").document(auth.currentUser?.email.toString()).collection("Itinerario")
+                    .document(id).collection("Lugar").get().await()
+
+                if(!documentos.isEmpty || documentos != null){
+                    for (documento in documentos){
+
+                        val lugar = Lugar(
+                            id = documento.getString("id").toString(),
+                            nombreLugar = documento.getString("nombreLugar").toString(),
+                            fechaDeVisita = null,
+                            horaDeVisita = null,
+                            imagen = null
+                        )
+
+                        //lista_Itinerario.add(itinerario)
+                        lista_Lugar.add(lugar)
+
+                    }
+
+                }
+
+                setListaLugar(lista_Lugar)
+                Log.d("obtener_lugar", "----------------------------------------------")
+                Log.d("obtener_lugar", itinerarioActual.value.id.toString())
+                Log.d("obtener_lugar", "Completado")
+                Log.d("obtener_lugar", "----------------------------------------------")
+
+            }catch (e: java.lang.Exception){
+
+                Log.i("obtener_lugar", "Error al entrar a la base: $e")
+            }
+        }
+    }
+
+
+
 }
 
