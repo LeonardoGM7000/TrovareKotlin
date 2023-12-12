@@ -107,12 +107,15 @@ import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.ktx.firestore
+import kotlinx.coroutines.delay
 
 data class ComentarioR(val Nombre:String, val fecha: String, val foto:String, val placeId: String,
                        var descripcion: String, var calificacion: String, val revisar: Boolean )
 data class DatoRes(val placeId: String)
 var estrellas : Int = 0
-
+var effectkey = 0
+var flagstate = mutableStateOf(0)
 @OptIn(ExperimentalMaterial3Api::class)
 data class Resena(val usuario: String, val puntuacion: Int, val texto: String, val tiempo: Int, val fotoPerfil: String)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -124,6 +127,7 @@ fun Detalles(
     viewModel: TrovareViewModel,
     navController: NavController
 ){
+
     var favorito by rememberSaveable { mutableStateOf(false) }
     var nombre by rememberSaveable { mutableStateOf("") }
     var direccion by rememberSaveable { mutableStateOf("") }
@@ -132,10 +136,43 @@ fun Detalles(
     var calificacion by rememberSaveable { mutableStateOf(-1.0) }
     var latLng by rememberSaveable { mutableStateOf(LatLng(0.0,0.0)) }
     var reseñasList by remember { mutableStateOf(mutableListOf<Resena>()) }
-    var reseñasPropias by remember { mutableStateOf(mutableListOf<Resena>()) }
+    var reseñasPropias by remember { mutableStateOf(mutableListOf<ComentarioR>()) }
     var fecha:Int = 0
     var foto:String = ""
     var NoexisteComPropios:Boolean = true
+    val db = Firebase.firestore
+
+    LaunchedEffect(effectKey){
+        val reseñasTrovare  = db.collection("Reseña").document("datos")
+        reseñasTrovare.get().addOnSuccessListener { documentSnapshot ->
+            if (documentSnapshot.exists()) {
+                val datosActuales = documentSnapshot.data
+
+                datosActuales?.let {
+                    val campoDataReseñas = it["dataReseñas"] as? MutableList<HashMap<String, Any>>
+
+                    campoDataReseñas?.forEach { reseñaMap ->
+                        val usuarioActual = reseñaMap["nombre"].toString()
+                        val estrellas = reseñaMap["calificacion"].toString()
+                        val textoComentario = reseñaMap["descripcion"].toString()
+                        val fecha = reseñaMap["fecha"].toString()
+                        val foto = reseñaMap["foto"].toString()
+                        val placeId  = reseñaMap["placeId"]
+
+                        // Crear una instancia de Resena con los datos obtenidos de Firestore
+                        val nuevaReseña = ComentarioR(usuarioActual,fecha,foto,placeId.toString(),textoComentario, estrellas,false)
+                        // Agregar la nueva reseña a la lista mutable reseñasPropias
+                        reseñasPropias.add(nuevaReseña)
+                    }
+                }
+            } else {
+                println("El documento 'datos' en la colección 'Reseña' no existe en Firestore")
+            }
+        }.addOnFailureListener { e ->
+            println("Error al obtener el documento 'datos' en Firestore: $e")
+        }
+    }
+
 
     fun obtenerResenas(apiKey: String, placeId: String) {
         val url = "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey&language=es"
@@ -238,6 +275,26 @@ fun Detalles(
         }
 
     }
+
+    LaunchedEffect(flagstate){
+        //flagstate = 1
+        if(flagstate.value == 1) {
+            scope.launch {
+                snackbarHostState
+                    .showSnackbar(
+                        message = "Reseña borrada correctamente",
+                        duration = SnackbarDuration.Short
+                    )
+
+            }
+
+        }
+        flagstate.value = 0;
+        }
+
+
+
+
 
     Surface(
         modifier = modifier
@@ -511,28 +568,36 @@ fun Detalles(
                     style = MaterialTheme.typography.displaySmall
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-
-                    firestore.collection("Reseñas").document(comentarioId).get()
-                    .addOnSuccessListener { documentSnapshot ->
-                        if (documentSnapshot.exists()) {
-                            /*Agregar funcion para mostrar comentarios de nuestros Usuarios*/
-                            NoexisteComPropios = false
-                        }
-                    }
-                    .addOnFailureListener { e ->
-                        println("Error al verificar la existencia del comentario en Firestore: $e")
-                    }
-                if(NoexisteComPropios){
-                    Text(
-                        text = "No hay reseñas de usuarios Trovare.",
-                        color = Color.White,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-
             }
+                item{
+
+                    Log.i("Resenaspropiasss","$reseñasPropias")
+                    val reseñasFiltradas = reseñasPropias.filter { it.placeId == placeId.toString() }
+
+// Mostrar las reseñas filtradas utilizando TarjetaReseña
+                    if (reseñasFiltradas.isNotEmpty()) {
+                        reseñasFiltradas.forEach { reseña ->
+                            // Crear la tarjeta de reseña para cada elemento de reseñasFiltradas
+                            val aux = Resena(reseña.Nombre,reseña.calificacion.toInt(),reseña.descripcion,reseña.fecha.toInt(),reseña.foto)
+                            TarjetaReseña(reseña = aux, onDeleteClick = {}, clave = placeId.toString(), APIoApp = false, navController = navController)
+                            Spacer(modifier = Modifier.height(15.dp))
+                        }
+                    } else {
+                        // No hay reseñas que coincidan con el placeId dado
+                        Text(
+                            text = "No hay reseñas para este lugar.",
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+
+                    }
+
+
+
+
+
             item {
                 Divisor()
             }
@@ -587,6 +652,7 @@ fun Detalles(
 
                         )
                 }
+
                 firestore.collection("Usuario").document(auth.currentUser?.email.toString())
                     .get()
                     .addOnSuccessListener { document ->
@@ -599,6 +665,7 @@ fun Detalles(
                     .addOnFailureListener { e ->
                         // Manejar errores al realizar la consulta
                     }
+
                 item {
                     Box(
                         modifier = modifier
@@ -615,8 +682,8 @@ fun Detalles(
                                     // Obtener referencia al documento del usuario activo
                                     val usuarioDocument = firestore.collection("Usuario").document(auth.currentUser?.email.toString())
                                     //obtener referencia a documento de reseñas
-                                    val resenasCollection = firestore.collection("Reseñas")
-
+                                    val resenasCollection = firestore.collection("Reseña")
+                                    val resenasTrovareMap = resenasCollection.document("datos")
                                     // Obtener referencia a la subcolección "comentarios"
                                     val comentariosCollection = usuarioDocument.collection("comentarios")
 
@@ -630,17 +697,11 @@ fun Detalles(
                                         .addOnSuccessListener { documentSnapshot ->
                                             if (!documentSnapshot.exists()) {
                                                 // El comentario no existe, crearlo
-                                                val comentarioData = ComentarioR(nombre,(System.currentTimeMillis() / 1000).toString(), usuarioFoto,
+                                                val comentarioData = ComentarioR(usuarioActual,(System.currentTimeMillis() / 1000).toString(), usuarioFoto,
                                                     placeId.toString(),aux, estrellas.toString(),false)
                                                 comentariosCollection.document(comentarioId).set(comentarioData)
                                                     .addOnSuccessListener {
-                                                        scope.launch {
-                                                            snackbarHostState.showSnackbar(
-                                                                message = "Comentario guardado con éxito",
-                                                                duration = SnackbarDuration.Short
-                                                            )
-                                                        }
-                                                        println("Comentario creado exitosamente en Firestore")
+                                                        flagstate.value = 1;
                                                     }
                                                     .addOnFailureListener { e ->
                                                         println("Error al crear el comentario en Firestore: $e")
@@ -650,52 +711,89 @@ fun Detalles(
                                         .addOnFailureListener { e ->
                                             println("Error al verificar la existencia del comentario en Firestore: $e")
                                         }
-                                    //crear o modificar en la coleccion de Firebase Reseñas
-                                    resenasCollection.document(comentarioId).get()
-                                        .addOnSuccessListener { documentSnapshot ->
-                                            if (!documentSnapshot.exists()) {
-                                                val ClaveRes = DatoRes(placeId.toString())
-                                                // El comentario no existe, crearlo
-                                                resenasCollection.document(comentarioId).set(ClaveRes)
+
+
+                                   // val resenasActuales = resenasTrovareMap["dataReseñas"] as? List<*>
+                                    val dataRes = ComentarioR(usuarioActual,(System.currentTimeMillis() / 1000).toString(),usuarioFoto,placeId.toString(),aux, estrellas.toString(),false)
+                                    //Agregar datos a la lista mutable de resenasPropias
+                                    reseñasPropias.add(dataRes)
+                                    Log.i("ReseñasCreada","$reseñasPropias")
+
+                                    resenasTrovareMap.get().addOnSuccessListener { documentSnapshot ->
+                                        if (documentSnapshot.exists()) {
+                                            val datosActuales = documentSnapshot.data
+
+                                            datosActuales?.let {
+                                                val campoDataReseñas = it["dataReseñas"] as? MutableList<ComentarioR> ?: mutableListOf()
+                                                campoDataReseñas.add(dataRes)
+
+                                                // Actualizar el campo dataReseñas en el documento
+                                                resenasTrovareMap.update("dataReseñas", campoDataReseñas)
                                                     .addOnSuccessListener {
-                                                        println("Lugar creado exitosamente en Firestore")
+                                                        println("Datos de reseñasPropias agregados correctamente a dataReseñas en Firestore")
                                                     }
                                                     .addOnFailureListener { e ->
-                                                        println("Error al crear el lugar en Firestore: $e")
+                                                        println("Error al agregar datos de reseñasPropias a dataReseñas en Firestore: $e")
                                                     }
                                             }
+                                        } else {
+                                            println("El documento 'datos' en la colección Reseña no existe en Firestore")
                                         }
-                                        .addOnFailureListener { e ->
-                                            println("Error al verificar la existencia del comentario en Firestore: $e")
-                                        }
-                                    //agrega la reseña del usuario dentro de la collecion de reseñas del lugar
-                                    Log.i("usuario activo",auth.currentUser!!.uid)
-                                    resenasCollection.document(comentarioId).collection(auth.currentUser!!.uid).document(comentarioId).get()
-                                        .addOnSuccessListener { documentSnapshot ->
-                                            if (!documentSnapshot.exists()) {
-                                                val dataRes = ComentarioR(usuarioActual,(System.currentTimeMillis() / 1000).toString(),usuarioFoto,placeId.toString(),aux,
-                                                    estrellas.toString(),false)
-                                                // El comentario no existe, crearlo
-                                                resenasCollection.document(comentarioId).collection(auth.currentUser!!.uid).document(comentarioId).set(dataRes)
-                                                    .addOnSuccessListener {
-                                                        println("Comentario creado exitosamente en Firestore")
-                                                    }
-                                                    .addOnFailureListener { e ->
-                                                        println("Error al crear el comentario en Firestore: $e")
-                                                    }
-                                            }
-                                        }
-                                        .addOnFailureListener { e ->
-                                            println("Error al verificar la existencia del comentario en Firestore: $e")
-                                        }
+                                    }.addOnFailureListener { e ->
+                                        println("Error al obtener el documento 'datos' en Firestore: $e")
+                                    }
+
+
+
+//                                    //crear o modificar en la coleccion de Firebase Reseñas
+//                                    resenasCollection.document(comentarioId).get()
+//                                        .addOnSuccessListener { documentSnapshot ->
+//                                            if (!documentSnapshot.exists()) {
+//                                                val ClaveRes = DatoRes(placeId.toString())
+//                                                // El comentario no existe, crearlo
+//                                                resenasCollection.document(comentarioId).set(ClaveRes)
+//                                                    .addOnSuccessListener {
+//                                                        println("Lugar creado exitosamente en Firestore")
+//                                                    }
+//                                                    .addOnFailureListener { e ->
+//                                                        println("Error al crear el lugar en Firestore: $e")
+//                                                    }
+//                                            }
+//                                        }
+//                                        .addOnFailureListener { e ->
+//                                            println("Error al verificar la existencia del comentario en Firestore: $e")
+//                                        }
+//                                    //agrega la reseña del usuario dentro de la collecion de reseñas del lugar
+//                                    Log.i("usuario activo",auth.currentUser!!.uid)
+//                                    resenasCollection.document(comentarioId).collection(auth.currentUser!!.uid).document(comentarioId).get()
+//                                        .addOnSuccessListener { documentSnapshot ->
+//                                            if (!documentSnapshot.exists()) {
+//                                                val dataRes = ComentarioR(usuarioActual,(System.currentTimeMillis() / 1000).toString(),usuarioFoto,placeId.toString(),aux,
+//                                                    estrellas.toString(),false)
+//                                                // El comentario no existe, crearlo
+//                                                resenasCollection.document(comentarioId).collection(auth.currentUser!!.uid).document(comentarioId).set(dataRes)
+//                                                    .addOnSuccessListener {
+//                                                        println("Comentario creado exitosamente en Firestore")
+//                                                    }
+//                                                    .addOnFailureListener { e ->
+//                                                        println("Error al crear el comentario en Firestore: $e")
+//                                                    }
+//                                            }
+//                                        }
+//                                        .addOnFailureListener { e ->
+//                                            println("Error al verificar la existencia del comentario en Firestore: $e")
+//                                        }
+
                                 } else {
                                     Log.i("activo null", userId.toString())
                                 }
-                                navController.navigate(Pantalla.Detalles.conArgs(placeId.toString())) {
-                                    popUpTo(Pantalla.Detalles.conArgs(placeId.toString())) {
-                                        inclusive = true
-                                    }
-                                }
+                                navController.popBackStack() // Regresa a la pantalla anterior rápidamente
+                                navController.navigate(Pantalla.Detalles.conArgs(placeId.toString())) // Navega de nuevo a la pantalla actual
+//                                navController.navigate(Pantalla.Detalles.conArgs(placeId.toString())) {
+//                                    popUpTo(Pantalla.Detalles.conArgs(placeId.toString())) {
+//                                        inclusive = true
+//                                    }
+//                                }
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Trv6,
@@ -729,8 +827,9 @@ fun Detalles(
                                 textoComentario = TextFieldValue(documentSnapshot.getString("descripcion").toString())
                                 existeComentario = true
                                 estrellas = documentSnapshot.getString("calificacion")!!.toInt()
+                                usuarioActual = documentSnapshot.getString("nombre").toString()
                                 fecha = documentSnapshot.getString("fecha")!!.toInt()
-                                foto = documentSnapshot.getString("foto")!!.toString()
+                                foto = documentSnapshot.getString("foto").toString()
                             } else {
                                 // El comentario no existe, iniciar en 0
                                 textoComentario = TextFieldValue("")
@@ -740,15 +839,50 @@ fun Detalles(
                             println("Error al verificar la existencia del comentario en Firestore: $e")
                         }
                     val detalleComentario = Resena(usuarioActual,estrellas,
-                        textoComentario.text,fecha,foto)
+                        textoComentario.text,(System.currentTimeMillis() / 1000).toInt(),foto)
+
                     TarjetaReseña(reseña = detalleComentario,
                         onDeleteClick = {
-                        // Eliminar la pregunta de Firestore
+                        // Eliminar resena
                         firestore.collection("Usuario").document(auth.currentUser?.email.toString())
                             .collection("comentarios").document(placeId.toString())
                             .delete()
 
-                            //mostrar mensaje de eliminado
+                            val resenasTrovareMapRef = firestore.collection("Reseña").document("datos")
+                            val reseñaAEliminar = reseñasPropias.find { it.placeId == placeId.toString() && it.Nombre == usuarioActual }
+
+                            reseñaAEliminar?.let {
+                                reseñasPropias.remove(it)
+                            }
+                            resenasTrovareMapRef.get().addOnSuccessListener { documentSnapshot ->
+                                if (documentSnapshot.exists()) {
+                                    val datosActuales = documentSnapshot.data
+
+                                    datosActuales?.let {
+                                        val campoDataReseñas = it["dataReseñas"] as? MutableList<HashMap<String, Any>>
+
+                                        campoDataReseñas?.let { reseñasList ->
+                                            val updatedReseñas = reseñasList.filterNot { reseña ->
+                                                reseña["placeId"] == placeId.toString() && reseña["nombre"] == usuarioActual
+                                            }
+
+                                            // Actualizar el campo dataReseñas en el documento
+                                            resenasTrovareMapRef.update("dataReseñas", updatedReseñas)
+                                                .addOnSuccessListener {
+                                                    println("Reseña con placeId eliminada correctamente en Firestore")
+                                                    flagstate.value=1;
+                                                }
+                                                .addOnFailureListener { e ->
+                                                    println("Error al eliminar la reseña en Firestore: $e")
+                                                }
+                                        }
+                                    }
+                                } else {
+                                    println("El documento 'datos' en la colección 'Reseña' no existe en Firestore")
+                                }
+                            }.addOnFailureListener { e ->
+                                println("Error al obtener el documento 'datos' en Firestore: $e")
+                            }
                     },
                                 clave = placeId.toString(), APIoApp = true, navController = navController)
                     Spacer(modifier = Modifier.height(15.dp))
@@ -883,6 +1017,7 @@ fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier,
         }
     }
 }
+
 @Composable
 fun RatingScreen() {
     var rating by remember { mutableStateOf(0) }
