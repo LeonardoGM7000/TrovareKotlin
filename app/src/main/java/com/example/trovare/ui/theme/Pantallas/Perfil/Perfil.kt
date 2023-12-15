@@ -63,7 +63,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
-import com.example.trovare.R
+import com.example.trovare.Data.usuarioPrueba
+//import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Pantallas.Cuenta
 import com.example.trovare.ui.theme.Pantallas.Question
@@ -358,7 +359,17 @@ fun TarjetaReseñaUsuario(reseña: reseña, modifier: Modifier = Modifier,
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if(reseña.foto != "")  fotoDePerfilUsuarioo(url = reseña.foto)
+                if(reseña.foto != null)  {
+                    fotoDePerfilUsuarioo(url = reseña.foto)
+                } else {
+                    val usuario = usuarioPrueba
+                    Log.i("entro", "no hay iamgen")
+                    Image(
+                        painter = rememberAsyncImagePainter(model = usuario.foto_perfil),
+                        contentDescription = "",
+                        contentScale = ContentScale.FillBounds
+                    )
+                }
 
                 Column(
                     horizontalAlignment = Alignment.Start,
