@@ -7,15 +7,18 @@ data class Itinerario(
     var id: String?,
     var nombre: String,
     var autor: String,
-    var lugares: MutableList<Lugar>?
+    var lugares: MutableList<Lugar>?,
+
+    // Creamos variable para guardar imagenes
+    var imagen: String?
 )
 
 data class Lugar(
     val id: String,
     val nombreLugar: String,
-    var fechaDeVisita: LocalDate?,
-    var horaDeVisita: Hora?,
-    var imagen: ImageBitmap?
+    var fechaDeVisita: String?,
+    var horaDeVisita: String?,
+    var imagen: String?
 )
 
 data class Hora(
@@ -27,7 +30,8 @@ val itinerarioPrueba: Itinerario = Itinerario(
     id = "",
     nombre = "Itinerario",
     autor = "",
-    lugares = null
+    lugares = null,
+    imagen = null
 )
 
 data class Actividad(

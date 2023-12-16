@@ -1,6 +1,10 @@
 package com.example.trovare.ui.theme.Pantallas.Itinerarios
 
+import android.graphics.Bitmap
+import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -66,7 +70,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
 import com.example.trovare.Data.Hora
+import com.example.trovare.Data.Itinerario
 import com.example.trovare.Data.Lugar
 import com.example.trovare.Data.Usuario
 import com.example.trovare.R
@@ -85,6 +92,8 @@ import com.example.trovare.ui.theme.Trv6
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
@@ -99,6 +108,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import okhttp3.internal.wait
+import java.io.ByteArrayOutputStream
 import java.time.LocalDate
 
 
@@ -126,6 +136,21 @@ fun EditarItinerario(
     viewModel.cargarLugar()
 
 
+    val storage = FirebaseStorage.getInstance()
+
+    val getContent = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            uri?.let {
+                // Seleccionar imagen exitosa, ahora puedes subirla a Firebase Storage
+                //uploadImageAndSaveReference(firestore, storage, userId ?: "", it, navController)
+                cargarImagenitinerario(storage, it, itinerario)
+            }
+        }
+    )
+    //guardarImagen(viewModel)
+
+
     
 
     CalendarTheme {
@@ -135,9 +160,14 @@ fun EditarItinerario(
                 CoroutineScope(Dispatchers.Default).launch {
                     listaVisible = false
                     viewModel.modificarFechaDeVisita(indiceActual = indiceActual, fechaNueva = fecha)
-                    itinerario.lugares = lugares?.sortedBy { it.fechaDeVisita }?.toMutableList()
+                    //itinerario.lugares = lugares?.sortedBy { it.fechaDeVisita }?.toMutableList()
+                    itinerario.lugares = lugares.toMutableList()
                     lugares = itinerario.lugares!!
                     listaVisible = true
+
+                    Log.d("Calendario_it", "${lugares.get(0).fechaDeVisita}")
+                    Log.d("Calendario_it", "${itinerario.lugares}")
+                    Log.d("Calendario_it", "${indiceActual}")
                 }
             },
             config = CalendarConfig(
@@ -155,6 +185,7 @@ fun EditarItinerario(
                     listaVisible = false
                     viewModel.modificarHoraDeVisita(indiceActual = indiceActual, horaNueva = Hora(hora = hours, minuto = minutes))
                     //itinerario.lugares = lugares?.sortedBy { it.fechaDeVisita }?.toMutableList()
+                    itinerario.lugares = lugares.toMutableList()
                     lugares = itinerario.lugares!!
                     listaVisible = true
                 }
@@ -230,17 +261,27 @@ fun EditarItinerario(
                             modifier = modifier.fillMaxSize(),
                             contentAlignment = Alignment.BottomEnd
                         ){
-                            Image(
-                                modifier = modifier
-                                    .fillMaxSize(),
-                                painter = painterResource(id = R.drawable.image_placeholder),
-                                contentDescription = ""
-                            )
+                            if(lugares.isEmpty()) {
+                                Image(
+                                    modifier = modifier
+                                        .fillMaxSize(),
+                                    painter = painterResource(id = R.drawable.image_placeholder),
+                                    contentDescription = ""
+                                )
+                            }else{
+
+                                Image(
+                                    modifier = modifier
+                                        .fillMaxSize(),
+                                    painter = rememberAsyncImagePainter(model = lugares.get(0).imagen),
+                                    contentDescription = ""
+                                )
+                            }
                             FloatingActionButton(
                                 modifier = modifier
                                     .padding(5.dp)
                                     .size(30.dp),
-                                onClick = { /*navController.popBackStack()*/ },
+                                onClick = { getContent.launch("image/*")},
                                 containerColor = Color.White,
                                 shape = CircleShape
                             ){
@@ -365,9 +406,13 @@ fun EditarItinerario(
                                                 .padding(5.dp)
                                                 .aspectRatio(1f),
                                         ) {
+
                                             if(lugar.imagen != null){
+
+                                                Log.d("Editar_ImagenIt", "Entro al if")
+                                                Log.d("Editar_ImagenIt", lugar.imagen!!)
                                                 Image(
-                                                    bitmap= lugar.imagen!!,
+                                                    painter = rememberAsyncImagePainter(model = lugar.imagen),
                                                     modifier = modifier
                                                         .fillMaxSize(),
                                                     contentScale = ContentScale.FillBounds,
@@ -429,7 +474,8 @@ fun EditarItinerario(
                                                         tint = Color.Black
                                                     )
                                                     Text(
-                                                        text = if(lugar.horaDeVisita == null) "" else "${lugar.horaDeVisita!!.hora}:${lugar.horaDeVisita!!.minuto}",
+                                                        //text = if(lugar.horaDeVisita == null) "" else "${lugar.horaDeVisita!!.hora}:${lugar.horaDeVisita!!.minuto}",
+                                                        text = lugar.horaDeVisita.toString(),
                                                         color = Color.Black,
                                                         fontSize = 20.sp
                                                     )
@@ -484,24 +530,41 @@ fun EditarItinerario(
 
 
 // Funciones auxiliares
-private fun actualizarItinerario(nombre_itinerario: String, usuario: Usuario, id: Int) {
 
+private fun cargarImagenitinerario(
 
-    usuario.itinerarios.get(id).nombre = nombre_itinerario
+    storage: FirebaseStorage,
+    imageUri: Uri,
+    itinerario: Itinerario,
+) {
 
-    // Creamos instancias para firebase
-    val firestore = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
+    val firestore = FirebaseFirestore.getInstance()
+    val storageRef: StorageReference = storage.reference.child("itinerario/user${auth.currentUser?.email.toString()}")
 
-    Log.i("actualizar_itinerario", "Actualizando datos...")
-
-    firestore.collection("Usuario").document(auth.currentUser?.email.toString()).set(usuario, SetOptions.merge())
+    // Subir la imagen a Firebase Storage
+    storageRef.putFile(imageUri)
         .addOnSuccessListener {
-            Log.i("actualizar_itinerario", "Datos guardados")
-        }
-        .addOnFailureListener{
-            Log.i("actualizar_itinerario", "Datos no guardados")
-        }
+            // Obtener la URL de descarga de la imagen
+            storageRef.downloadUrl.addOnSuccessListener { uri ->
+                // Guardar la referencia de la imagen en Firestore
+                val lugar = firestore.collection("Usuario").document(auth.currentUser?.email.toString())
+                    .collection("Itinerario").document(itinerario.id.toString())
+                lugar.update("imagen", uri.toString())
+                    .addOnSuccessListener {
+                        // Éxito al guardar la referencia en Firestore
+                        Log.i("Imagen_Itinerario", "Imagen cargada con éxito")
+                    }
+                    .addOnFailureListener { e ->
+                        // Error al guardar la referencia en Firestore
+                        Log.i("Imagen_Itinerario", "Error al guardar la imagen", e)
+                    }
+            }
 
 
+        }
+        .addOnFailureListener { e ->
+            // Error al subir la imagen a Firebase Storage
+            Log.i("firebase", "Error uploading image to Storage", e)
+        }
 }

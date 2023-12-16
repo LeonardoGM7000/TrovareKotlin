@@ -31,11 +31,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.trovare.Data.Itinerario
 import com.example.trovare.Data.Usuario
 import com.example.trovare.R
@@ -49,7 +51,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.tasks.await
-import java.lang.Exception
 
 @Composable
 fun Itinerarios(
@@ -60,10 +61,14 @@ fun Itinerarios(
 
     val usuario by viewModel.usuario.collectAsState()
     val lista_Itinerario by viewModel.listaIt.collectAsState()
+    val itinerario by viewModel.itinerarioActual.collectAsState()
+    val lista_lugares by viewModel.listaLugares.collectAsState()
+    var lugares = lista_lugares
 
+    actualizarItinerario(itinerario)
 
     viewModel.obtenerItinerario()
-
+    Log.d("nombre_it", itinerario.nombre)
 
 
     // Lo hacemos para actualizar cada pantalla
@@ -111,6 +116,7 @@ fun Itinerarios(
                                 nombre = "nuevo Itinerario",
                                 autor = usuario.nombre,
                                 lugares = null,
+                                imagen = null
                             )
 
                             //guardarItinerario(nuevoItinerario.nombre, nuevoItinerario.autor)
@@ -153,12 +159,29 @@ fun Itinerarios(
                                 .padding(5.dp)
                                 .aspectRatio(1f),
                         ) {
-                            Image(
-                                modifier = modifier
-                                    .fillMaxSize(),
-                                painter = painterResource(id = R.drawable.image_placeholder),
-                                contentDescription = ""
-                            )
+                            if(!lugares.isEmpty()){
+
+                                // Pasamos el url a imagen de los itinerarios
+                                itinerario.imagen = lugares.get(0).imagen
+                                actualizarItinerario(itinerario)
+
+                                Log.d("Editar_ImagenIt", "Entro al if")
+
+                                Image(
+                                    painter = rememberAsyncImagePainter(model = itinerario.imagen),
+                                    modifier = modifier
+                                        .fillMaxSize(),
+                                    contentScale = ContentScale.FillBounds,
+                                    contentDescription = ""
+                                )
+                            } else{
+                                Image(
+                                    modifier = modifier
+                                        .fillMaxSize(),
+                                    painter = painterResource(id = R.drawable.image_placeholder),
+                                    contentDescription = ""
+                                )
+                            }
                         }
                         Column {
                             Text(
@@ -240,8 +263,26 @@ private fun guardarItinerario(itinerario: Itinerario) {
             }
         }
 
+}
+
+private fun actualizarItinerario(itinerario: Itinerario){
 
 
+    // Creamos instancias para firebase
+    val firestore = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
+
+    Log.i("guardar_itinerario", "Guardando datos...")
+
+    try {
+        firestore.collection("Usuario").document(auth.currentUser?.email.toString())
+            .collection("Itinerario")
+            .document(itinerario.id.toString()).set(itinerario, SetOptions.merge())
+
+    }catch(e: Exception){
+
+        Log.d("error_actualizar", "Error en la base de datos")
+    }
 }
 
 
