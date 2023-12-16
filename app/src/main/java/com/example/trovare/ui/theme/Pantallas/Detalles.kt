@@ -839,7 +839,7 @@ fun Detalles(
                             println("Error al verificar la existencia del comentario en Firestore: $e")
                         }
                     val detalleComentario = Resena(usuarioActual,estrellas,
-                        textoComentario.text,(System.currentTimeMillis() / 1000).toInt(),foto)
+                        textoComentario.text,fecha,foto)
 
                     TarjetaReseña(reseña = detalleComentario,
                         onDeleteClick = {
