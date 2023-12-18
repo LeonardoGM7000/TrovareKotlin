@@ -459,9 +459,9 @@ fun EditarItinerario(
                                                     viewModel.setOrigenRuta(lugar.origen?: origen)//origen que se debe mostrar
                                                     viewModel.setDestinoRuta(lugar.ubicacion!!)//destino que se debe mostrar
                                                     viewModel.setZoomRuta(lugar.zoom)//zoom que se debe mostrar
-                                                    viewModel.setNombreLugarRuta(lugar.nombreLugar)//nombre del lugar que se debe mostrar
+                                                    viewModel.setNombreRuta(lugar.nombreLugar)//nombre del lugar que se debe mostrar
                                                     viewModel.setTransporteRuta(lugar.transporte)//tipo de transporte que se utiliza en la ruta
-                                                    viewModel.setIdLugarRuta(lugar.id)//Id del lugar para hacer la consulta a la API
+                                                    viewModel.setIdRuta(lugar.id)//Id del lugar para hacer la consulta a la API
                                                     navController.navigate(Pantalla.AgregarRutaALugar.ruta)
                                                 }
                                             ) {

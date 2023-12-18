@@ -360,30 +360,6 @@ fun AgregarLugarItinerario(
                         draggable = false
                     )
                 }
-                //varios marcadores
-                if(estadoMapaItinerario.marcadoresInicializado){
-
-                    MapEffect(estadoMapaItinerario.marcadorInicializado) {
-                        val cameraPosition = CameraPosition.fromLatLngZoom(estadoMapaItinerario.origen, estadoMapaItinerario.zoom)
-                        cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
-                    }
-
-                    estadoMapaItinerario.marcadores.forEach { marcador ->
-                        Marker(
-                            state = rememberMarkerState(position = marcador.ubicacion),
-                            onClick ={
-                                viewModel.setDestinoItinerario(marcador.ubicacion)
-                                viewModel.setInformacionInicializadaItinerario(false)
-                                obtenerMarcadorEntreMuchosItinerario(
-                                    placesClient = placesClient,
-                                    placeId = marcador.id,
-                                    viewModel = viewModel
-                                )
-                                false
-                            }
-                        )
-                    }
-                }
             }
 
             Column {
@@ -420,38 +396,6 @@ fun AgregarLugarItinerario(
                                 )
                             }
                         },
-                        trailingIcon = {
-                            IconButton(
-                                onClick = { /*TODO*/ },
-                                colors = IconButtonDefaults.iconButtonColors(
-
-                                )
-                            ){
-                                Icon(imageVector = Icons.Rounded.FilterList, contentDescription = "")
-                            }
-                            IconToggleButton(
-                                checked = filtroExtendido,
-                                onCheckedChange = { checked -> filtroExtendido = checked },
-                                colors = IconButtonDefaults.iconToggleButtonColors(
-                                    containerColor = Color.Black,
-                                    contentColor = Color.White,
-                                    checkedContentColor = Color.White
-                                )
-                            ) {
-                                if(filtroExtendido){
-                                    Icon(
-                                        imageVector = Icons.Rounded.FilterListOff,
-                                        contentDescription = ""
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Rounded.FilterList,
-                                        contentDescription = ""
-                                    )
-                                }
-
-                            }
-                        },
                         textStyle = MaterialTheme.typography.labelSmall,
                         placeholder = { Text(text = "Buscar lugares", style = MaterialTheme.typography.labelSmall) },
                         singleLine = true,
@@ -462,57 +406,6 @@ fun AgregarLugarItinerario(
                             cursorColor = Color.White,
                         ),
                     )
-                }
-                //Mostrar filtros-----------------------------------------------------------------------
-                if(filtroExtendido){
-                    LazyRow(
-                        modifier = modifier
-                            .padding(horizontal = 55.dp)
-                    ){
-                        items(categorias){categoria ->
-                            Card(
-                                modifier = modifier
-                                    .padding(end = 5.dp)
-                                    .clickable {
-                                        viewModel.setZoomItinerario(13f)
-                                        viewModel.reiniciarImagenMapaItinerario()
-                                        viewModel.setMarcadorInicializadoItinerario(false)
-                                        viewModel.setMarcadoresInicializadoItinerario(false)
-                                        viewModel.setInformacionInicializadaItinerario(false)
-                                        CoroutineScope(Dispatchers.Default).launch {
-
-                                            rawJSONUbicacionesCercanasItinerario(
-                                                filtro = categoria.nombre,
-                                                viewModel = viewModel,
-                                                ubicacion = estadoMapaItinerario.origen
-                                            )
-
-                                        }
-
-                                    },
-                                colors = CardDefaults.cardColors(
-                                    containerColor = Color.Black,
-                                    contentColor = Color.White
-                                )
-                            ){
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically
-                                ){
-                                    Icon(
-                                        modifier = modifier.padding(5.dp),
-                                        imageVector = categoria.icono,
-                                        contentDescription = ""
-                                    )
-                                    Text(
-                                        modifier = modifier.padding(end = 5.dp),
-                                        text = categoria.nombre,
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                }
-                            }
-
-                        }
-                    }
                 }
                 //Mostrar resultados de la Busqueda-----------------------------------------------------
                 if(!busquedaEnProgreso && textoBuscar.text != ""){

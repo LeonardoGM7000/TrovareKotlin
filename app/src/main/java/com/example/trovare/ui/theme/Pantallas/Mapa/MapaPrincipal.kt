@@ -75,6 +75,7 @@ import com.example.trovare.Data.categorias
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Navegacion.Pantalla
+import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Recursos.Divisor2
 import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
 import com.example.trovare.ui.theme.Trv1
@@ -327,9 +328,6 @@ fun MapaPrincipal(
                         }
                     }
                 }
-                item {
-                    Divisor2()
-                }
                 //Seleccionar transportes-----------------------------------------------------------
                 item {
                     Column {
@@ -337,8 +335,7 @@ fun MapaPrincipal(
                         Row(
                             modifier = modifier
                                 .fillMaxSize()
-                                .align(Alignment.CenterHorizontally)
-                                .padding(bottom = 10.dp),
+                                .align(Alignment.CenterHorizontally),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
 

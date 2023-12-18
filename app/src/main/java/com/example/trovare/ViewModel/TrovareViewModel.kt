@@ -502,8 +502,6 @@ class TrovareViewModel : ViewModel() {
         }
     }
 
-
-
     //--------------------------------------------------------------------------------------------//
     //------------------------------MAPA DE RUTAS ITINERARIO--------------------------------------//
     //--------------------------------------------------------------------------------------------//
@@ -532,7 +530,7 @@ class TrovareViewModel : ViewModel() {
     fun setPolilineaCodRuta(nuevoValor: String) {
         _estadoMapaRuta.update { estadoActual ->
             estadoActual.copy(
-                polilineaCodRuta = nuevoValor,
+                polilineaCod = nuevoValor,
             )
         }
     }
@@ -540,7 +538,7 @@ class TrovareViewModel : ViewModel() {
     fun setPolilineaInicializadaRuta(nuevoValor: Boolean) {
         _estadoMapaRuta.update { estadoActual ->
             estadoActual.copy(
-                polilineaInicializadaRuta = nuevoValor,
+                polilineaInicializada = nuevoValor,
             )
         }
     }
@@ -548,7 +546,7 @@ class TrovareViewModel : ViewModel() {
     fun setZoomRuta(nuevoValor: Float) {
         _estadoMapaRuta.update { estadoActual ->
             estadoActual.copy(
-                zoomRuta = nuevoValor,
+                zoom = nuevoValor,
             )
         }
     }
@@ -556,23 +554,63 @@ class TrovareViewModel : ViewModel() {
     fun setMarcadorInicializadoRuta(nuevoValor: Boolean) {
         _estadoMapaRuta.update { estadoActual ->
             estadoActual.copy(
-                marcadorInicializadoRuta = nuevoValor,
+                marcadorInicializado = nuevoValor,
             )
         }
     }
 
-    fun setNombreLugarRuta(nuevoValor: String) {
+    fun setNombreRuta(nuevoValor: String) {
         _estadoMapaRuta.update { estadoActual ->
             estadoActual.copy(
-                nombreLugarRuta = nuevoValor,
+                nombreLugar = nuevoValor,
             )
         }
     }
 
-    fun setIdLugarRuta(nuevoValor: String) {
+    fun setIdRuta(nuevoValor: String) {
         _estadoMapaRuta.update { estadoActual ->
             estadoActual.copy(
-                idLugarRuta = nuevoValor,
+                idLugar = nuevoValor,
+            )
+        }
+    }
+
+    fun setDireccionRuta(nuevoValor: String) {
+        _estadoMapaRuta.update { estadoActual ->
+            estadoActual.copy(
+                direccionLugar = nuevoValor,
+            )
+        }
+    }
+
+    fun setRatingRuta(nuevoValor: Double?) {
+        _estadoMapaRuta.update { estadoActual ->
+            estadoActual.copy(
+                ratingLugar = nuevoValor,
+            )
+        }
+    }
+
+    fun setTelefonoRuta(nuevoValor: String?) {
+        _estadoMapaRuta.update { estadoActual ->
+            estadoActual.copy(
+                telefonoLugar = nuevoValor
+            )
+        }
+    }
+
+    fun setPaginaWebRuta(nuevoValor: String?) {
+        _estadoMapaRuta.update { estadoActual ->
+            estadoActual.copy(
+                paginaLugar = nuevoValor
+            )
+        }
+    }
+
+    fun setImagenRuta(nuevoValor: ImageBitmap) {
+        _estadoMapaRuta.update { estadoActual ->
+            estadoActual.copy(
+                imagen = nuevoValor,
             )
         }
     }

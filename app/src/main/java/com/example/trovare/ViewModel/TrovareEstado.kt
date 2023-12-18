@@ -79,12 +79,17 @@ data class TrovareEstadoMapaRuta(
 
     val origenRuta: LatLng = ubicacionEscom,//origen a marcar en el mapa
     val destinoRuta: LatLng = ubicacionEscom,//destino a marcar en el mapa
-    val polilineaCodRuta: String = "",
-    val polilineaInicializadaRuta: Boolean = false,
-    val zoomRuta: Float = 15f,
-    val marcadorInicializadoRuta: Boolean = true,
-    val nombreLugarRuta: String = "",
-    val idLugarRuta: String = "",
+    val polilineaCod: String = "",
+    val polilineaInicializada: Boolean = false,
+    val zoom: Float = 15f,
+    val marcadorInicializado: Boolean = true,
+    val nombreLugar: String = "",
+    val ratingLugar: Double? = null,
+    val idLugar: String = "",
+    val direccionLugar: String = "",
+    val telefonoLugar: String? = null,
+    val paginaLugar: String? = null,
+    val imagen: ImageBitmap? = null,
     val distanciaEntrePuntos: Float = 0.0f,
     val tiempoDeViaje: String = "",
     val transporteRuta: String = "",

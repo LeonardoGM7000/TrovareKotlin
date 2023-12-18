@@ -44,11 +44,6 @@ fun obtenerMarcadorOrigen(
 fun obtenerLugarRuta(
     placesClient: PlacesClient,
     placeId: String,
-    nombre: (String?) -> Unit,
-    direccion: (String?) -> Unit,
-    rating: (Double?) -> Unit,
-    numeroTelefono: (String?) -> Unit,
-    paginaWeb: (String?) -> Unit,
     viewModel: TrovareViewModel
 ){
     val placeFields = listOf(
@@ -65,14 +60,13 @@ fun obtenerLugarRuta(
         .addOnSuccessListener { response: FetchPlaceResponse ->
             val place = response.place
 
-
-            nombre(place.name)
-            direccion(place.address)
-            rating(place.rating)
-            numeroTelefono(place.phoneNumber)
+            viewModel.setNombreRuta(place.name?:"")
+            viewModel.setDireccionRuta(place.address)
+            viewModel.setRatingRuta(place.rating)
+            viewModel.setTelefonoRuta(place.phoneNumber)
 
             if(place.websiteUri != null){
-                paginaWeb(place.websiteUri?.toString())
+                viewModel.setPaginaWebRuta(place.websiteUri.toString())
             }
 
             // Obtener metadatos de la foto-----------------------------------------------------
@@ -91,7 +85,7 @@ fun obtenerLugarRuta(
 
                         val image = fetchPhotoResponse.bitmap
                         val imagenBitmap: ImageBitmap = image.asImageBitmap()
-                        viewModel.setImagen(imagenBitmap)
+                        viewModel.setImagenRuta(imagenBitmap)
                     }.addOnFailureListener { exception: Exception ->
                         if (exception is ApiException) {
                             val statusCode = exception.statusCode

@@ -6,6 +6,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,6 +25,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBackIos
+import androidx.compose.material.icons.rounded.Attractions
 import androidx.compose.material.icons.rounded.DirectionsBus
 import androidx.compose.material.icons.rounded.DirectionsCar
 import androidx.compose.material.icons.rounded.DirectionsWalk
@@ -31,6 +33,7 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.MyLocation
 import androidx.compose.material.icons.rounded.Phone
+import androidx.compose.material.icons.rounded.Route
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.Web
 import androidx.compose.material3.BottomSheetScaffold
@@ -74,6 +77,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
@@ -86,9 +91,12 @@ import com.example.trovare.Api.rawJSON
 import com.example.trovare.Data.Places
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
+import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Recursos.Divisor2
+import com.example.trovare.ui.theme.Recursos.NoRippleInteractionSource
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv10
+import com.example.trovare.ui.theme.Trv7
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -152,7 +160,7 @@ fun RutasItinerario(
     val estadoMapaRuta by viewModel.estadoMapaRuta.collectAsState()
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.zoomRuta)
+        position = CameraPosition.fromLatLngZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.zoom)
     }
     val mapProperties = MapProperties(
         // Only enable if user has accepted location permissions.
@@ -232,28 +240,15 @@ fun RutasItinerario(
         }
     }
 
-    var nombre by rememberSaveable { mutableStateOf("") }
-    var direccion by rememberSaveable { mutableStateOf("") }
-    var numeroTelefono by rememberSaveable { mutableStateOf("") }
-    var paginaWeb by rememberSaveable { mutableStateOf("") }
-    var calificacion by rememberSaveable { mutableStateOf(-1.0) }
-
-
-
     LaunchedEffect(key1 = Unit){
         viewModel.getLastLocation(fusedLocationProviderClient)
-        if(estadoMapaRuta.polilineaCodRuta == ""){
+        if(estadoMapaRuta.polilineaCod == ""){
             viewModel.setOrigenRuta(ubicacionActual)
         }
 
         obtenerLugarRuta(
             placesClient = placesClient,
-            placeId = estadoMapaRuta.idLugarRuta,
-            nombre = { nombre = it?:"" },
-            direccion = { direccion = it?:""},
-            rating =  { calificacion = it?: -1.0},
-            numeroTelefono = {numeroTelefono = it?: ""},
-            paginaWeb = {paginaWeb = it?: ""},
+            placeId = estadoMapaRuta.idLugar,
             viewModel = viewModel
         )
         calcularZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.destinoRuta)
@@ -306,8 +301,9 @@ fun RutasItinerario(
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
-        containerColor = Trv1,
+        sheetContainerColor = Trv1,
         sheetPeekHeight = peekHeight,
+        sheetShape = RectangleShape,
         //Tarjeta superior para seleccionar lugar de origen-----------------------------------------
         topBar = {
             Surface(
@@ -415,7 +411,7 @@ fun RutasItinerario(
                                 textStyle = MaterialTheme.typography.labelSmall,
                                 placeholder = {
                                     Text(
-                                        text = estadoMapaRuta.nombreLugarRuta,
+                                        text = estadoMapaRuta.nombreLugar,
                                         style = MaterialTheme.typography.labelSmall
                                     )
                                 },
@@ -552,31 +548,35 @@ fun RutasItinerario(
                                        Icons.Rounded.DirectionsCar
                                    }
                                },
-                               contentDescription = ""
+                               contentDescription = "",
+                               tint = Color.White
                            )
                            Spacer(modifier = modifier.padding(horizontal = 3.dp))
                            if(tiempoDeViajeTemp != null){
                                if(((tiempoDeViajeTemp/60)/60)!=0){
                                    Text(
                                        text = "${((tiempoDeViajeTemp/60)/60)} hrs ",
-                                       style = MaterialTheme.typography.labelMedium
+                                       style = MaterialTheme.typography.labelMedium,
+                                       color = Color.White
                                    )
                                }
                                Text(
                                    text = "${tiempoDeViajeTemp%60} min",
-                                   style = MaterialTheme.typography.labelMedium
+                                   style = MaterialTheme.typography.labelMedium,
+                                   color = Color.White
                                )
                            }
                            Spacer(modifier = modifier.padding(horizontal = 3.dp))
                            Text(
                                text = "(${distancia} km)",
-                               style = MaterialTheme.typography.labelMedium
+                               style = MaterialTheme.typography.labelMedium,
+                               color = Color.White
                            )
                        }
                     }
                     //Boton agregar ruta-----
                     TextButton(
-                        enabled = estadoMapaRuta.polilineaInicializadaRuta,
+                        enabled = estadoMapaRuta.polilineaInicializada,
                         onClick = {
                             scope.launch {
                                 scaffoldState.bottomSheetState.show()
@@ -586,8 +586,8 @@ fun RutasItinerario(
                                 )
                             }
                             viewModel.guardarOrigenRuta(indiceActual = indiceActual, origenNuevo = estadoMapaRuta.origenRuta)
-                            viewModel.guardarRutaLugar(indiceActual = indiceActual, rutaNueva = estadoMapaRuta.polilineaCodRuta)
-                            viewModel.guardarZoomLugar(indiceActual = indiceActual, nuevoZoom = estadoMapaRuta.zoomRuta)
+                            viewModel.guardarRutaLugar(indiceActual = indiceActual, rutaNueva = estadoMapaRuta.polilineaCod)
+                            viewModel.guardarZoomLugar(indiceActual = indiceActual, nuevoZoom = estadoMapaRuta.zoom)
                             viewModel.guardarTransporte(indiceActual = indiceActual, nuevoTransporte = estadoMapaRuta.transporteRuta)
                         },
                         colors = ButtonDefaults.buttonColors(
@@ -607,104 +607,87 @@ fun RutasItinerario(
                     color = Color.White
                 )
                 //Mostrar imágenes del lugar
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 5.dp)
-                ){
-                    item{
-                        Card(
-                            modifier = modifier
-                                .padding(end = 5.dp)
-                                .size(150.dp)
-                                .aspectRatio(1F),
-                        ){
-                            Box(
-                                modifier = modifier.fillMaxSize(),
-                                contentAlignment = Alignment.BottomEnd
-                            ){
-                                Image(
-                                    modifier = modifier
-                                        .fillMaxSize(),
-                                    painter = painterResource(id = R.drawable.image_placeholder),
-                                    contentDescription = ""
-                                )
-                            }
-                        }
-                    }
-                    item{
-                        Card(
-                            modifier = modifier
-                                .padding(end = 5.dp)
-                                .size(150.dp)
-                                .aspectRatio(1F),
-                        ){
-                            Box(
-                                modifier = modifier.fillMaxSize(),
-                                contentAlignment = Alignment.BottomEnd
-                            ){
-                                Image(
-                                    modifier = modifier
-                                        .fillMaxSize(),
-                                    painter = painterResource(id = R.drawable.image_placeholder),
-                                    contentDescription = ""
-                                )
-                            }
-                        }
-                    }
-                    item{
-                        Card(
-                            modifier = modifier
-                                .padding(end = 5.dp)
-                                .size(150.dp)
-                                .aspectRatio(1F),
-                        ){
-                            Box(
-                                modifier = modifier.fillMaxSize(),
-                                contentAlignment = Alignment.BottomEnd
-                            ){
-                                Image(
-                                    modifier = modifier
-                                        .fillMaxSize(),
-                                    painter = painterResource(id = R.drawable.image_placeholder),
-                                    contentDescription = ""
-                                )
-                            }
-                        }
-                    }
-                }
+
                 Row(
-                    modifier = modifier.padding(vertical = 10.dp),
+                    modifier = modifier
+                        .clickable(
+                            indication = null,
+                            interactionSource = NoRippleInteractionSource()
+                        ) { navController.navigate(Pantalla.Detalles.conArgs(estadoMapaRuta.idLugar)) },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
+
+                    Card(
                         modifier = modifier
-                            .fillMaxWidth(0.7f),
-                        text = nombre,
-                        textAlign = TextAlign.Justify,
-                        color = Color.White,
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                    Row( modifier = modifier
-                        .fillMaxWidth(1f),
-                        verticalAlignment = Alignment.CenterVertically
+                            .size(120.dp)
+                            .aspectRatio(1f)
+                    ){
+                        if (estadoMapaRuta.imagen != null) {
+                            Image(
+                                bitmap = estadoMapaRuta.imagen!!,
+                                contentDescription = "",
+                                modifier = Modifier
+                                    .fillMaxSize(),
+                                contentScale = ContentScale.FillBounds
+                            )
+                        } else {
+                            Image(
+                                modifier = modifier
+                                    .fillMaxSize(),
+                                painter = painterResource(id = R.drawable.image_placeholder),
+                                contentDescription = ""
+                            )
+                        }
+                    }
+
+                    Column(
+                        modifier = modifier.padding(start = 5.dp)
                     ) {
+                        //Nombre del lugar----------------------------------------------------------------------
                         Text(
-                            modifier = modifier.fillMaxWidth(0.75f),
-                            text = "${calificacion}/5",
-                            textAlign = TextAlign.Right,
+                            text = estadoMapaRuta.nombreLugar,
+                            textAlign = TextAlign.Justify,
+                            style = MaterialTheme.typography.labelMedium,
                             color = Color.White,
-                            style = MaterialTheme.typography.bodyMedium
+                            maxLines = 2
                         )
-                        Icon(
-                            imageVector = Icons.Rounded.Star,
-                            contentDescription = "",
-                            tint = Color.Yellow
-                        )
+                        //Icono y calificación del lugar--------------------------------------------------------
+                        Row(
+                            modifier = modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 5.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Attractions,
+                                contentDescription = "",
+                                tint = Color.White
+                            )
+                            Card(
+                                colors = CardDefaults.cardColors(containerColor = Trv7)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Star,
+                                        contentDescription = "",
+                                        tint = Trv10
+                                    )
+                                    Text(
+                                        modifier = modifier.padding(horizontal = 5.dp),
+                                        text = if(estadoMapaRuta.ratingLugar == null) "---" else estadoMapaRuta.ratingLugar.toString(),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Trv10
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
 
-
                 //Direccion-----------------------------------------------------------------------------
-                if(direccion != ""){
+                if(estadoMapaRuta.direccionLugar != ""){
                     Row(modifier = modifier
                         .padding(vertical = 15.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -716,14 +699,14 @@ fun RutasItinerario(
                             tint = Color.White
                         )
                         Text(
-                            text = direccion,
+                            text = estadoMapaRuta.direccionLugar,
                             color = Color.White,
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
                 }
                 //Horario de apertura-------------------------------------------------------------------
-                if(numeroTelefono != ""){
+                if(estadoMapaRuta.telefonoLugar != ""){
                     Row(modifier = modifier
                         .padding(vertical = 15.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -735,14 +718,14 @@ fun RutasItinerario(
                             tint = Color.White
                         )
                         Text(
-                            text = numeroTelefono,
+                            text = estadoMapaRuta.telefonoLugar.toString(),
                             color = Color.White,
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
                 }
                 //Pagina web----------------------------------------------------------------------------
-                if(paginaWeb != ""){
+                if(estadoMapaRuta.paginaLugar != null){
                     Row(modifier = modifier
                         .padding(vertical = 15.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -755,7 +738,7 @@ fun RutasItinerario(
                         )
                         Text(
                             //modifier = modifier.clickable { context.startActivity(intent) },
-                            text = paginaWeb,
+                            text = estadoMapaRuta.paginaLugar!!,
                             color = Color.White,
                             style = MaterialTheme.typography.bodyMedium
                         )
@@ -798,18 +781,18 @@ fun RutasItinerario(
                     MapEffect(estadoMapaRuta.origenRuta) {
                         calcularZoom(estadoMapaRuta.origenRuta, estadoMapaRuta.destinoRuta)
                     }
-                    MapEffect(estadoMapaRuta.zoomRuta){
+                    MapEffect(estadoMapaRuta.zoom){
                         val cameraPosition = CameraPosition.fromLatLngZoom(
                             LatLng(
                                 ((estadoMapaRuta.origenRuta.latitude+estadoMapaRuta.destinoRuta.latitude)/2),
                                 ((estadoMapaRuta.origenRuta.longitude+estadoMapaRuta.destinoRuta.longitude)/2)),
-                            estadoMapaRuta.zoomRuta
+                            estadoMapaRuta.zoom
                         )
                         cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
                     }
 
                     //Mostrar marcador de origen
-                    if(estadoMapaRuta.marcadorInicializadoRuta){
+                    if(estadoMapaRuta.marcadorInicializado){
                         MarkerInfoWindow(
                             state = rememberMarkerState(position = estadoMapaRuta.origenRuta),
                             onClick = {
@@ -826,14 +809,14 @@ fun RutasItinerario(
                         },
                         draggable = false
                     )
-                    if(estadoMapaRuta.polilineaInicializadaRuta){
+                    if(estadoMapaRuta.polilineaInicializada){
 
                         MapEffect(estadoMapaRuta.origenRuta) {
-                            val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(((estadoMapaRuta.origenRuta.latitude+estadoMapaRuta.destinoRuta.latitude)/2),((estadoMapaRuta.origenRuta.longitude+estadoMapaRuta.destinoRuta.longitude)/2)), estadoMapaRuta.zoomRuta)
+                            val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(((estadoMapaRuta.origenRuta.latitude+estadoMapaRuta.destinoRuta.latitude)/2),((estadoMapaRuta.origenRuta.longitude+estadoMapaRuta.destinoRuta.longitude)/2)), estadoMapaRuta.zoom)
                             cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(cameraPosition), 800)
                         }
 
-                        val encodedPolyline = estadoMapaRuta.polilineaCodRuta // Reemplaza con tu encoded polyline
+                        val encodedPolyline = estadoMapaRuta.polilineaCod // Reemplaza con tu encoded polyline
                         val decodedPolyline: List<LatLng> = PolyUtil.decode(encodedPolyline)
 
                         for (latLng in decodedPolyline) {
