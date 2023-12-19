@@ -177,37 +177,6 @@ fun Soporte(
                 item {
                     Divisor()
                 }
-                item {
-                    Text(
-                        modifier = modifier
-                            .padding(horizontal = 55.dp, vertical = 15.dp)
-                            .fillMaxSize(),
-                        text = "¿Te resultó útil?",
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    Row(
-                        modifier = modifier.fillMaxSize(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        FilterChip(
-                            selected = uiState.resultoUtil == "Si",
-                            onClick = { viewModel.setResultoUtil("Si") },
-                            colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF298538), containerColor = Trv1),
-                            label = { Text(text = "Si") }
-                        )
-                        Spacer(modifier = modifier.padding(3.dp))
-                        FilterChip(
-                            selected = uiState.resultoUtil == "No",
-                            onClick = { viewModel.setResultoUtil("No") },
-                            colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF853129), containerColor = Trv1),
-                            label = { Text(text = "No") }
-                        )
-                    }
-                }
-                item {
-                    Divisor()
-                }
                 //Caja de comentarios---------------------------------------------------------------
                 item {
                     OutlinedTextField(

@@ -129,18 +129,7 @@ fun Configuracion(
                     Divisor()
                 }
                 item {
-                    //Configuración-Idioma----------------------------------------------------------
-                    TarjetaConfiguracion(
-                        configuracion = listaDeConfiguracion[0],
-                        configuracionActual = uiState.idioma
-                    ) {
 
-                        viewModel.setIdioma(it)
-
-                        // Modificamos Shared Preferences
-                        editor.putString(KEY_IDIOMA, it).apply()
-
-                    }
                     //Configuración-Unidad----------------------------------------------------------
                     TarjetaConfiguracion(
                         configuracion = listaDeConfiguracion[1],

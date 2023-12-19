@@ -182,7 +182,7 @@ fun EditarItinerario(
                                 .size(125.dp)
                                 .aspectRatio(1F),
                         ){
-                            /*
+
                             if(itinerario.lugares?.get(0)?.imagen != null){
                                 Log.d("testError","error")
                                 Image(
@@ -201,7 +201,7 @@ fun EditarItinerario(
                                 )
                             }
 
-                             */
+
 
                             Image(
                                 modifier = modifier
@@ -499,9 +499,9 @@ fun EditarItinerario(
     }
     DisposableEffect(Unit) {
         onDispose {
-            //if(itinerario.lugares?.get(0)?.imagen != null){
-                //itinerario.lugares!!.get(0).imagen?.let { viewModel.setImagenItinerario(it) }
-            //}
+            if(itinerario.lugares?.get(0)?.imagen != null){
+                itinerario.lugares!!.get(0).imagen?.let { viewModel.setImagenItinerario(it) }
+            }
         }
     }
 }
