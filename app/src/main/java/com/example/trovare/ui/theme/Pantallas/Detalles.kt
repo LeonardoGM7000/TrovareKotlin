@@ -53,6 +53,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,7 +62,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -73,10 +73,10 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Navegacion.Pantalla
+import com.example.trovare.ui.theme.Pantallas.Perfil.fotoDePerfilUsuarioo
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Recursos.VentanaDeAlerta
 import com.example.trovare.ui.theme.Trv1
@@ -88,7 +88,6 @@ import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.google.maps.android.compose.GoogleMap
@@ -105,10 +104,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.ktx.firestore
-import kotlinx.coroutines.delay
 
 data class ComentarioR(val Nombre:String, val fecha: String, val foto:String, val placeId: String,
                        var descripcion: String, var calificacion: String, val revisar: Boolean )
@@ -227,6 +222,7 @@ fun Detalles(
     var userId by remember { mutableStateOf<String?>(null) }
     var usuarioActual by remember { mutableStateOf("Desconocido")}
     var usuarioFoto by remember { mutableStateOf("")}
+    val usuario by viewModel.usuario.collectAsState()
 
     // Verificar si hay un usuario autenticado
     val currentUser = auth.currentUser
@@ -291,11 +287,6 @@ fun Detalles(
         }
         flagstate.value = 0;
         }
-
-
-
-
-
     Surface(
         modifier = modifier
             .fillMaxSize(),
@@ -593,11 +584,6 @@ fun Detalles(
                     }
 
                     }
-
-
-
-
-
             item {
                 Divisor()
             }
@@ -711,8 +697,6 @@ fun Detalles(
                                         .addOnFailureListener { e ->
                                             println("Error al verificar la existencia del comentario en Firestore: $e")
                                         }
-
-
                                    // val resenasActuales = resenasTrovareMap["dataReseñas"] as? List<*>
                                     val dataRes = ComentarioR(usuarioActual,(System.currentTimeMillis() / 1000).toString(),usuarioFoto,placeId.toString(),aux, estrellas.toString(),false)
                                     //Agregar datos a la lista mutable de resenasPropias
@@ -743,57 +727,11 @@ fun Detalles(
                                         println("Error al obtener el documento 'datos' en Firestore: $e")
                                     }
 
-
-
-//                                    //crear o modificar en la coleccion de Firebase Reseñas
-//                                    resenasCollection.document(comentarioId).get()
-//                                        .addOnSuccessListener { documentSnapshot ->
-//                                            if (!documentSnapshot.exists()) {
-//                                                val ClaveRes = DatoRes(placeId.toString())
-//                                                // El comentario no existe, crearlo
-//                                                resenasCollection.document(comentarioId).set(ClaveRes)
-//                                                    .addOnSuccessListener {
-//                                                        println("Lugar creado exitosamente en Firestore")
-//                                                    }
-//                                                    .addOnFailureListener { e ->
-//                                                        println("Error al crear el lugar en Firestore: $e")
-//                                                    }
-//                                            }
-//                                        }
-//                                        .addOnFailureListener { e ->
-//                                            println("Error al verificar la existencia del comentario en Firestore: $e")
-//                                        }
-//                                    //agrega la reseña del usuario dentro de la collecion de reseñas del lugar
-//                                    Log.i("usuario activo",auth.currentUser!!.uid)
-//                                    resenasCollection.document(comentarioId).collection(auth.currentUser!!.uid).document(comentarioId).get()
-//                                        .addOnSuccessListener { documentSnapshot ->
-//                                            if (!documentSnapshot.exists()) {
-//                                                val dataRes = ComentarioR(usuarioActual,(System.currentTimeMillis() / 1000).toString(),usuarioFoto,placeId.toString(),aux,
-//                                                    estrellas.toString(),false)
-//                                                // El comentario no existe, crearlo
-//                                                resenasCollection.document(comentarioId).collection(auth.currentUser!!.uid).document(comentarioId).set(dataRes)
-//                                                    .addOnSuccessListener {
-//                                                        println("Comentario creado exitosamente en Firestore")
-//                                                    }
-//                                                    .addOnFailureListener { e ->
-//                                                        println("Error al crear el comentario en Firestore: $e")
-//                                                    }
-//                                            }
-//                                        }
-//                                        .addOnFailureListener { e ->
-//                                            println("Error al verificar la existencia del comentario en Firestore: $e")
-//                                        }
-
                                 } else {
                                     Log.i("activo null", userId.toString())
                                 }
                                 navController.popBackStack() // Regresa a la pantalla anterior rápidamente
                                 navController.navigate(Pantalla.Detalles.conArgs(placeId.toString())) // Navega de nuevo a la pantalla actual
-//                                navController.navigate(Pantalla.Detalles.conArgs(placeId.toString())) {
-//                                    popUpTo(Pantalla.Detalles.conArgs(placeId.toString())) {
-//                                        inclusive = true
-//                                    }
-//                                }
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Trv6,
@@ -829,7 +767,7 @@ fun Detalles(
                                 estrellas = documentSnapshot.getString("calificacion")!!.toInt()
                                 usuarioActual = documentSnapshot.getString("nombre").toString()
                                 fecha = documentSnapshot.getString("fecha")!!.toInt()
-                                foto = documentSnapshot.getString("foto").toString()
+                                foto = usuario.foto_perfil.toString()
                             } else {
                                 // El comentario no existe, iniciar en 0
                                 textoComentario = TextFieldValue("")
@@ -927,7 +865,7 @@ fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier,
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
-                fotoDePerfilUsuario(url = reseña.fotoPerfil)
+                fotoDePerfilUsuarioo(url = reseña.fotoPerfil)
 
                 Column(
                     horizontalAlignment = Alignment.Start,
@@ -1080,15 +1018,5 @@ fun StarIcon(
     )
 }
 
-@Composable
-fun fotoDePerfilUsuario(url: String) {
-    AsyncImage(
-        model = url,
-        contentDescription = null,
-        modifier = Modifier
-            .size(80.dp, 80.dp)
-            .clip(CircleShape)
-            .padding(13.dp)
-    )
-}
+
 

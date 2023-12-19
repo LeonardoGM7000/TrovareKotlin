@@ -1,8 +1,8 @@
 package com.example.trovare.ui.theme.Pantallas.Perfil
 
+//import com.example.trovare.R
 import android.text.format.DateUtils
 import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -20,12 +20,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Star
@@ -38,47 +34,34 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.example.trovare.ui.theme.Navegacion.Pantalla
-import com.example.trovare.ui.theme.Recursos.BarraSuperior
-import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
-import com.example.trovare.ui.theme.Recursos.Divisor
-import com.example.trovare.ui.theme.Trv1
-import com.example.trovare.ui.theme.Trv2
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.draw.clip
-import coil.compose.AsyncImage
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.trovare.Data.usuarioPrueba
-//import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
-import com.example.trovare.ui.theme.Pantallas.Cuenta
+import com.example.trovare.ui.theme.Navegacion.Pantalla
 import com.example.trovare.ui.theme.Pantallas.Question
-import com.example.trovare.ui.theme.Pantallas.Resena
-import com.example.trovare.ui.theme.Pantallas.TarjetaReseña
-import com.example.trovare.ui.theme.Pantallas.effectKey
-import com.example.trovare.ui.theme.Pantallas.fotoDePerfilUsuario
-import com.example.trovare.ui.theme.Recursos.VentanaDeAlerta
+import com.example.trovare.ui.theme.Recursos.BarraSuperior
+import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
+import com.example.trovare.ui.theme.Recursos.Divisor
+import com.example.trovare.ui.theme.Trv1
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.tasks.await
 import java.util.concurrent.TimeUnit
 
 data class reseña(val Nombre:String, val fecha: String, val foto:String, val placeId: String,
@@ -160,7 +143,7 @@ fun PerfilPrincipal(
                 for (reseñaDocument in commentsCollection) {
                     val reseñaData = reseña(Nombre = reseñaDocument.getString("nombre") ?: "",
                         fecha = reseñaDocument.getString("fecha") ?: "",
-                        foto = reseñaDocument.getString("foto") ?: "",
+                        foto = usuario.foto_perfil!!,
                         placeId = reseñaDocument.getString("placeId") ?: "",
                         descripcion = reseñaDocument.getString("descripcion") ?: "",
                         calificacion = reseñaDocument.getString("calificacion") ?: "",
@@ -424,12 +407,17 @@ fun TarjetaReseñaUsuario(reseña: reseña, modifier: Modifier = Modifier,
 
 @Composable
 fun fotoDePerfilUsuarioo(url: String) {
-    AsyncImage(
-        model = url,
-        contentDescription = null,
+    Card(
         modifier = Modifier
-            .size(80.dp, 80.dp)
-            .clip(CircleShape)
-            .padding(13.dp)
-    )
+            .padding(10.dp)
+            .size(50.dp),
+        shape = RoundedCornerShape(100.dp)
+    ) {
+        Image(
+            modifier = Modifier.fillMaxSize(),
+            painter = rememberAsyncImagePainter(model = url),
+            contentDescription = "",
+            contentScale = ContentScale.FillBounds
+        )
+    }
 }
