@@ -31,6 +31,7 @@ import com.example.trovare.ui.theme.Pantallas.Ingreso.ActualizarContrasena
 import com.example.trovare.ui.theme.Pantallas.Ingreso.RecuperarContrasena
 import com.example.trovare.ui.theme.Pantallas.Ingreso.TokenRecuperarContrasena
 import com.example.trovare.ui.theme.Pantallas.Itinerarios.RutasItinerario
+import com.example.trovare.ui.theme.Pantallas.Itinerarios.VerItinerario
 import com.example.trovare.ui.theme.Pantallas.Mapa.AgregarLugarItinerario
 import com.example.trovare.ui.theme.Pantallas.PreguntasAdmin
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -65,6 +66,7 @@ sealed class Pantalla(val ruta: String) {
     object RecuperarContrasena : Pantalla("RecuperarContrasena")
     object TokenRecuperarContrasena : Pantalla("TokenRecuperarContrasena")
     object ActualizarContrasena : Pantalla("ActualizarContrasena")
+    object VerItinerario : Pantalla("VerItinerario")
 
 
     fun conArgs(vararg args: String): String {
@@ -260,6 +262,13 @@ fun Trovare(
         composable(route = Pantalla.ActualizarContrasena.ruta) {
             ActualizarContrasena(
                 navController = navController
+            )
+        }
+        //Ver Itinerario-----------------------------------------------------------------------------
+        composable(route = Pantalla.VerItinerario.ruta) {
+            VerItinerario(
+                navController = navController,
+                viewModel = viewModel
             )
         }
     }

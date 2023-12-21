@@ -25,5 +25,5 @@ data class LugarFavorito(
 
 val lugarFavoritoPrueba: LugarFavorito = LugarFavorito(
     id = "",
-    nombre = "",
+    nombre = ""
 )

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Attractions
 import androidx.compose.material.icons.rounded.DirectionsBus
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.rounded.DirectionsCar
 import androidx.compose.material.icons.rounded.DirectionsWalk
 import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.FilterListOff
+import androidx.compose.material.icons.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.rounded.Route
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.TravelExplore
@@ -33,8 +35,10 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -497,82 +501,102 @@ fun MapaPrincipal(
         }
 
         Column {
-            //Busqueda------------------------------------------------------------------------------
-            Card(
-                modifier = modifier
-                    .padding(start = 55.dp, top = 15.dp, end = 55.dp, bottom = 5.dp)
-                    .fillMaxWidth(),
-                colors = CardDefaults.cardColors(Color.Black),
-                border = CardDefaults.outlinedCardBorder()
-            ){
-                TextField(
+            Row {
+                /*
+                FloatingActionButton(
                     modifier = modifier
-                        .fillMaxWidth(),
-                    value = textoBuscar,
-                    onValueChange = {
-                        textoBuscar = it
-                        job?.cancel() // Cancela la corrutina actual si es que existe
-                        tiempoRestante = 1//resetea el timer a 1 segundo
-                        iniciarTimer()//reinicia la cuenta regresiva del timer
-                    },
-                    leadingIcon = {
-                        if(busquedaEnProgreso){
-                            CircularProgressIndicator(
-                                modifier = modifier.size(20.dp),
-                                color = Color.White,
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Rounded.TravelExplore,
-                                contentDescription = "",
-                                tint = Color.White
-                            )
-                        }
-                    },
-                    trailingIcon = {
-                        IconButton(
-                            onClick = { /*TODO*/ },
-                            colors = IconButtonDefaults.iconButtonColors(
+                        .size(35.dp)
+                        .padding(25.dp),
+                    onClick = { navController.popBackStack() },
+                    containerColor = Color.White,
+                    shape = CircleShape
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.KeyboardArrowLeft,
+                        contentDescription = "",
+                        tint = Color.Black
+                    )
+                }
 
-                            )
-                        ){
-                            Icon(imageVector = Icons.Rounded.FilterList, contentDescription = "")
-                        }
-                        IconToggleButton(
-                            checked = filtroExtendido,
-                            onCheckedChange = { checked -> filtroExtendido = checked },
-                            colors = IconButtonDefaults.iconToggleButtonColors(
-                                containerColor = Color.Black,
-                                contentColor = Color.White,
-                                checkedContentColor = Color.White
-                            )
-                        ) {
-                            if(filtroExtendido){
-                                Icon(
-                                    imageVector = Icons.Rounded.FilterListOff,
-                                    contentDescription = ""
+                 */
+                //Busqueda------------------------------------------------------------------------------
+                Card(
+                    modifier = modifier
+                        .padding(start = 55.dp, top = 15.dp, end = 55.dp, bottom = 5.dp)
+                        .fillMaxWidth(),
+                    colors = CardDefaults.cardColors(Color.Black),
+                    border = CardDefaults.outlinedCardBorder()
+                ){
+                    TextField(
+                        modifier = modifier
+                            .fillMaxWidth(),
+                        value = textoBuscar,
+                        onValueChange = {
+                            textoBuscar = it
+                            job?.cancel() // Cancela la corrutina actual si es que existe
+                            tiempoRestante = 1//resetea el timer a 1 segundo
+                            iniciarTimer()//reinicia la cuenta regresiva del timer
+                        },
+                        leadingIcon = {
+                            if(busquedaEnProgreso){
+                                CircularProgressIndicator(
+                                    modifier = modifier.size(20.dp),
+                                    color = Color.White,
+                                    strokeWidth = 2.dp
                                 )
                             } else {
                                 Icon(
-                                    imageVector = Icons.Rounded.FilterList,
-                                    contentDescription = ""
+                                    imageVector = Icons.Rounded.TravelExplore,
+                                    contentDescription = "",
+                                    tint = Color.White
                                 )
                             }
+                        },
+                        trailingIcon = {
+                            IconButton(
+                                onClick = { /*TODO*/ },
+                                colors = IconButtonDefaults.iconButtonColors(
 
-                        }
-                    },
-                    textStyle = MaterialTheme.typography.labelSmall,
-                    placeholder = { Text(text = "Buscar lugares", style = MaterialTheme.typography.labelSmall) },
-                    singleLine = true,
-                    colors = TextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedContainerColor = Color.Black,
-                        focusedContainerColor = Color.Black,
-                        cursorColor = Color.White,
-                    ),
-                )
+                                )
+                            ){
+                                Icon(imageVector = Icons.Rounded.FilterList, contentDescription = "")
+                            }
+                            IconToggleButton(
+                                checked = filtroExtendido,
+                                onCheckedChange = { checked -> filtroExtendido = checked },
+                                colors = IconButtonDefaults.iconToggleButtonColors(
+                                    containerColor = Color.Black,
+                                    contentColor = Color.White,
+                                    checkedContentColor = Color.White
+                                )
+                            ) {
+                                if(filtroExtendido){
+                                    Icon(
+                                        imageVector = Icons.Rounded.FilterListOff,
+                                        contentDescription = ""
+                                    )
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Rounded.FilterList,
+                                        contentDescription = ""
+                                    )
+                                }
+
+                            }
+                        },
+                        textStyle = MaterialTheme.typography.labelSmall,
+                        placeholder = { Text(text = "Buscar lugares", style = MaterialTheme.typography.labelSmall) },
+                        singleLine = true,
+                        colors = TextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedContainerColor = Color.Black,
+                            focusedContainerColor = Color.Black,
+                            cursorColor = Color.White,
+                        ),
+                    )
+                }
             }
+
             //Mostrar filtros-----------------------------------------------------------------------
             if(filtroExtendido){
                 LazyRow(

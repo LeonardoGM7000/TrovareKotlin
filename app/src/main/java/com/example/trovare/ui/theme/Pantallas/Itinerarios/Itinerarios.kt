@@ -241,6 +241,97 @@ fun Itinerarios(
                         color = Color.White
                     )
                 }
+                if(listaVisible){
+                    items(usuario.itinerarios){itinerario ->
+                        if(itinerario.publico){
+                            Card(
+                                modifier = modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 25.dp, vertical = 5.dp)
+                                    .size(100.dp)
+                                    .clickable {
+                                        navController.navigate(Pantalla.VerItinerario.ruta)
+                                        viewModel.setItinerarioActual(itinerario)
+                                    },
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Trv3
+                                )
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Card(
+                                        modifier = modifier
+                                            .padding(5.dp)
+                                            .aspectRatio(1f),
+                                    ) {
+                                        if (itinerario.imagen != null) {
+                                            Image(
+                                                bitmap = itinerario.imagen!!,
+                                                contentDescription = "",
+                                                modifier = Modifier
+                                                    .fillMaxSize(),
+                                                contentScale = ContentScale.FillBounds
+                                            )
+                                        } else {
+                                            Image(
+                                                modifier = modifier
+                                                    .fillMaxSize(),
+                                                painter = painterResource(id = R.drawable.image_placeholder),
+                                                contentDescription = ""
+                                            )
+                                        }
+                                    }
+                                    Column(
+                                        modifier = modifier.fillMaxWidth(0.8f)
+                                    ) {
+                                        Text(
+                                            text = itinerario.nombre,
+                                            color = Color.Black,
+                                            maxLines = 1
+                                        )
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.Public,
+                                                contentDescription = "",
+                                                tint = Color.Black
+                                            )
+                                            if(itinerario.publico){
+                                                Text(
+                                                    text = "público",
+                                                    color = Color.Black,
+                                                    fontSize = 20.sp
+                                                )
+                                            } else {
+                                                Text(
+                                                    text = "privado",
+                                                    color = Color.Black,
+                                                    fontSize = 20.sp
+                                                )
+                                            }
+                                        }
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ){
+                                            Icon(
+                                                imageVector = Icons.Rounded.Person,
+                                                contentDescription = "",
+                                                tint = Color.Black
+                                            )
+                                            Text(
+                                                text = itinerario.autor,
+                                                color = Color.Black,
+                                                fontSize = 20.sp
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

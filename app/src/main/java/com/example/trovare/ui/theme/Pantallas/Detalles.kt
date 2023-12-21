@@ -193,6 +193,8 @@ fun Detalles(
     var usuarioFoto by remember { mutableStateOf("")}
 
 
+
+
     // Verificar si hay un usuario autenticado
     val currentUser = auth.currentUser
     if (currentUser != null) {
