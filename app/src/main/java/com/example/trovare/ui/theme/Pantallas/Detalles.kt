@@ -118,6 +118,8 @@ data class ComentarioR(val Nombre:String, val fecha: String, val foto:String, va
                        var descripcion: String, var calificacion: String, val revisar: Boolean )
 data class DatoRes(val placeId: String)
 var estrellas : Int = 0
+var effectkey = 0
+var flagstate = mutableStateOf(0)
 @OptIn(ExperimentalMaterial3Api::class)
 data class Resena(val usuario: String, val puntuacion: Int, val texto: String, val tiempo: Int, val fotoPerfil: String)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -130,33 +132,72 @@ fun Detalles(
     navController: NavController
 ){
 
-    val usuario by viewModel.usuario.collectAsState()
+
+
 
     var favorito by rememberSaveable { mutableStateOf(false) }
     var eraFavoritoBand = false
-
     var nombre by rememberSaveable { mutableStateOf("") }
     var direccion by rememberSaveable { mutableStateOf("") }
     var numeroTelefono by rememberSaveable { mutableStateOf("") }
     var paginaWeb by rememberSaveable { mutableStateOf("") }
     var calificacion by rememberSaveable { mutableStateOf(-1.0) }
     var latLng by rememberSaveable { mutableStateOf(LatLng(0.0,0.0)) }
-    var resenasList by remember { mutableStateOf(mutableListOf<Resena>()) }
-    var reseñasPropias by remember { mutableStateOf(mutableListOf<Resena>()) }
+    var reseñasList by remember { mutableStateOf(mutableListOf<Resena>()) }
+    var reseñasPropias by remember { mutableStateOf(mutableListOf<ComentarioR>()) }
     var fecha:Int = 0
     var foto:String = ""
     var NoexisteComPropios:Boolean = true
+    val db = Firebase.firestore
+
+    LaunchedEffect(effectKey){
+        val reseñasTrovare  = db.collection("Reseña").document("datos")
+        reseñasTrovare.get().addOnSuccessListener { documentSnapshot ->
+            if (documentSnapshot.exists()) {
+                val datosActuales = documentSnapshot.data
+
+                datosActuales?.let {
+                    val campoDataReseñas = it["dataReseñas"] as? MutableList<HashMap<String, Any>>
+
+                    campoDataReseñas?.forEach { reseñaMap ->
+                        val usuarioActual = reseñaMap["nombre"].toString()
+                        val estrellas = reseñaMap["calificacion"].toString()
+                        val textoComentario = reseñaMap["descripcion"].toString()
+                        val fecha = reseñaMap["fecha"].toString()
+                        val foto = reseñaMap["foto"].toString()
+                        val placeId  = reseñaMap["placeId"]
+
+                        // Crear una instancia de Resena con los datos obtenidos de Firestore
+                        val nuevaReseña = ComentarioR(usuarioActual,fecha,foto,placeId.toString(),textoComentario, estrellas,false)
+                        // Agregar la nueva reseña a la lista mutable reseñasPropias
+                        reseñasPropias.add(nuevaReseña)
+                    }
+                }
+            } else {
+                println("El documento 'datos' en la colección 'Reseña' no existe en Firestore")
+            }
+        }.addOnFailureListener { e ->
+            println("Error al obtener el documento 'datos' en Firestore: $e")
+        }
+    }
+
+
     fun obtenerResenas(apiKey: String, placeId: String) {
         val url = "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey&language=es"
+
         val cliente = OkHttpClient()
         val solicitud = Request.Builder().url(url).build()
+
         cliente.newCall(solicitud).execute().use { respuesta ->
             if (respuesta.isSuccessful) {
                 val cuerpoRespuesta = respuesta.body?.string()
                 val datos = JSONObject(cuerpoRespuesta)
+
                 if (datos.has("result")) {
                     val reseñas = datos.getJSONObject("result").optJSONArray("reviews")
+
                     if (reseñas != null) {
+
                         for (i in 0 until reseñas.length()) {
                             val reseña = reseñas.getJSONObject(i)
                             val usuario = reseña.optString("author_name", "Desconocido")
@@ -164,8 +205,10 @@ fun Detalles(
                             val texto = reseña.optString("text", "N/A")
                             val tiempo = reseña.optInt("time",-1)
                             val fotoDePerfil = reseña.optString("profile_photo_url","N/A")
-                            resenasList.add(Resena(usuario, puntuacion, texto, tiempo, fotoDePerfil))
+
+                            reseñasList.add(Resena(usuario, puntuacion, texto, tiempo, fotoDePerfil))
                         }
+
                     } else {
                         Log.i("resena", "No se encontraron reseñas para este lugar.")
                     }
@@ -176,8 +219,9 @@ fun Detalles(
                 Log.i("resena","Error en la solicitud: ${respuesta.message}")
             }
         }
-        Log.i("resena",resenasList.toString())
+        Log.i("resena",reseñasList.toString())
     }
+
     var textoComentario by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
@@ -191,9 +235,7 @@ fun Detalles(
     var userId by remember { mutableStateOf<String?>(null) }
     var usuarioActual by remember { mutableStateOf("Desconocido")}
     var usuarioFoto by remember { mutableStateOf("")}
-
-
-
+    val usuario by viewModel.usuario.collectAsState()
 
     // Verificar si hay un usuario autenticado
     val currentUser = auth.currentUser
@@ -203,6 +245,7 @@ fun Detalles(
     val usuarioDocument = firestore.collection("Usuario").document(auth.currentUser?.email.toString())
     // Obtener referencia a la subcolección "comentarios"
     val comentariosCollection = usuarioDocument.collection("comentarios")
+
     // ID del comentario a modificar (reemplaza con el ID real)
     val comentarioId = placeId.toString()
     // Obtener valores iniciales del comentario para mostrar modificar o nuevo
@@ -223,6 +266,7 @@ fun Detalles(
         }
     //}
     LaunchedEffect(key1 = Unit){
+
         eraFavoritoBand = false
         coroutineScope {
             //checar si es lugar favorito
@@ -253,8 +297,30 @@ fun Detalles(
             paginaWeb = {paginaWeb = it?: ""},
             latLng = {latLng = it?: LatLng(0.0,0.0) },
         )
-        com.example.trovare.Api.obtenerResenas(placeId!!, resenasList)
+        GlobalScope.launch(Dispatchers.IO) {
+            if (placeId != null) {
+                obtenerResenas("AIzaSyDJBAeLUu6KewjD9hhDGNP8gCnshpG5y7c", placeId)
+            }
+        }
+
     }
+
+    LaunchedEffect(flagstate){
+        //flagstate = 1
+        if(flagstate.value == 1) {
+            scope.launch {
+                snackbarHostState
+                    .showSnackbar(
+                        message = "Reseña borrada correctamente",
+                        duration = SnackbarDuration.Short
+                    )
+
+            }
+
+        }
+        flagstate.value = 0;
+    }
+
     Surface(
         modifier = modifier
             .fillMaxSize(),
@@ -489,10 +555,10 @@ fun Detalles(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
-            Log.i("resena",resenasList.size.toString())
+            Log.i("resena",reseñasList.size.toString())
             item {
-                if (resenasList.isNotEmpty()) {
-                    resenasList.forEach { reseña ->
+                if (reseñasList.isNotEmpty()) {
+                    reseñasList.forEach { reseña ->
                         TarjetaReseña(reseña = reseña, clave = placeId.toString(), APIoApp = false, onDeleteClick = {},
                             navController = navController)
                         Spacer(modifier = Modifier.height(15.dp))
@@ -519,25 +585,30 @@ fun Detalles(
                     style = MaterialTheme.typography.displaySmall
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                firestore.collection("Reseñas").document(comentarioId).get()
-                    .addOnSuccessListener { documentSnapshot ->
-                        if (documentSnapshot.exists()) {
-                            /*Agregar funcion para mostrar comentarios de nuestros Usuarios*/
-                            NoexisteComPropios = false
-                        }
+            }
+            item{
+
+                Log.i("Resenaspropiasss","$reseñasPropias")
+                val reseñasFiltradas = reseñasPropias.filter { it.placeId == placeId.toString() }
+
+// Mostrar las reseñas filtradas utilizando TarjetaReseña
+                if (reseñasFiltradas.isNotEmpty()) {
+                    reseñasFiltradas.forEach { reseña ->
+                        // Crear la tarjeta de reseña para cada elemento de reseñasFiltradas
+                        val aux = Resena(reseña.Nombre,reseña.calificacion.toInt(),reseña.descripcion,reseña.fecha.toInt(),reseña.foto)
+                        TarjetaReseña(reseña = aux, onDeleteClick = {}, clave = placeId.toString(), APIoApp = false, navController = navController)
+                        Spacer(modifier = Modifier.height(15.dp))
                     }
-                    .addOnFailureListener { e ->
-                        println("Error al verificar la existencia del comentario en Firestore: $e")
-                    }
-                if(NoexisteComPropios){
+                } else {
+                    // No hay reseñas que coincidan con el placeId dado
                     Text(
-                        text = "No hay reseñas de usuarios Trovare.",
+                        text = "No hay reseñas para este lugar.",
                         color = Color.White,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(16.dp)
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+
             }
             item {
                 Divisor()
