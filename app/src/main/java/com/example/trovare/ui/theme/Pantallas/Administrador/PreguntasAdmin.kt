@@ -112,10 +112,6 @@ fun PreguntasAdmin(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    var isErrorL: Int by rememberSaveable { mutableIntStateOf(0) }
-    val maximoLetras = 30
-
-
     LaunchedEffect(Unit) {
         Log.i("FaqScreen", "LaunchedEffect: Obtaining questions from Firestore")
         try {
@@ -141,16 +137,6 @@ fun PreguntasAdmin(
         }
     }
 
-    fun validarLetras(text: String) {
-        if (!(text.matches("[a-zA-ZÀ-ÿ ]*".toRegex()))) {
-            Log.i("Error Caracter inválido", text)
-            isErrorL = 1
-        } else {
-            if (text.length > maximoLetras) {
-                isErrorL = 2
-            }
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -282,8 +268,6 @@ fun PreguntasAdmin(
                         value = textoPregunta,
                         onValueChange = {
                             textoPregunta = it
-                            isErrorL = 0
-                            validarLetras(textoPregunta.text)
                         },
                         label = {
                             Text(
@@ -296,30 +280,14 @@ fun PreguntasAdmin(
                             focusedTextColor = Color.White,
                             focusedLabelColor = Color.White,
                             unfocusedLabelColor = Color.White,
-                            focusedContainerColor =  Trv8,
+                            focusedContainerColor =  Trv1,
                             cursorColor = Color.White,
                             focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White
+                            unfocusedIndicatorColor = Color.White,
+                            unfocusedContainerColor = Trv1
                         ),
                         singleLine = true,
                         keyboardOptions = keyboardOptionsTexto,
-                        //parametro para mostrar eltipo de error
-                        supportingText = {
-                            isErrorL = isErrorL
-                            if (isErrorL == 1) {
-                                Text(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    text = "Ingresa solo letras",
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            } else if (isErrorL == 2) {
-                                Text(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    text = "Máximo $maximoLetras carácteres",
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        },
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -341,10 +309,11 @@ fun PreguntasAdmin(
                             focusedTextColor = Color.White,
                             focusedLabelColor = Color.White,
                             unfocusedLabelColor = Color.White,
-                            focusedContainerColor =  Trv8,
+                            focusedContainerColor =  Trv1,
                             cursorColor = Color.White,
                             focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White
+                            unfocusedIndicatorColor = Color.White,
+                            unfocusedContainerColor = Trv1
                         ),
                         singleLine = true,
                         keyboardOptions = keyboardOptionsTexto,
@@ -366,13 +335,6 @@ fun PreguntasAdmin(
                                     scope.launch {
                                         snackbarHostState.showSnackbar(
                                             message = "Campos obligatorios no completados",
-                                            duration = SnackbarDuration.Short
-                                        )
-                                    }
-                                } else if (isErrorL > 0) {
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            message = "Pregunta inválida",
                                             duration = SnackbarDuration.Short
                                         )
                                     }

@@ -54,8 +54,7 @@ fun EditarPreguntas(
     var textoRespuesta by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue("", TextRange(0, 7)))
     }
-    var isErrorL: Int by rememberSaveable { mutableIntStateOf(0) }
-    val maximoLetras = 30
+
 
     // Estado para manejar la carga de la pregunta desde Firestore
     var preguntaActual by remember(preguntaId) { mutableStateOf("") }
@@ -68,16 +67,6 @@ fun EditarPreguntas(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    fun validarLetras(text: String) {
-        if (!(text.matches("[a-zA-ZÀ-ÿ ]*".toRegex()))) {
-            Log.i("Error Caracter inválido", text)
-            isErrorL = 1
-        } else {
-            if (text.length > maximoLetras) {
-                isErrorL = 2
-            }
-        }
-    }
 
     // Utilizar LaunchedEffect para cargar la pregunta una vez al ingresar a la pantalla
     LaunchedEffect(preguntaId) {
@@ -178,8 +167,6 @@ fun EditarPreguntas(
                         value = textoPregunta,
                         onValueChange = {
                             textoPregunta = it
-                            isErrorL = 0
-                            validarLetras(textoPregunta.text)
                         },
                         label = {
                             Text(
@@ -192,29 +179,14 @@ fun EditarPreguntas(
                             focusedTextColor = Color.White,
                             focusedLabelColor = Color.White,
                             unfocusedLabelColor = Color.White,
-                            focusedContainerColor = Trv8,
+                            focusedContainerColor = Trv1,
                             cursorColor = Color.White,
                             focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White
+                            unfocusedIndicatorColor = Color.White,
+                            unfocusedContainerColor = Trv1
                         ),
                         singleLine = true,
                         keyboardOptions = keyboardOptionsTexto,
-                        supportingText = {
-                            isErrorL = isErrorL
-                            if (isErrorL == 1) {
-                                Text(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    text = "Ingresa solo letras",
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            } else if (isErrorL == 2) {
-                                Text(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    text = "Máximo $maximoLetras carácteres",
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        },
                     )
                     OutlinedTextField(
                         modifier = modifier
@@ -233,10 +205,11 @@ fun EditarPreguntas(
                             focusedTextColor = Color.White,
                             focusedLabelColor = Color.White,
                             unfocusedLabelColor = Color.White,
-                            focusedContainerColor = Trv8,
+                            focusedContainerColor = Trv1,
                             cursorColor = Color.White,
                             focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White
+                            unfocusedIndicatorColor = Color.White,
+                            unfocusedContainerColor = Trv1
                         ),
                         singleLine = true,
                         keyboardOptions = keyboardOptionsTexto,
