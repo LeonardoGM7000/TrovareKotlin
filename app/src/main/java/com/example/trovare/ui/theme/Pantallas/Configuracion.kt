@@ -129,19 +129,6 @@ fun Configuracion(
                     Divisor()
                 }
                 item {
-
-                    //Configuración-Unidad----------------------------------------------------------
-                    TarjetaConfiguracion(
-                        configuracion = listaDeConfiguracion[1],
-                        configuracionActual = uiState.unidad
-                    ) {
-                        viewModel.setUnidades(it)
-
-                        // Modificamos Shared Preferences
-                        editor.putString(KEY_UNIDADES, it).apply()
-                    }
-                }
-                item {
                     TarjetaNormal(
                         titulo = "Soporte",
                         icono = Icons.Filled.Help,
