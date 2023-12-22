@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.trovare.Data.Itinerario
+import com.example.trovare.Data.Lugar
 import com.example.trovare.R
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Navegacion.Pantalla
@@ -51,6 +52,7 @@ import com.example.trovare.ui.theme.Recursos.BarraSuperiorConfig
 import com.example.trovare.ui.theme.Recursos.Divisor
 import com.example.trovare.ui.theme.Trv1
 import com.example.trovare.ui.theme.Trv3
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 
 @Composable
 fun Itinerarios(
@@ -61,6 +63,12 @@ fun Itinerarios(
 
     val usuario by viewModel.usuario.collectAsState()
     var listaVisible by remember { mutableStateOf(true) }
+    val lugares = mutableListOf(
+        Lugar(id = "ChIJP1dJRVf_0YURr8MZosHl4kI", nombreLugar = "Bosque de Chapultepec", fechaDeVisita = null, horaDeVisita = null, origen = null, ubicacion = null, ruta = null, zoom = 0f, imagen = null ),
+        Lugar(id = "ChIJI4_tR83-0YURMouBJIUA4KY", nombreLugar = "Castillo de Chapultepec", fechaDeVisita = null, horaDeVisita = null, origen = null, ubicacion = null, ruta = null, zoom = 0f, imagen = null ),
+        Lugar(id = "ChIJwXColAIC0oURBKBWFzsqhkI", nombreLugar = "Zoológico de Chapultepec", fechaDeVisita = null, horaDeVisita = null, origen = null, ubicacion = null, ruta = null, zoom = 0f, imagen = null )
+    )
+    val itinerarioFalso = Itinerario(nombre = "Chapultepec", autor = "Julio", lugares = lugares, imagen = null, publico = true)
 
     Scaffold(
         topBar = {
@@ -229,6 +237,7 @@ fun Itinerarios(
                         }
                     }
                 }
+
                 item {
                     Divisor()
                 }
@@ -328,6 +337,100 @@ fun Itinerarios(
                                         }
                                     }
                                 }
+                            }
+                        }
+                    }
+                }
+                item {
+                    val itinerario = itinerarioFalso
+                    Card(
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 25.dp, vertical = 5.dp)
+                            .size(100.dp)
+                            .clickable {
+                                navController.navigate(Pantalla.VerItinerario.ruta)
+                                viewModel.setItinerarioActual(itinerario)
+                            },
+                        colors = CardDefaults.cardColors(
+                            containerColor = Trv3
+                        )
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Card(
+                                modifier = modifier
+                                    .padding(5.dp)
+                                    .aspectRatio(1f),
+                            ) {
+                                Image(
+                                    modifier = modifier
+                                        .fillMaxSize(),
+                                    painter = painterResource(id = R.drawable.chapultepec),
+                                    contentDescription = "",
+                                    contentScale = ContentScale.FillBounds
+                                )
+                            }
+                            Column(
+                                modifier = modifier.fillMaxWidth(0.8f)
+                            ) {
+                                Text(
+                                    text = itinerario.nombre,
+                                    color = Color.Black,
+                                    maxLines = 1
+                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Public,
+                                        contentDescription = "",
+                                        tint = Color.Black
+                                    )
+                                    if(itinerario.publico){
+                                        Text(
+                                            text = "público",
+                                            color = Color.Black,
+                                            fontSize = 20.sp
+                                        )
+                                    } else {
+                                        Text(
+                                            text = "privado",
+                                            color = Color.Black,
+                                            fontSize = 20.sp
+                                        )
+                                    }
+                                }
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ){
+                                    Icon(
+                                        imageVector = Icons.Rounded.Person,
+                                        contentDescription = "",
+                                        tint = Color.Black
+                                    )
+                                    Text(
+                                        text = itinerario.autor,
+                                        color = Color.Black,
+                                        fontSize = 20.sp
+                                    )
+                                }
+                            }
+                            IconButton(
+                                onClick = {
+                                    listaVisible = false
+                                    viewModel.borrarItinerarioActual(itinerario)
+                                    listaVisible = true
+
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.DeleteForever,
+                                    contentDescription = "",
+                                    tint = Color.Black,
+                                )
+
                             }
                         }
                     }
