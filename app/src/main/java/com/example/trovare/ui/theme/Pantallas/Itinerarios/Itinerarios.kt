@@ -417,21 +417,6 @@ fun Itinerarios(
                                     )
                                 }
                             }
-                            IconButton(
-                                onClick = {
-                                    listaVisible = false
-                                    viewModel.borrarItinerarioActual(itinerario)
-                                    listaVisible = true
-
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.DeleteForever,
-                                    contentDescription = "",
-                                    tint = Color.Black,
-                                )
-
-                            }
                         }
                     }
                 }
