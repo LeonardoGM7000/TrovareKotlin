@@ -72,12 +72,6 @@ fun Administrador(
                 )
                 TarjetaNormal(
                     modifier = modifier.padding(top = 5.dp),
-                    titulo = "Eliminar Comentarios",
-                    icono = Icons.Filled.Comment,
-                    accion = {navController.navigate(Pantalla.EliminarComentarios.ruta)}
-                )
-                TarjetaNormal(
-                    modifier = modifier.padding(top = 5.dp),
                     titulo = "Cerrar Sesión",
                     icono = Icons.Filled.Info,
                     accion = {mostrarCerrarSesion = true}
@@ -99,7 +93,6 @@ fun Administrador(
                 )
             }
         }
-
     }
 }
 
