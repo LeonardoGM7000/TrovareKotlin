@@ -247,7 +247,7 @@ fun obtenerMarcador(
 interface APIServiceBuscarUbicacionesCercanas {
     @Headers(
         "Content-Type: application/json",
-        "X-Goog-Api-Key: AIzaSyBpmAJRF6PsRJVNm6oq1qmfXbdaBjNA5mQ",
+        "X-Goog-Api-Key: AIzaSyDiFpHGDFegDBzku5qKvnGniIN88T6vuQc",
         "X-Goog-FieldMask: places.location,places.id",
     )
     @POST("/v1/places:searchNearby")

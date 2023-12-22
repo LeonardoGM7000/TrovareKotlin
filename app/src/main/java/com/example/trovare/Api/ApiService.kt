@@ -37,7 +37,7 @@ import retrofit2.http.POST
 interface APIServiceBuscarTexto {
     @Headers(
         "Content-Type: application/json",
-        "X-Goog-Api-Key: AIzaSyBpmAJRF6PsRJVNm6oq1qmfXbdaBjNA5mQ",
+        "X-Goog-Api-Key: AIzaSyDiFpHGDFegDBzku5qKvnGniIN88T6vuQc",
         "X-Goog-FieldMask: places.displayName,places.formattedAddress,places.id"
     )
     @POST("/v1/places:searchText")

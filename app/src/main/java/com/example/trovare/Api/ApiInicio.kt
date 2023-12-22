@@ -43,7 +43,7 @@ import kotlin.coroutines.resumeWithException
 private interface ApiBuscarPorCategorias {
     @Headers(
         "Content-Type: application/json",
-        "X-Goog-Api-Key: AIzaSyBpmAJRF6PsRJVNm6oq1qmfXbdaBjNA5mQ",
+        "X-Goog-Api-Key: AIzaSyDiFpHGDFegDBzku5qKvnGniIN88T6vuQc",
         "X-Goog-FieldMask: places.id,places.displayName,places.rating,places.primaryType",
     )
     @POST("/v1/places:searchNearby")

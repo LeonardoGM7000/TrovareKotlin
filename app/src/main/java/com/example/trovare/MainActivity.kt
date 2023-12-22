@@ -62,8 +62,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        /*colocar aqui API de google places*/
-        Places.initialize(this, /*colocar aqui llave de API de google places*/"AIzaSyBpmAJRF6PsRJVNm6oq1qmfXbdaBjNA5mQ")//Inicializar API de Places
+        /*colocar aqui API de google places AIzaSyDiFpHGDFegDBzku5qKvnGniIN88T6vuQc*/
+        Places.initialize(this, /*colocar aqui llave de API de google places*/"AIzaSyDiFpHGDFegDBzku5qKvnGniIN88T6vuQc")//Inicializar API de Places
         val placesClient: PlacesClient = Places.createClient(this)//Crear cliente
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         askPermissions()
