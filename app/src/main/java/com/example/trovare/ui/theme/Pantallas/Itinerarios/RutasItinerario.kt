@@ -89,6 +89,7 @@ import com.example.trovare.ui.theme.Trv10
 import com.example.trovare.ui.theme.Trv7
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
@@ -788,8 +789,11 @@ fun RutasItinerario(
                             onClick = {
                                 false
                             },
+                            icon = BitmapDescriptorFactory.fromResource(R.drawable.imagen1),
                             draggable = false
+
                         )
+
                     }
                     //Mostrar marcador de destino(siempre se muestra)
                     MarkerInfoWindow(

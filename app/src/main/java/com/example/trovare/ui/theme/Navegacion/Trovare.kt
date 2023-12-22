@@ -24,6 +24,7 @@ import com.example.trovare.ui.theme.Pantallas.Perfil.PerfilConfiguracion
 import com.example.trovare.ViewModel.TrovareViewModel
 import com.example.trovare.ui.theme.Pantallas.Administrador
 import com.example.trovare.ui.theme.Pantallas.CrearCuenta
+import com.example.trovare.ui.theme.Pantallas.EditarComentario
 import com.example.trovare.ui.theme.Pantallas.EditarPreguntas
 import com.example.trovare.ui.theme.Pantallas.EliminarComentarios
 import com.example.trovare.ui.theme.Pantallas.EliminarCuentas
@@ -67,6 +68,7 @@ sealed class Pantalla(val ruta: String) {
     object TokenRecuperarContrasena : Pantalla("TokenRecuperarContrasena")
     object ActualizarContrasena : Pantalla("ActualizarContrasena")
     object VerItinerario : Pantalla("VerItinerario")
+    object EditarComentario : Pantalla("EditarComentario")
 
 
     fun conArgs(vararg args: String): String {
@@ -269,6 +271,14 @@ fun Trovare(
             VerItinerario(
                 navController = navController,
                 viewModel = viewModel
+            )
+        }
+        //Editar comentario-------------------------------------------------------------------------
+        composable(route = Pantalla.EditarComentario.ruta + "/{preguntaId}") { navBackStackEntry ->
+            val preguntaId = navBackStackEntry.arguments?.getString("preguntaId") ?: ""
+            EditarComentario(
+                navController = navController,
+                placeId = preguntaId
             )
         }
     }

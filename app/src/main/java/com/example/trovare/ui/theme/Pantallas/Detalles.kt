@@ -967,7 +967,7 @@ fun TarjetaReseña(reseña: Resena, modifier: Modifier = Modifier,
                                 modifier = Modifier
                                     .padding(13.dp)
                                     .clickable {
-                                        //navController.navigate(Pantalla.EditarComentario.ruta + "/${clave}")
+                                        navController.navigate(Pantalla.EditarComentario.ruta + "/${clave}")
                                     },
                                 imageVector = Icons.Rounded.Edit,
                                 contentDescription = "",
